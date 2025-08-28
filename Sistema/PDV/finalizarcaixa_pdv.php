@@ -4,124 +4,125 @@ header('Content-Type: text/html; charset=utf-8');
 include "../../Dev/Exec/config.php";
 include DEV_PATH . 'Exec/conexao.php';
 
-if (isset($_POST['finalizar_caixa'])) {
+if (!isset($_SESSION['ID_Caixa'], $_SESSION['ID_CaixaAberto'], $_SESSION['Saldo_Inicial'])) {
+    $_SESSION['msg'] = ['texto' => 'Nenhum caixa para conferir', 'tipo' => 'warning'];
+    header('Location:' . BASE_URL .'dashboard.php');
+    exit;
+}
 
-    if (!isset($_SESSION['ID_Caixa'], $_SESSION['ID_CaixaAberto'], $_SESSION['Saldo_Inicial'])) {
-        echo "<p>Erro: sessão inválida ou expirada.</p>";
-        exit;
+$id_caixa = $_SESSION['ID_Caixa'];
+$id_caixaAberto = $_SESSION['ID_CaixaAberto'];
+$saldoInicial = $_SESSION['Saldo_Inicial'];
+$suprimento = $_SESSION['Suprimento'] ?? 0;
+$sangria = $_SESSION['Sangria'] ?? 0;
+
+// 1. Busca relatórios
+$sqlRelatorio = "SELECT COUNT(*) AS total_vendas, SUM(Valor_Total) AS valor_total FROM VENDAS WHERE ID_CaixaAberto = ?";
+$stmtRelatorio = $conn->prepare($sqlRelatorio);
+$stmtRelatorio->bind_param("i", $id_caixaAberto);
+$stmtRelatorio->execute();
+$resultado = $stmtRelatorio->get_result();
+$relatorioCaixa = $resultado->fetch_assoc();
+
+$total_vendas = $relatorioCaixa['total_vendas'] ?? 0;
+$valor_total = $relatorioCaixa['valor_total'] ?? 0.0;
+
+$sqlCaixaEDatas = "SELECT C.Caixa,
+                            CA.Data_Abertura,
+                            CA.Data_Fechamento
+                    FROM CAIXAS C LEFT JOIN CAIXAS_ABERTOS CA
+                    ON CA.ID_Caixa = C.ID_Caixa
+                    WHERE CA.ID_CaixaAberto = ?";
+$stmtCaixaEDatas = $conn->prepare($sqlCaixaEDatas);
+$stmtCaixaEDatas->bind_param("i", $id_caixaAberto);
+$stmtCaixaEDatas->execute();
+$resultCaixaEDatas = $stmtCaixaEDatas->get_result();
+$relatorioCaixaEDatas = $resultCaixaEDatas->fetch_assoc();
+
+// 2. Busca total vendido por método de pagamento
+$sqlMetodos = "SELECT FP.Tipo,
+                    SUM(VP.Valor) AS 'Total_Recebido',
+                    SUM(VP.Troco) AS 'Troco_Total'
+                FROM VENDA_PAGAMENTOS VP INNER JOIN VENDAS V 
+                    ON VP.ID_Venda = V.ID_Venda
+                INNER JOIN FORMAS_PAGAMENTO FP 
+                    ON VP.ID_Forma_Pag = FP.ID_Forma_Pag
+                WHERE V.ID_CaixaAberto = ?
+                GROUP BY FP.Tipo";
+$stmtMetodos = $conn->prepare($sqlMetodos);
+$stmtMetodos->bind_param("i", $id_caixaAberto);
+$stmtMetodos->execute();
+$resultMetodos = $stmtMetodos->get_result();
+
+$valor_dinheiro = $valor_credito = $valor_debito = $valor_pix = $troco = 0;
+$quant_dinheiro = $quant_credito = $quant_debito = $quant_pix = 0;
+
+while ($row = $resultMetodos->fetch_assoc()){
+    switch ($row['Tipo']){
+        case 'Dinheiro': 
+            $valor_dinheiro += (float)$row['Total_Recebido'];
+            $troco += (float)$row['Troco_Total'];
+            $quant_dinheiro++;
+            break;
+        case 'Cartão de Crédito':
+            $valor_credito += (float)$row['Total_Recebido'];
+            $quant_credito++;
+            break;
+        case 'Cartão de Débito':
+            $valor_debito += (float)$row['Total_Recebido'];
+            $quant_debito++;
+            break;
+        case 'PIX':
+            $valor_pix += (float)$row['Total_Recebido'];
+            $quant_pix++;
+            break;
+    }
+}
+
+$dinheiroEmCaixa = ($saldoInicial + $suprimento - $sangria) + $valor_dinheiro - $troco;
+$saldoFinal = ($saldoInicial + $suprimento - $sangria) + $valor_total - $troco;
+$dataAtual = date('Y-m-d H:i:s');
+
+
+if (isset($_GET['acao']) && $_GET['acao'] == 'confirmar_fechamento') {
+    if ($dinheiroEmCaixa > 0.00) {
+        $_SESSION['msg'] = ['texto' => 'Retire o dinheiro em caixa primeiro', 'tipo' => 'warning'];
+        header('Location: finalizarcaixa_pdv.php');
+        exit();
     }
 
-    $id_caixa = $_SESSION['ID_Caixa'];
-    $id_caixaAberto = $_SESSION['ID_CaixaAberto'];
-    $saldoInicial = $_SESSION['Saldo_Inicial'];
-
-    // 1. Atualiza status do caixa
+    // 4. Atualiza status do caixa
     $sqlFechar = "UPDATE CAIXAS SET Status = 'Fechado' WHERE ID_CAIXA = ?";
     $stmtFechar = $conn->prepare($sqlFechar);
     $stmtFechar->bind_param("i", $id_caixa);
 
-    if ($stmtFechar->execute()) {
-
-        // 2. Busca relatório
-        $sqlRelatorio = "SELECT COUNT(*) AS total_vendas, SUM(Valor_Total) AS valor_total FROM VENDAS WHERE ID_CaixaAberto = ?";
-        $stmtRelatorio = $conn->prepare($sqlRelatorio);
-        $stmtRelatorio->bind_param("i", $id_caixaAberto);
-        $stmtRelatorio->execute();
-        $resultado = $stmtRelatorio->get_result();
-        $relatorioCaixa = $resultado->fetch_assoc();
-
-        $total_vendas = $relatorioCaixa['total_vendas'];
-        $valor_total = $relatorioCaixa['valor_total'] ?? 0.0;
-
-        // 3. Busca os pagamentos das vendas
-        $sqlVendas = "SELECT V.ID_Venda,
-                             V.DataHora_Venda,
-                             V.Valor_Total,
-                             F.Nome AS 'Nome_Funcionario',
-                             C.Nome AS 'Nome_Cliente',
-                             FP.Tipo AS 'Forma_Pag',
-                             VP.Valor AS 'Valor_Pag',
-                             VP.Troco
-                    FROM VENDA_PAGAMENTOS VP INNER JOIN VENDAS V
-                        ON VP.ID_Venda = V.ID_Venda
-                    LEFT JOIN FUNCIONARIOS F
-                        ON V.ID_Funcionario = F.ID_Funcionario
-                    LEFT JOIN CLIENTES C
-                        ON V.ID_Cliente = C.ID_Cliente
-                    LEFT JOIN FORMAS_PAGAMENTO FP
-                        ON VP.ID_Forma_Pag = FP.ID_Forma_Pag
-                    LEFT JOIN CAIXAS_ABERTOS CA
-                        ON V.ID_CaixaAberto = CA.ID_CaixaAberto
-                    WHERE CA.ID_CaixaAberto = ?
-                    ORDER BY V.ID_Venda ASC, VP.ID_VendaPagamento ASC";
-        $stmtVendas = $conn->prepare($sqlVendas);
-        $stmtVendas->bind_param("i", $id_caixaAberto);
-        $stmtVendas->execute();
-        $resultVendas = $stmtVendas->get_result();
-
-        // 4. Busca total vendido por método de pagamento
-        $sqlMetodos = "SELECT FP.Tipo,
-                            SUM(VP.Valor) AS 'Total_Recebido',
-                            SUM(VP.Troco) AS 'Troco_Total'
-                        FROM VENDA_PAGAMENTOS VP INNER JOIN VENDAS V 
-                            ON VP.ID_Venda = V.ID_Venda
-                        INNER JOIN FORMAS_PAGAMENTO FP 
-                            ON VP.ID_Forma_Pag = FP.ID_Forma_Pag
-                        WHERE V.ID_CaixaAberto = ?
-                        GROUP BY FP.Tipo";
-        $stmtMetodos = $conn->prepare($sqlMetodos);
-        $stmtMetodos->bind_param("i", $id_caixaAberto);
-        $stmtMetodos->execute();
-        $resultMetodos = $stmtMetodos->get_result();
-
-        $valor_dinheiro = 0;
-        $valor_credito = 0;
-        $valor_debito = 0;
-        $valor_pix = 0;
-        $troco = 0;
-
-        while ($row = $resultMetodos->fetch_assoc()){
-            $forma = $row['Tipo'];
-            $valor = (float)$row['Total_Recebido'];
-            $trocoForma = (float)$row['Troco_Total'];
-
-            switch ($forma){
-                case 'Dinheiro': 
-                    $valor_dinheiro += $valor;
-                    $troco += $trocoForma;
-                    break;
-                case 'Cartão de Crédito': $valor_credito += $valor; break;
-                case 'Cartão de Débito': $valor_debito += $valor; break;
-                case 'PIX': $valor_pix += $valor; break;
-            }
-            
-        }
-
-        $saldoFinal = $saldoInicial + $valor_dinheiro - $troco;
-        $dataAtual = date('Y-m-d H:i:s');
-
-        // 4. Fecha o caixa aberto
-        $sql = "UPDATE CAIXAS_ABERTOS SET Data_Fechamento = ?, Saldo_Final = ?, Valor_Vendido = ? WHERE ID_CaixaAberto = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sddi", $dataAtual, $saldoFinal, $valor_total, $id_caixaAberto);
-        $stmt->execute();
-
-        $stmtRelatorio->close();
-        $stmt->close();
-
+    // 5. Fecha o caixa aberto
+    $sql = "UPDATE CAIXAS_ABERTOS SET Data_Fechamento = ?, Saldo_Final = ?, Valor_Vendido = ? WHERE ID_CaixaAberto = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sddi", $dataAtual, $dinheiroEmCaixa, $valor_total, $id_caixaAberto);
+    
+    if($stmt->execute() && $stmtFechar->execute()){
         unset(
             $_SESSION['ID_Caixa'],
             $_SESSION['ID_CaixaAberto'],
-            $_SESSION['Saldo_Inicial']
+            $_SESSION['Saldo_Inicial'],
+            $_SESSION['Sangria'],
+            $_SESSION['Suprimento']
         );
-    } 
-    else {
-        echo "<p>Erro ao finalizar o caixa.</p>";
-    }
 
-    $stmtFechar->close();
-    $conn->close();
+        $_SESSION['msg'] = ['texto' => 'Caixa fechado com sucesso!', 'tipo' => 'success'];
+
+        header('Location: ' . SISTEMA_URL . 'dashboard.php');
+        exit();
+    }
+    else{
+        $_SESSION['msg'] = ['texto' => 'Erro ao finalizar o caixa', 'tipo' => 'danger'];
+        header('Location: finalizarcaixa_pdv.php');
+        exit();
+    }
 }
+
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -132,87 +133,225 @@ if (isset($_POST['finalizar_caixa'])) {
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
+        <style>
+            .resumoCaixa {
+                background: white;
+                max-width: 425px;
+                margin: 7px auto;
+                padding: 20px;
+                border: 1px dashed #000;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .resumoCaixa hr {
+                border: none;
+                border-top: 1px dashed #000;
+                margin: 5px 0;
+            }
+
+            .resumoCaixa .text-center {
+                text-align: center;
+            }
+
+            .resumoCaixa .small {
+                font-size: 0.8em;
+                font-family: monospace;
+            }
+        </style>
     </head>
     <body class="bg-light">
         <!-- Navbar -->
         <?php include_once DEV_PATH . 'Views/sidebar.php'?>
 
-        <div class="content">
-            <!-- Banner -->
-            <div class="container-fluid bg-secondary text-white text-center p-4">
-                <h3>Seleção de Caixa</h3>
-                <?php
-                    // Verifica se $_SESSION["msg"] não é nulo e imprime a mensagem
-                    if(isset($_SESSION["msg"]) && $_SESSION["msg"] != null){
-                        echo $_SESSION["msg"];
-                        // Limpa a mensagem para evitar que seja exibida novamente
-                        $_SESSION["msg"] = null;
-                    }
-                ?>
+        <div class="content d-flex flex-column min-vh-100">
+            <div class="content flex-grow-1">
+                <!-- Banner -->
+                <div class="container-fluid bg-secondary text-white text-center p-4">
+                    <h3>Relatório de Caixa</h3>
+                </div>
+                
+                <div class="container mt-3 p-4">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="col">
+                            <div class="resumoCaixa">
+                                <div class="text-center small">
+                                    <?= $dataAtual ?>
+                                </div>
+                                <hr>
+                                <div class="small">
+                                    Caixa: <?= $relatorioCaixaEDatas['Caixa'] ?><br>
+                                    Data Abertura: <?= $relatorioCaixaEDatas['Data_Abertura'] ?><br>
+                                    Data Fechamento: <?= $relatorioCaixaEDatas['Data_Fechamento'] ? $relatorioCaixaEDatas['Data_Fechamento'] : '' ?>
+                                </div>
+                                <hr>
+                                <div class="small">
+                                    Saldo Inicial: R$ <?= number_format($saldoInicial, 2, ',', '.') ?>
+                                </div>
+                                <hr>
+                                <div class="small">
+                                    Dinheiro(<?= $quant_dinheiro ?>): R$ <?= number_format($valor_dinheiro, 2, ',', '.') ?><br>
+                                    Crédito(<?= $quant_credito ?>): R$ <?= number_format($valor_credito, 2, ',', '.') ?><br>
+                                    Débito(<?= $quant_debito ?>): R$ <?= number_format($valor_debito, 2, ',', '.') ?><br>
+                                    PIX(<?= $quant_pix ?>): R$ <?= number_format($valor_pix, 2, ',', '.') ?><br>
+                                    <br>
+                                    Total Vendido: R$ <?= number_format($valor_total, 2, ',', '.') ?><br>
+                                    Total de Vendas: <?= $total_vendas ?>
+                                </div>
+                                <hr>
+                                <div class="small">
+                                    Dinheiro em Caixa: R$ <?= number_format($dinheiroEmCaixa, 2, ',', '.') ?><br>
+                                    (Abert. + Dinheiro + Suprim.) - (Sangria + Troco)
+                                </div>
+                                <hr>
+                                <div class="small">
+                                    Saldo Final: R$ <?= number_format($saldoFinal, 2, ',', '.') ?><br>
+                                    (Abert. + Total Vendido + Suprim.) - (Sangria + Troco)
+                                </div>
+                                <hr>
+                                <div class="small">
+                                    Valor Suprimentos: R$ <?= number_format($suprimento, 2, ',', '.') ?><br>
+                                    Valor Sangrias: R$ <?= number_format($sangria, 2, ',', '.') ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="mt-1 p-2">
+                                <button class="btn btn-success m-2" id="btnSangria" onclick="sangria()">Sangria</button>
+                                <a href="?acao=confirmar_fechamento" class="btn btn-danger m-2">Confirmar e Fechar Caixa Definitivamente</a>
+                            </div>
+                            <div id="camposSangria"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
-            <div class="container mt-3 p-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2>Relatório do Caixa</h2>
-                    <a href="caixa_pdv.php" class="btn btn-primary">Abrir novo Caixa</a>
-                </div>
-
-                <div>
-                    <p>Saldo Inicial: R$ <?= number_format($saldoInicial, 2, ',', '.') ?></p>
-                    <p>Total de Vendas: <?= $total_vendas ?></p>
-                    <p>Valor Total (Vendido): R$ <?= number_format($valor_total, 2, ',', '.') ?></p>
-                    <p>Vendido Dinheiro: R$ <?= number_format($valor_dinheiro, 2, ',', '.') ?></p>
-                    <p>Vendido Crédito: R$ <?= number_format($valor_credito, 2, ',', '.') ?></p>
-                    <p>Vendido Débito: R$ <?= number_format($valor_debito, 2, ',', '.') ?></p>
-                    <p>Vendido PIX: R$ <?= number_format($valor_pix, 2, ',', '.') ?></p>
-                    <p>Saldo Final: R$ <?= number_format($saldoFinal, 2, ',', '.') ?></p>
-                </div>
-
-                <table class="table table-striped table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th scope="col">Nº Venda</th>
-                            <th scope="col">Caixa</th>
-                            <th scope="col">Funcionario</th>
-                            <th scope="col">Cliente</th>
-                            <th scope="col">Data e Hora</th>
-                            <th scope="col">Formas Pag</th>
-                            <th scope="col">R$ Pag</th>
-                            <th scope="col">R$ Troco</th>
-                            <th scope="col">R$ Total</th>
-                            <th scope="col">Cupom Fiscal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                            if ($resultVendas->num_rows > 0) {
-                                while ($row = $resultVendas->fetch_assoc()) { // quebra de página após 20 resultados
-                                    $nomeCli = ($row['Nome_Cliente']) ? $row['Nome_Cliente'] : '--';
-                                    echo '<tr>';
-                                        echo '<td>' . $row["ID_Venda"] . '</td>';
-                                        echo '<td>' . $id_caixa . '</td>';
-                                        echo '<td>' . $row["Nome_Funcionario"] . '</td>';
-                                        echo '<td>' . $nomeCli . '</td>';
-                                        echo '<td>' . $row["DataHora_Venda"] . '</td>';
-                                        echo '<td>' . $row["Forma_Pag"] . '</td>';
-                                        echo '<td>' . number_format($row["Valor_Pag"], 2, ',', '.') . '</td>';
-                                        echo '<td>' . number_format($row["Troco"], 2, ',', '.') . '</td>';
-                                        echo '<td>' . number_format($valor_total, 2, ',', '.') . '</td>';
-                                        echo '<td>
-                                                <a href="cupomNfiscal.php?ID_Venda=' . $row["ID_Venda"] . '" class="btn btn-info btn-sm">Ver</a>
-                                             </td>';
-                                    echo '</tr>';
-                                }
-                            } else {
-                                echo '<tr><td colspan="10" class="text-center">Nenhuma venda realizada</td></tr>';
-                            }
-                        ?>
-                    </tbody>
-                </table>
-            </div>
-
             <!-- Footer -->
             <?php include_once DEV_PATH . 'Views/footer.php'?>
         </div>
+
+        <!-- Toast -->
+        <div class="toast-container position-fixed top-0 end-0 p-3">
+            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                <strong class="me-auto" id="toastTitulo">Notificação</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body" id="toastCorpo">
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function sangria() {
+                document.getElementById('btnSangria').disabled = true; // Desabilita o botão
+                const sangria = document.createElement('div');
+                const valorARetirar = <?= $dinheiroEmCaixa ?>;
+
+                sangria.innerHTML = `
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label">Sangria (Saída de Dinheiro)</label>
+                        <div class="col-sm-8 d-flex align-items-center">
+                            <input type="number" step="0.01" min="0" class="form-control" id="valorMovimentacao" value="${valorARetirar}">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label">Descrição</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="descricaoMovimentacao" value="Sangria - Finalização de caixa" disabled>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <button class="btn btn-primary w-100" onclick="registrarMovimentacao('saida')">Confirmar</button>
+                        <div id="erroFuncionalidade" class="text-danger mt-2 w-100 text-center"></div>
+                    </div>
+                `;
+                
+                document.getElementById('camposSangria').appendChild(sangria);
+            }
+
+            let registroSangria = null;
+
+            function registrarMovimentacao(tipo) {
+                registroSangria = tipo;
+                let valor = parseFloat(document.getElementById('valorMovimentacao').value);
+                let descricao = document.getElementById('descricaoMovimentacao').value.trim();
+
+                if (isNaN(valor) || valor <= 0) {
+                    document.getElementById('erroFuncionalidade').textContent = "Informe um valor válido.";
+                    return;
+                }
+
+                fetch('registrarmovimentacao.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: `tipo=${registroSangria}&valor=${valor}&descricao=${encodeURIComponent(descricao)}`
+                })
+                .then(response => response.text())
+                .then(data => {
+                    if (data.trim() === 'ok') {
+                        mostrarToast('Movimentação registrada com sucesso!', 'success', 'Sucesso');
+                        location.reload();
+                    } else {
+                        document.getElementById('erroFuncionalidade').textContent = data;
+                    }
+                });
+            }
+
+            // Lógica para ativar o Toast
+            function mostrarToast(texto, tipo = 'success', titulo = 'Notificação') {
+                const toastLiveExample = document.getElementById('liveToast');
+                const toastHeader = toastLiveExample.querySelector('.toast-header');
+                
+                // Define o título padrão baseado no tipo, se não for fornecido
+                if (titulo === 'Notificação') {
+                    titulo = ucfirst(tipo === 'danger' ? 'Erro' : (tipo === 'warning' ? 'Atenção' : 'Sucesso'));
+                }
+                const headerClass = `text-bg-${tipo}`;
+
+                document.getElementById('toastTitulo').innerText = titulo;
+                document.getElementById('toastCorpo').innerText = texto;
+                
+                // Remove classes de cor antigas e adiciona a nova
+                toastHeader.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning', 'text-bg-info');
+                toastHeader.classList.add(headerClass);
+
+                const toast = new bootstrap.Toast(toastLiveExample);
+                toast.show();
+            }
+
+            // Função auxiliar para deixar a primeira letra maiúscula (o PHP faz isso, o JS não)
+            function ucfirst(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            }
+
+            <?php
+            if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {
+                $texto = addslashes($_SESSION['msg']['texto']);
+                $tipo = $_SESSION['msg']['tipo']; // ex: 'success', 'danger', 'warning'
+                
+                // Define o título e a cor do cabeçalho baseado no tipo
+                $titulo = ucfirst($tipo === 'danger' ? 'Erro' : ($tipo === 'warning' ? 'Atenção' : 'Sucesso'));
+                $headerClass = "text-bg-" . ($tipo === 'danger' ? 'danger' : ($tipo === 'warning' ? 'warning' : 'success'));
+                
+                echo "
+                document.addEventListener('DOMContentLoaded', function() {
+                    const toastLiveExample = document.getElementById('liveToast');
+                    const toastHeader = toastLiveExample.querySelector('.toast-header');
+                    
+                    document.getElementById('toastTitulo').innerText = '{$titulo}';
+                    document.getElementById('toastCorpo').innerText = '{$texto}';
+                    
+                    // Remove classes de cor antigas e adiciona a nova
+                    toastHeader.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning');
+                    toastHeader.classList.add('{$headerClass}');
+
+                    const toast = new bootstrap.Toast(toastLiveExample);
+                    toast.show();
+                });
+                ";
+                unset($_SESSION['msg']);
+            }
+            ?>
+        </script>
     </body>
 </html>

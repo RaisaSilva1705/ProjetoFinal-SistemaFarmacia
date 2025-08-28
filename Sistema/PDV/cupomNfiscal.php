@@ -120,7 +120,7 @@ $dataHora = date('d/m/Y H:i:s', strtotime($dadosVenda['DataHora_Venda']));
             margin: 30px auto;
             padding: 20px;
             border: 1px dashed #000;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         hr {
             border: none;
@@ -224,7 +224,7 @@ $dataHora = date('d/m/Y H:i:s', strtotime($dadosVenda['DataHora_Venda']));
                 <strong>** <?= $dadosEmpresa['Nome_Fantasia'] ?> **</strong><br>
                 "<?= $dadosEmpresa['Slogan'] ?>"<br>
                 AGRADECEMOS A PREFERÊNCIA!<br>
-                <?= $dataHora ?> - Caixa: <?= $dadosVenda['ID_Caixa'] ?? '01' ?>
+                <?= $dataHora ?> - Caixa: <?= $dadosPagamento[0]['Caixa'] ?>
             </div>
         </div>
     </div>

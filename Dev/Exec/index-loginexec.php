@@ -38,38 +38,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['Nome'] = $dados['Nome'];
                 $_SESSION['ID_Cargo'] = $dados['ID_Cargo'];
                 $_SESSION['expire'] = strtotime('+60 minutes', strtotime('now'));
-                $_SESSION["msg"] = "<div class='alert alert-primary' role='aviso'>
-                                        Olá <strong>".$_SESSION["Nome"]."</strong>, Login efetuado com sucesso!
-                                    </div>";
+                $_SESSION["msg"] = ['texto' => "Olá " . $_SESSION['Nome'] . ". Login efetuado com sucesso!", 'tipo' => 'success'];
                 mysqli_close($conn);                    
-                header('Location: http://localhost/htdocs/Farmácia/Sistema/dashboard.php');
+                header('Location:' . SISTEMA_URL .'dashboard.php');
                 exit();
             }
-            else{
-                $_SESSION["msg"] = "<div class='alert alert-warning' role='aviso'>
-                                        Usuário ou senha estão incorretos. Por favor, verifique suas credenciais.
-                                    </div>";
+            else {
+                $_SESSION["msg"] = ['texto' => 'Usuário ou senha estão incorretos. Por favor, verifique suas credenciais', 'tipo' => 'danger'];
                 mysqli_close($conn);
-                header('Location: http://localhost/htdocs/Farmácia/Sistema/index.php');
+                header('Location' . SISTEMA_URL .'index.php');
                 exit;
             }
         }
         else {
-            $_SESSION["msg"] = "<div class='alert alert-warning' role='aviso'>
-                        Usuário não está ativo.
-                    </div>";
+            $_SESSION["msg"] = ['texto' => 'Usuário não está ativo', 'tipo' => 'danger'];
             mysqli_close($conn);
-            header('Location: http://localhost/htdocs/Farmácia/Sistema/index.php');
+            header('Location' . SISTEMA_URL .'index.php');
             exit;
         }
         
     }
-    else{
-        $_SESSION["msg"] = "<div class='alert alert-warning' role='aviso'>
-                                Usuário ou senha incorretas. Por favor, verifique suas credenciais.
-                            </div>";
+    else {
+        $_SESSION["msg"] = ['texto' => 'Usuário ou senha estão incorretos. Por favor, verifique suas credenciais', 'tipo' => 'danger'];
         mysqli_close($conn);
-        header('Location: http://localhost/htdocs/Farmácia/Sistema/index.php');
+        header('Location' . SISTEMA_URL .'index.php');
         exit;
     }
 }

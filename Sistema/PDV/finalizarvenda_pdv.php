@@ -33,7 +33,7 @@ if (empty($formas_pagamento)) {
 
 // Verifica se há itens no carrinho
 if (empty($_SESSION['carrinho'])) {
-    $_SESSION['msg'] = "Carrinho vazio. Nenhuma venda registrada.";
+    $_SESSION['msg'] = ['texto' => 'Carrinho vazio. Nenhuma venda registrada.', 'tipo' => 'warning'];
     header("Location: pdv.php");
     exit;
 }
@@ -59,13 +59,16 @@ try {
 
     // ------- ID DA VENDA -------
     $idVenda = $stmt->insert_id;
+
+    // ------- ID CAIXA -------
+    $id_caixa = $_SESSION['ID_Caixa'];
     
     // Prepara a inserção da movimentação de caixa
     $stmtMov = $conn->prepare("INSERT INTO MOVIMENTACOES_CAIXA (ID_Caixa, ID_Funcionario, Tipo, Valor, Descricao)
                                VALUES (?, ?, 'Entrada', ?, ?)");
     // Descrição  da movimentação
     $descricaoMov = "Venda ID: $idVenda";
-    $stmtMov->bind_param("iids", $id_caixaAberto, $id_funcionario, $valor_total, $descricaoMov);
+    $stmtMov->bind_param("iids", $id_caixa, $id_funcionario, $valor_total, $descricaoMov);
     $stmtMov->execute();
 
 

@@ -23,6 +23,17 @@ $sqlTurnos = "SELECT ID_Turno,
               FROM TURNOS";
 $turnos = $conn->query($sqlTurnos);
 
+// Pega a hora atual no formato 24h (ex: "08", "15", "22")
+$horaAtual = date('H');
+
+$idTurnoAutomatico = null;
+if ($horaAtual >= 6 && $horaAtual < 12)
+    $idTurnoAutomatico = 1; // Manhã
+elseif ($horaAtual >= 12 && $horaAtual < 18)
+    $idTurnoAutomatico = 2; // Tarde
+else
+    $idTurnoAutomatico = 3; // Noite
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST'){
     $id_caixa = $_POST['id_caixa'];
     $id_funcionario = $_SESSION['ID_Funcionario'];
@@ -64,17 +75,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
             exit();
         }
         else {
-            $_SESSION["msg"] = "<div class='alert alert-primary' role='aviso'>
-                                    Erro ao abrir caixa.
-                                </div>";
+            $_SESSION["msg"] = ['texto' => 'Erro ao abrir o caixa', 'tipo' => 'danger'];
             header("Location: caixa_pdv.php"); 
             exit();
         }
     }
     else {
-        $_SESSION["msg"] = "<div class='alert alert-primary' role='aviso'>
-                                Caixa já está aberto.
-                            </div>";
+        $_SESSION["msg"] = ['texto' => 'Caixa já está aberto', 'tipo' => 'warning'];
         header("Location: caixa_pdv.php"); 
         exit();
     }
@@ -99,51 +106,98 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         <!-- Navbar -->
         <?php include_once DEV_PATH . 'Views/sidebar.php'?>
 
-        <div class="content">
-            <!-- Banner -->
-            <div class="container-fluid bg-secondary text-white text-center p-4">
-                <h3>Seleção de Caixa</h3>
-                <?php
-                    // Verifica se $_SESSION["msg"] não é nulo e imprime a mensagem
-                    if(isset($_SESSION["msg"]) && $_SESSION["msg"] != null){
-                        echo $_SESSION["msg"];
-                        // Limpa a mensagem para evitar que seja exibida novamente
-                        $_SESSION["msg"] = null;
-                    }
-                ?>
+        <div class="content d-flex flex-column min-vh-100">
+            <div class="content flex-grow-1">
+                <!-- Banner -->
+                <div class="container-fluid bg-secondary text-white text-center p-4">
+                    <h3>Seleção de Caixa</h3>
+                </div>
+                <div class="container flex-column d-flex justify-content-center align-items-center mt-5">
+                    <form action="#" method="POST">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="id_caixa" class="form-label">Selecione o Caixa</label>
+                                <select class="form-select" name="id_caixa" id="id_caixa" required>
+                                    <option value="">Selecione</option>
+                                    <?php while($caixa = $caixas->fetch_assoc()): ?>
+                                        <option value="<?= $caixa['ID_Caixa'] ?>"><?= $caixa['Caixa'] ?></option>
+                                    <?php endwhile; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="id_turno" class="form-label">Turno</label>
+                                <select class="form-select" name="id_turno" id="id_turno" required disabled>
+                                    <?php 
+                                    $turnos->data_seek(0);
+                                    while($turno = $turnos->fetch_assoc()): 
+                                        $selected = ($turno['ID_Turno'] == $idTurnoAutomatico ? 'selected' : '')
+                                    ?>
+                                        <option value="<?= $turno['ID_Turno'] ?>" <?= $selected ?>><?= $turno['Turno'] ?></option>
+                                    <?php endwhile; ?>
+                                </select>
+                                <input type="hidden" name="id_turno" value="<?= $idTurnoAutomatico ?>">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label" for="saldo_inicial">Saldo Inicial</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input class="form-control" type="number" name="saldo_inicial" id="saldo_inicial" required placeholder="0,00">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary mt-4 px-5">Abrir Caixa</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="container m-4">
-                <form action="#" method="POST">
-                    <div class="row">
-                        <div class="col-md-3 mb-3">
-                            <label for="id_caixa" class="form-label">Selecione o Caixa</label>
-                            <select class="form-select" name="id_caixa" id="id_caixa" required>
-                                <option value="">Selecione</option>
-                                <?php while($caixa = $caixas->fetch_assoc()): ?>
-                                    <option value="<?= $caixa['ID_Caixa'] ?>"><?= $caixa['Caixa'] ?></option>
-                                <?php endwhile; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="id_turno" class="form-label">Selecione o Turno</label>
-                            <select class="form-select" name="id_turno" id="id_turno" required>
-                                <option value="">Selecione</option>
-                                <?php while($turno = $turnos->fetch_assoc()): ?>
-                                    <option value="<?= $turno['ID_Turno'] ?>"><?= $turno['Turno'] ?></option>
-                                <?php endwhile; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label" for="saldo_inicial">Saldo Inicial</label>
-                            <input class="form-control" type="number" name="saldo_inicial" id="saldo_inicial" required placeholder="Digite o valor inicial...">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary mt-4">Abrir Caixa</button>
-                </form>
-            </div>
-            <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
             <!-- Footer -->
             <?php include_once DEV_PATH . 'Views/footer.php'?>
         </div>
+
+        <!-- Toast -->
+         <div class="toast-container position-fixed top-0 end-0 p-3">
+            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                <strong class="me-auto" id="toastTitulo">Notificação</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body" id="toastCorpo">
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            // Lógica para ativar o Toast
+            <?php
+            if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {
+                $texto = addslashes($_SESSION['msg']['texto']);
+                $tipo = $_SESSION['msg']['tipo']; // ex: 'success', 'danger', 'warning'
+                
+                // Define o título e a cor do cabeçalho baseado no tipo
+                $titulo = ucfirst($tipo === 'danger' ? 'Erro' : ($tipo === 'warning' ? 'Atenção' : 'Sucesso'));
+                $headerClass = "text-bg-" . ($tipo === 'danger' ? 'danger' : ($tipo === 'warning' ? 'warning' : 'success'));
+                
+                echo "
+                document.addEventListener('DOMContentLoaded', function() {
+                    const toastLiveExample = document.getElementById('liveToast');
+                    const toastHeader = toastLiveExample.querySelector('.toast-header');
+                    
+                    document.getElementById('toastTitulo').innerText = '{$titulo}';
+                    document.getElementById('toastCorpo').innerText = '{$texto}';
+                    
+                    // Remove classes de cor antigas e adiciona a nova
+                    toastHeader.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning');
+                    toastHeader.classList.add('{$headerClass}');
+
+                    const toast = new bootstrap.Toast(toastLiveExample);
+                    toast.show();
+                });
+                ";
+                unset($_SESSION['msg']);
+            }
+            ?>
+        </script>
     </body>
 </html>

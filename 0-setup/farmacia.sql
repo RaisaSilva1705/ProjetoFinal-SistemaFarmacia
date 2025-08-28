@@ -367,7 +367,7 @@ CREATE TABLE IF NOT EXISTS `VENDAS` (
     FOREIGN KEY (`ID_Cliente`) REFERENCES `CLIENTES` (`ID_Cliente`)
 ) ENGINE = InnoDB;
 /* drop table VENDAS; */
-select * from VENDAS; 
+/* select * from VENDAS; */
 
 -- -----------------------------------------------------
 -- Table `MOVIMENTACAO_ESTOQUE`
@@ -405,7 +405,7 @@ CREATE TABLE IF NOT EXISTS `VENDA_PAGAMENTOS` (
     FOREIGN KEY (`ID_Forma_Pag`) REFERENCES `FORMAS_PAGAMENTO` (`ID_Forma_Pag`)
 ) ENGINE = InnoDB;
 /* drop table VENDA_PAGAMENTOS; */
- select * from VENDA_PAGAMENTOS; 
+/* select * from VENDA_PAGAMENTOS; */
 
 -- -----------------------------------------------------
 -- Table `ITENS_VENDA`

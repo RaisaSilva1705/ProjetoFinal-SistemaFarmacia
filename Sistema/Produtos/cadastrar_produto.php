@@ -111,7 +111,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Cadastro</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
         <style>
             select > option:first-child {
@@ -123,185 +122,227 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <!-- Navbar -->
         <?php include_once DEV_PATH . 'Views/sidebar.php'?>
 
-        <div class="content">
-            <!-- Banner -->
-            <div class="container-fluid bg-secondary text-white text-center p-4">
-                <h3>Cadastro de Produto</h3>
-                <?php
-                    // Verifica se $_SESSION["msg"] não é nulo e imprime a mensagem
-                    if(isset($_SESSION["msg"]) && $_SESSION["msg"] != null){
-                        echo $_SESSION["msg"];
-                        // Limpa a mensagem para evitar que seja exibida novamente
-                        $_SESSION["msg"] = null;
-                    }
-                ?>
-            </div>
-
-            <!-- Formulário de Edição -->
-            <div class="container p-5">
-                <form action="#" method="POST" enctype="multipart/form-data">
-                    <h5>Informações do Produto</h5>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="nome" class="form-label">Nome do Produto</label>
-                            <input type="text" name="nome" class="form-control" required>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="marca" class="form-label">Marca</label>
-                            <input type="text" name="marca" class="form-control" required>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="id_categoria" class="form-label">Categoria</label>
-                            <select class="form-select" name="id_categoria" id="id_categoria" required>
-                                <option value="">Selecione</option>
-                                <?php while($cat = $categorias->fetch_assoc()): ?>
-                                    <option value="<?= $cat['ID_Categoria'] ?>"><?= $cat['Categoria'] ?></option>
-                                <?php endwhile; ?>
-                            </select>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="descricao" class="form-label">Descrição</label>
-                            <input type="text" name="descricao" class="form-control">
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="id_unidade" class="form-label">Unidade</label>
-                            <select class="form-select" name="id_unidade" id="id_unidade" required>
-                                <option value="">Selecione</option>
-                                <?php while($uni = $unidades->fetch_assoc()): ?>
-                                    <option value="<?= $uni['ID_Unidade'] ?>"><?= $uni['Unidade'] ?></option>
-                                <?php endwhile; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="quant_minima" class="form-label">Quantidade Mínima</label>
-                            <input type="number" name="quant_minima" id="quant_minima" class="form-control" value="10">
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="obs" class="form-label">Observações</label>
-                            <textarea class="form-control" name="obs" id="obs" rows="1"></textarea>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="status" class="form-label">Status</label>
-                            <select name="status" class="form-select">
-                                <option value="">Selecione</option>
-                                <option value="Ativo">Ativo</option>
-                                <option value="Inativo">Inativo</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="foto" class="form-label">Foto (URL ou nome do arquivo)</label>
-                            <input type="file" name="foto" class="form-control">
-                        </div>
-
-                        <!-- Campos de Medicamento -->
-                        <div id="campos_medicamento" style="display: none;">
-                            <hr>
-                            
-                            <h5 class="mt-4">Informações do Medicamento</h5>
-                            <div class="row">
-                                <div class="col-md-3 mb-3">
-                                    <label for="id_categoria_med" class="form-label">Categoria Medicamento</label>
-                                    <select class="form-select" name="id_categoria_med" id="id_categoria_med">
-                                        <option value="">Selecione</option>
-                                        <?php while($catMed = $categoriasMed->fetch_assoc()): ?>
-                                            <option value="<?= $catMed['ID_CategoriaMed'] ?>"><?= $catMed['Categoria_Med'] ?></option>
-                                        <?php endwhile; ?>
-                                    </select>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label for="tipo_med" class="form-label">Tipo</label>
-                                    <select name="tipo_med" class="form-select" id="tipo_med">
-                                        <option value="">Selecione</option>
-                                        <option value="Genérico">Genérico</option>
-                                        <option value="Similar">Similar</option>
-                                        <option value="Referência">Referência</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label for="id_tarja_med" class="form-label">Tarja</label>
-                                    <select class="form-select" name="id_tarja_med" id="id_tarja_med">
-                                        <option value="">Selecione</option>
-                                        <?php while($tjMed = $tarjaMed->fetch_assoc()): ?>
-                                            <option value="<?= $tjMed['ID_Tarja'] ?>"><?= $tjMed['Tarja'] ?></option>
-                                        <?php endwhile; ?>
-                                    </select>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label for="prin_ativo" class="form-label">Princípio Ativo</label>
-                                    <input type="text" class="form-control" name="prin_ativo" id="prin_ativo">
-                                </div>
+        <div class="content d-flex flex-column min-vh-100">
+            <div class="content flex-grow-1">
+                <!-- Banner -->
+                <div class="container-fluid bg-secondary text-white text-center p-4">
+                    <h3>Cadastro de Produto</h3>
+                </div>
+    
+                <!-- Formulário de Edição -->
+                <div class="container p-5">
+                    <form action="#" method="POST" enctype="multipart/form-data">
+                        <h5>Informações do Produto</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nome" class="form-label">Nome do Produto</label>
+                                <input type="text" name="nome" class="form-control" required>
                             </div>
-                        </div>              
-                        
-                    </div>
-
-                    <hr>
-
-                    <h5>Informações Fiscais</h5>
-                    <div class="row">
-                        <div class="col-md-3 mb-3">
-                            <label for="ncm" class="form-label">NCM</label>
-                            <input type="text" name="ncm" class="form-control" maxlength="8" required>
+                            <div class="col-md-3 mb-3">
+                                <label for="marca" class="form-label">Marca</label>
+                                <input type="text" name="marca" class="form-control" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="id_categoria" class="form-label">Categoria</label>
+                                <select class="form-select" name="id_categoria" id="id_categoria" required>
+                                    <option value="">Selecione</option>
+                                    <?php while($cat = $categorias->fetch_assoc()): ?>
+                                        <option value="<?= $cat['ID_Categoria'] ?>"><?= $cat['Categoria'] ?></option>
+                                    <?php endwhile; ?>
+                                </select>
+                            </div>
+    
+                            <div class="col-md-6 mb-3">
+                                <label for="descricao" class="form-label">Descrição</label>
+                                <input type="text" name="descricao" class="form-control">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="id_unidade" class="form-label">Unidade</label>
+                                <select class="form-select" name="id_unidade" id="id_unidade" required>
+                                    <option value="">Selecione</option>
+                                    <?php while($uni = $unidades->fetch_assoc()): ?>
+                                        <option value="<?= $uni['ID_Unidade'] ?>"><?= $uni['Unidade'] ?></option>
+                                    <?php endwhile; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="quant_minima" class="form-label">Quantidade Mínima</label>
+                                <input type="number" name="quant_minima" id="quant_minima" class="form-control" value="10">
+                            </div>
+    
+                            <div class="col-md-6 mb-3">
+                                <label for="obs" class="form-label">Observações</label>
+                                <textarea class="form-control" name="obs" id="obs" rows="1"></textarea>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="status" class="form-label">Status</label>
+                                <select name="status" class="form-select">
+                                    <option value="">Selecione</option>
+                                    <option value="Ativo">Ativo</option>
+                                    <option value="Inativo">Inativo</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="foto" class="form-label">Foto (URL ou nome do arquivo)</label>
+                                <input type="file" name="foto" class="form-control">
+                            </div>
+    
+                            <!-- Campos de Medicamento -->
+                            <div id="campos_medicamento" style="display: none;">
+                                <hr>
+                                
+                                <h5 class="mt-4">Informações do Medicamento</h5>
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <label for="id_categoria_med" class="form-label">Categoria Medicamento</label>
+                                        <select class="form-select" name="id_categoria_med" id="id_categoria_med">
+                                            <option value="">Selecione</option>
+                                            <?php while($catMed = $categoriasMed->fetch_assoc()): ?>
+                                                <option value="<?= $catMed['ID_CategoriaMed'] ?>"><?= $catMed['Categoria_Med'] ?></option>
+                                            <?php endwhile; ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="tipo_med" class="form-label">Tipo</label>
+                                        <select name="tipo_med" class="form-select" id="tipo_med">
+                                            <option value="">Selecione</option>
+                                            <option value="Genérico">Genérico</option>
+                                            <option value="Similar">Similar</option>
+                                            <option value="Referência">Referência</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="id_tarja_med" class="form-label">Tarja</label>
+                                        <select class="form-select" name="id_tarja_med" id="id_tarja_med">
+                                            <option value="">Selecione</option>
+                                            <?php while($tjMed = $tarjaMed->fetch_assoc()): ?>
+                                                <option value="<?= $tjMed['ID_Tarja'] ?>"><?= $tjMed['Tarja'] ?></option>
+                                            <?php endwhile; ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="prin_ativo" class="form-label">Princípio Ativo</label>
+                                        <input type="text" class="form-control" name="prin_ativo" id="prin_ativo">
+                                    </div>
+                                </div>
+                            </div>              
+                            
                         </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="ean_gtin" class="form-label">EAN/GTIN</label>
-                            <input type="text" name="ean_gtin" class="form-control" maxlength="14" required>
+    
+                        <hr>
+    
+                        <h5>Informações Fiscais</h5>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="ncm" class="form-label">NCM</label>
+                                <input type="text" name="ncm" class="form-control" maxlength="8" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="ean_gtin" class="form-label">EAN/GTIN</label>
+                                <input type="text" name="ean_gtin" class="form-control" maxlength="14" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="cbnef" class="form-label">CBENEF</label>
+                                <input type="text" name="cbenef" class="form-control">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="cest" class="form-label">CEST</label>
+                                <input type="text" name="cest" class="form-control">
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <label for="extipi" class="form-label">EXTIPI</label>
+                                <input type="text" name="extipi" class="form-control">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="cfop" class="form-label">CFOP</label>
+                                <input type="number" name="cfop" class="form-control">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="mva" class="form-label">MVA</label>
+                                <input type="text" name="mva" class="form-control">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="nfci" class="form-label">NFCI</label>
+                                <input type="text" name="nfci" class="form-control">
+                            </div>
                         </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="cbnef" class="form-label">CBENEF</label>
-                            <input type="text" name="cbenef" class="form-control">
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="cest" class="form-label">CEST</label>
-                            <input type="text" name="cest" class="form-control">
-                        </div>
-                        
-                        <div class="col-md-3 mb-3">
-                            <label for="extipi" class="form-label">EXTIPI</label>
-                            <input type="text" name="extipi" class="form-control">
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="cfop" class="form-label">CFOP</label>
-                            <input type="number" name="cfop" class="form-control">
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="mva" class="form-label">MVA</label>
-                            <input type="text" name="mva" class="form-control">
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label for="nfci" class="form-label">NFCI</label>
-                            <input type="text" name="nfci" class="form-control">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary mt-4">Cadastrar Produto</button>
-                    <a href="produtos.php" class="btn btn-secondary mt-4 ms-2">Cancelar</a>
-                </form>
+    
+                        <button type="submit" class="btn btn-primary mt-4">Cadastrar Produto</button>
+                        <a href="produtos.php" class="btn btn-secondary mt-4 ms-2">Cancelar</a>
+                    </form>
+                </div>
             </div>
             
             <!-- Footer -->
             <?php include_once DEV_PATH . 'Views/footer.php'?>
         </div>
 
+        <!-- Toast -->
+         <div class="toast-container position-fixed top-0 end-0 p-3">
+            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                <strong class="me-auto" id="toastTitulo">Notificação</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body" id="toastCorpo">
+                </div>
+            </div>
+        </div>
         
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
             document.addEventListener("DOMContentLoaded", function () {
                 const categoria = document.getElementById("id_categoria");
                 const camposMedicamento = document.getElementById("campos_medicamento");
 
                 function toggleCamposMedicamento() {
-                    if (categoria.value == "1") {
+                    if (categoria.value == "1")
                         camposMedicamento.style.display = "block";
-                    } else {
+                    else
                         camposMedicamento.style.display = "none";
-                    }
                 }
 
                 toggleCamposMedicamento();
                 categoria.addEventListener("change", toggleCamposMedicamento);
             });
+
+            function mostrarToast(texto, tipo = 'success', titulo = 'Notificação') {
+                const toastLiveExample = document.getElementById('liveToast');
+                const toastHeader = toastLiveExample.querySelector('.toast-header');
+                
+                // Define o título padrão baseado no tipo, se não for fornecido
+                if (titulo === 'Notificação')
+                    titulo = ucfirst(tipo === 'danger' ? 'Erro' : (tipo === 'warning' ? 'Atenção' : 'Sucesso'));
+                
+                const headerClass = `text-bg-${tipo}`;
+
+                document.getElementById('toastTitulo').innerText = titulo;
+                document.getElementById('toastCorpo').innerText = texto;
+                
+                // Remove classes de cor antigas e adiciona a nova
+                toastHeader.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning', 'text-bg-info');
+                toastHeader.classList.add(headerClass);
+
+                const toast = new bootstrap.Toast(toastLiveExample);
+                toast.show();
+            }
+
+            // Função auxiliar para deixar a primeira letra maiúscula (o PHP faz isso, o JS não)
+            function ucfirst(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            }
+
+            <?php
+            if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {
+                $texto = addslashes($_SESSION['msg']['texto']);
+                $tipo = $_SESSION['msg']['tipo'];
+                
+                echo "mostrarToast('{$texto}', '{$tipo}');";
+
+                unset($_SESSION['msg']);
+            }
+            ?>
         </script>
     </body>
 </html>

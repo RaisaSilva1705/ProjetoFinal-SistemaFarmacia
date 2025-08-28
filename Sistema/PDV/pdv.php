@@ -34,15 +34,6 @@ if (isset($_POST['cancelar_venda'])) {
 // Inicializa o carrinho
 if (!isset($_SESSION['carrinho'])) $_SESSION['carrinho'] = [];
 
-// Remove item do carrinho
-if (isset($_GET['remover'])) {
-    $index = intval($_GET['remover']);
-    if (isset($_SESSION['carrinho'][$index])) {
-        unset($_SESSION['carrinho'][$index]);
-        $_SESSION['carrinho'] = array_values($_SESSION['carrinho']); // reorganiza os índices
-    }
-}
-
 // Adiciona item no carrinho
 if (isset($_POST['codigo'])) {
     $codigo = $_POST['codigo'];
@@ -64,7 +55,7 @@ if (isset($_POST['codigo'])) {
 
         // Verificação se o valor do produto não é nulo ou 0
         if ($preco === null || $preco <= 0) {
-            $_SESSION['msg'] = "<div class='alert alert-danger'>Produto sem preço definido!</div>";
+            $_SESSION['msg'] = ['texto' => 'Produto sem preço!', 'tipo' => 'danger'];
             header("Location: " . $_SERVER['PHP_SELF']);
             exit;
         }
@@ -101,7 +92,7 @@ if (isset($_POST['codigo'])) {
         exit;
     } 
     else {
-        $_SESSION['msg'] = "<div class='alert alert-primary'>Produto não encontrado!</div>";
+        $_SESSION['msg'] = ['texto' => 'Produto não encontrado!', 'tipo' => 'danger'];
         header("Location: " . $_SERVER['PHP_SELF']);
         exit;
     }
@@ -116,6 +107,7 @@ if (isset($_POST['codigo'])) {
         <meta charset="UTF-8">
         <title>Frente de Caixa</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
         <style>
@@ -134,37 +126,14 @@ if (isset($_POST['codigo'])) {
     </head>
     <body class="bg-light">
 
-        <div class="content">
-            <!-- Banner -->
-            <div class="container-fluid bg-secondary text-white text-center p-4">
-                <h3>Frente de Caixa</h3>
-                <?php
-                    // Verifica se $_SESSION["msg"] não é nulo e imprime a mensagem
-                    if(isset($_SESSION["msg"]) && $_SESSION["msg"] != null){
-                        echo "<script>alert('" . $_SESSION["msg"] . "');</script>";
-                        // Limpa a mensagem para evitar que seja exibida novamente
-                        $_SESSION["msg"] = null;
-                    }
-                ?>
-            </div>
+        <div class="content align-items-center justify-content-center">
             <div class="container mt-4">
 
                 <!-- TOPO -->
                 <div class="row mb-3">
                     <div class="col-md-3">
-                        <?php 
-                            $sql = "SELECT COUNT(ID_Venda) + 1 AS num FROM VENDAS;";
-                            $result = $conn->query($sql);
-                            if ($result->num_rows > 0) {
-                                $temp = $result->fetch_assoc();
-                                $id_venda = $temp['num'];
-                            }
-                            else {
-                                $id_venda = 1;
-                            }
-                        ?>
                         <label for="id_venda" class="form-label">Nº Venda:</label>
-                        <input type="text" name="id_venda" id="id_venda" class="form-control" value="<?php echo $id_venda ?>" readonly>
+                        <input type="text" name="id_venda" id="id_venda" class="form-control" value="NOVA VENDA" style="font-weight: bold; text-align: center;" readonly>
                     </div>
                     <div class="col-md-3">
                         <label for="data" class="form-label">Data Venda:</label>
@@ -191,15 +160,15 @@ if (isset($_POST['codigo'])) {
                 </div>
 
                 <!-- CENTRO -->
-                <div class="row mb-3">
+                <div class="row mb-3 mt-4">
                     <!-- COLUNA PRODUTO -->
                     <div class="col-md-7 border p-2">
                         <form action="#" method="POST">
                             <div class="row">
                                 <!-- COLUNA IMAGEM -->
-                                <div class="col-md-5 m-3">
+                                <div class="col-md-5 m-2">
                                     <div class="col-md-5 text-center">
-                                        <img src='<?php echo DEV_URL?>Imagens/ImgSistema/sem-imagem.jpg' id="foto" name="foto" class="product-img mb-2" alt="Imagem da Embalagem do Produto" height="280px" width="280px">
+                                        <img src='<?php echo DEV_URL?>Imagens/ImgSistema/sem-imagem.jpg' id="foto" name="foto" class="product-img mb-2" alt="Imagem da Embalagem do Produto" height="300px" width="300px">
                                     </div>
                                 </div>
                                 <!-- COLUNA INFO -->
@@ -233,10 +202,10 @@ if (isset($_POST['codigo'])) {
                         </form>
                     </div>
 
-                    <div class="col-md-5 border p-2" style="height: 350px; overflow-y: auto;">
+                    <div class="col-md-5 border p-1" style="height: 350px; overflow-y: auto;">
                         <!-- COLUNA VALORES/LOGO -->
-                        <table class="table table-bordered table-striped table-sm mb-0">
-                            <thead class="table-dark">
+                        <table class="table table-bordered table-striped table-sm">
+                            <thead class="table-dark text-center">
                                 <tr>
                                     <th style="width: 200px;">Nome</th>
                                     <th>Valor</th>
@@ -265,8 +234,9 @@ if (isset($_POST['codigo'])) {
                                         <td>R$ <?= number_format($preco, 2, ',', '.') ?></td>
                                         <td><?= $item['quantidade'] ?></td>
                                         <td>R$ <?= number_format($subtotal, 2, ',', '.') ?></td>
-                                        <td>
-                                            <a href="?remover=<?= $index ?>" class="btn btn-sm btn-danger">Remover</a>
+                                        <td class="d-flex align-items-center justify-content-center gap-1">
+                                            <button class="btn btn-sm btn-secondary" onclick="gerenciarItem(<?= $index ?>, 'diminuir')"><i class="bi bi-dash-lg"></i></button>
+                                            <button class="btn btn-sm btn-danger" onclick="gerenciarItem(<?= $index ?>, 'remover')"><i class="bi bi-trash-fill"></i></button>
                                         </td>
                                     </tr>
                                     <?php
@@ -338,6 +308,9 @@ if (isset($_POST['codigo'])) {
                             <input type="hidden" name="finalizar_caixa" value="1">
                             <button class="btn btn-secondary" type="submit">Fechar Caixa</button>
                         </form>
+                        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#popupFuncionalidades">
+                            Funcionalidades
+                        </button>
                     </div>
                 </div>
 
@@ -374,7 +347,7 @@ if (isset($_POST['codigo'])) {
                                 </div>
                             <?php endwhile; ?>
 
-                            <div class="text-end fw-bold mt-3" id="troco">Troco: R$ 0,00</div>
+                            <div class="text-end fw-bold mt-3" id="troco" style="display: none;">Troco: R$ 0,00</div>
                         </div>
                         
                         <div class="modal-footer">
@@ -388,7 +361,6 @@ if (isset($_POST['codigo'])) {
 
             <!-- Modal PIX -->
             <div id="modalPix" class="modalPix">
-                
                 <div style="background:white; padding:20px; border-radius:10px; text-align:center;">
                     <h3>Escaneie o QR Code PIX:</h3>
                     <img id="pixImg" src="" width="300">
@@ -397,8 +369,66 @@ if (isset($_POST['codigo'])) {
                 </div>
             </div>
 
+            <!-- Modal de Funcionalidades -->
+            <div class="modal fade modal-lg" id="popupFuncionalidades" tabindex="-1" aria-labelledby="popupFuncionalidadesLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Funcionalidades do Caixa</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                        </div>
+                        <div class="modal-body" id="funcionalidadesConteudo">
+                            <div class="text-center">
+                                <button class="btn btn-danger m-2" onclick="selecionarFuncionalidade('saida')">Sangria (Saída de Dinheiro)</button>
+                                <button class="btn btn-success m-2" onclick="selecionarFuncionalidade('entrada')">Entrada de Dinheiro</button>
+                            </div>
+                        </div>
+                        <div class="modal-footer" id="funcionalidadesFooter" style="display: none;">
+                            <button class="btn btn-primary w-100" onclick="registrarMovimentacao()">Confirmar</button>
+                            <div id="erroFuncionalidade" class="text-danger mt-2 w-100 text-center"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         
+        <!-- Modal de confirmação -->
+        <div class="modal fade" id="modalGerente" tabindex="-1">
+            <div class="modal-dialog modal-sm modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Acesso Restrito</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Por favor, insira a senha do gerente para continuar.</p>
+                        <div class="form-group">
+                            <label for="senhaGerente">Senha:</label>
+                            <input type="password" class="form-control" id="senhaGerente">
+                            <div id="erroSenha" class="text-danger mt-2"></div>
+                        </div>
+                        <input type="hidden" id="acaoGerente">
+                        <input type="hidden" id="itemIndex">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" onclick="validarSenha()">Confirmar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast -->
+        <div class="toast-container position-fixed top-0 end-0 p-3">
+            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                <strong class="me-auto" id="toastTitulo">Notificação</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body" id="toastCorpo">
+                </div>
+            </div>
+        </div>
 
         <script> 
             // MUDAR OS VALORES POR CÓDIGO DE BARRAS
@@ -415,14 +445,15 @@ if (isset($_POST['codigo'])) {
                             document.getElementById('preco').value = "R$ " + parseFloat(data.preco).toFixed(2).replace('.', ',');
                             document.getElementById('foto').src = '../../Dev/Imagens/imgProdutos/' + data.foto;
                         } else {
-                            alert(data.msg);
+                            mostrarToast('Produto não existe', 'warning', 'Erro');
+                            console.log(data.msg);
                             document.getElementById('descricao').value = '';
                             document.getElementById('preco').value = 'R$ 0,00';
                             document.getElementById('foto').src = '../../Dev/Imagens/imgSistema/sem-imagem.jpg';
                         }
                     })
                     .catch(err => {
-                        alert('Erro ao buscar produto.');
+                        mostrarToast('Erro ao buscar produto.', 'warning', 'Erro');
                         console.error(err);
                     });
             });
@@ -474,30 +505,90 @@ if (isset($_POST['codigo'])) {
             // -------------------------------------------------------------------------
             // -------------------------------------------------------------------------
 
+            const valorTotalVenda = <?= $totalGeral ?>;
             let formasSelecionadas = [];
+            const popupPagamento = new bootstrap.Modal(document.getElementById('popupPagamento'))
 
             function selecionarForma(id) {
-                /*if (formasSelecionadas.includes(id)) return;
+                if (valorTotalVenda <= 0) {
+                    mostrarToast('Adicione itens ao carrinho antes de pagar.', 'warning', 'Atenção');
+                    return;
+                }
 
                 if (formasSelecionadas.length >= 2) {
-                    alert("Só é possível usar até 2 formas de pagamento por venda.");
-                    return;
-                }*/
+                    if (!formasSelecionadas.includes(id)){
+                        mostrarToast('Apenas 2 formas de pagamento permitidas.', 'warning', 'Atenção');
+                        return;
+                    }
+                }
 
-                formasSelecionadas.push(id);
-                mostrarInputsSelecionados();
-                abrirPopup();
+                if (!formasSelecionadas.includes(id)) {
+                    formasSelecionadas.push(id);
+                }
+
+                atualizarModalPagamento();
+                popupPagamento.show();
             }
 
-            function mostrarInputsSelecionados() {
-                const ultimoSelecionado = formasSelecionadas[formasSelecionadas.length - 1];
-                
-                document.querySelectorAll('.campo-forma').forEach(div => {
+            function atualizarModalPagamento() {
+                let valorJaPago = 0;
+                const camposForma = document.querySelectorAll('.campo-forma');
+
+                camposForma.forEach(div => {
                     const idForma = parseInt(div.dataset.id);
-                    div.style.display = (idForma === ultimoSelecionado) ? 'flex' : 'none';
+                    const input = div.querySelector('.forma');
+
+                    if (formasSelecionadas.includes(idForma))
+                        div.style.display = 'flex';
+                    else {
+                        div.style.display = 'none';
+                        input.value = ''; 
+                    }
+
+                    input.removeAttribute('readonly');
                 });
+
+                if (formasSelecionadas.length > 1) {
+                    for (let i = 0; i < formasSelecionadas.length - 1; i++){
+                        const idAnterior = formasSelecionadas[i];
+                        const inputAnterior = document.querySelector(`.forma[data-id="${idAnterior}"]`);
+                        if (inputAnterior && inputAnterior.value)
+                            valorJaPago = parseFloat(inputAnterior.value.replace(',', '.')) || 0;
+                    }   
+                }
+
+                const valorRestante = valorTotalVenda - valorJaPago;
+
+                if (formasSelecionadas.length > 0) {
+                    const ultimoId = formasSelecionadas[formasSelecionadas.length - 1];
+                    const ultimoInput = document.querySelector(`.forma[data-id="${ultimoId}"]`);
+                    
+                    ultimoInput.value = valorRestante.toFixed(2).replace('.', ',');
+
+                    if (formasSelecionadas.length === 2) 
+                        ultimoInput.setAttribute('readonly', true);
+                    else {
+                        ultimoInput.removeAttribute('readonly');
+                        ultimoInput.focus(); 
+                    }
+                }
+                
+                // Atualiza o troco
+                calcularTroco();
             }
 
+            function atualizarExibicaoTroco() {
+                const temDinheiroSelecionado = formasSelecionadas.includes(1); // 1 = Dinheiro
+                const trocoDiv = document.getElementById('troco');
+                trocoDiv.style.display = temDinheiroSelecionado ? 'block' : 'none';
+            }
+
+            document.getElementById('popupPagamento').addEventListener('hidden.bs.modal', function () {
+                formasSelecionadas = [];
+                document.querySelectorAll('.campo-forma').forEach(div => {
+                    div.querySelector('.forma').removeAttribute('readonly');
+                });
+            });
             // -------------------------------------------------------------------------
             // -------------------------------------------------------------------------
             
@@ -519,10 +610,12 @@ if (isset($_POST['codigo'])) {
                         totalPago += valor;
 
                         if (!mapaFormas[id]){
+                            const inputParcelas = document.getElementById('parcelas');
+
                             mapaFormas[id] = {
                                 id_forma_pag: id,
                                 valor: 0,
-                                quant_vezes: (valor >= <?= $infoParcelas['Valor_Min_Parcelas'] ?>) ? document.getElementById('parcelas').value : 1
+                                quant_vezes: (inputParcelas && valor >= <?= $infoParcelas['Valor_Min_Parcelas'] ?>) ? inputParcelas.value : 1
                             };
                         }
                         mapaFormas[id].valor += valor;
@@ -533,7 +626,7 @@ if (isset($_POST['codigo'])) {
                 console.log(formas_pagamento);
 
                 if (totalPago < <?= $totalGeral ?>) {
-                    alert("Pagamento Concluído. Ainda faltam R$ " + (<?= $totalGeral ?> - totalPago).toFixed(2).replace('.', ','));
+                    mostrarToast("Pagamento Concluído. Ainda faltam R$ " + (<?= $totalGeral ?> - totalPago).toFixed(2).replace('.', ','), 'success', 'Sucesso');
                     calcularTroco();
                     return;
                 }
@@ -547,7 +640,7 @@ if (isset($_POST['codigo'])) {
                         if (forma.id_forma_pag === 4){ // PIX
 
                             // -------- STRIPE -> precisa de verificação com CNPJ --------
-                            /*response = await fetch('http://localhost/htdocs/Farmácia/Dev/Exec/stripe_pagamento.php', {
+                            /*response = await fetch('../../Dev/Exec/stripe_pagamento.php', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
@@ -576,7 +669,7 @@ if (isset($_POST['codigo'])) {
 
                         }
                         else { // Cartão
-                            response = await fetch('http://localhost/htdocs/Farmácia/Dev/Exec/stripe_pagamento.php', {
+                            response = await fetch('../../Dev/Exec/stripe_pagamento.php', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
@@ -636,48 +729,48 @@ if (isset($_POST['codigo'])) {
                 .then(data => {
                     if(data.sucesso){
                         totalPago = 0;
+                        formasSelecionadas = [];
                         formas_pagamento = [];
                         console.log('Venda finalizada:', data);
-                        alert('Venda finalizada com sucesso!');
+                        mostrarToast('Venda finalizada com sucesso!', 'success', 'Sucesso');
                         window.open(`cupomNfiscal.php?ID_Venda=${data.id_venda}`, '_blank');
                         location.reload();
                     }
                     else {
                         console.error('Erro ao finalizar:', data);
-                        alert('Erro ao finalizar venda: ' + (data.erro || 'Desconhecido'));
+                        mostrarToast('Erro ao finalizar venda: ' + (data.erro || 'Desconhecido'), 'warning', 'Atenção');
                     }
                 })
                 .catch(error => {
                     console.error('Erro:', error);
-                    alert('Erro ao finalizar venda!');
+                    mostrarToast('Erro ao finalizar venda!', 'danger', 'Erro');
                 });
             }
 
             // -------------------------------------------------------------------------
             // -------------------------------------------------------------------------
             
-            // SCRIPT MODAL
+            // SCRIPT MODAL PAGAMENTOS
             const valorTotal = parseFloat("<?= $totalGeral ?>");
             const popup = new bootstrap.Modal(document.getElementById('popupPagamento'));
 
             function abrirPopup() {
                 popup.show();
-                document.addEventListener('keydown', atalhoPagamento);
             }
 
-            // calcula o troco automaticamente
+            // Função para calcular o troco automaticamente
             function calcularTroco() {
-                /*const inputs = document.querySelectorAll('.forma');
-                let totalPago = 0;
-
-                inputs.forEach(input => {
-                    const valor = parseFloat(input.value.replace(',', '.')) || 0;
-                    totalPago += valor;
-                });*/
                 const totalPagoAtual = calcularTotalPago();
-                const troco = totalPagoAtual - valorTotal;
+                const troco = Math.max(totalPagoAtual - valorTotal, 0);
                 document.getElementById('troco').innerText = "Troco: R$ " + troco.toFixed(2).replace('.', ',');
             }
+
+            // Atualiza troco enquanto digita valor
+            document.querySelectorAll('.forma').forEach(input => {
+                input.addEventListener('input', function() {
+                    calcularTroco();
+                });
+            });
 
             // -------------------------------------------------------------------------
             // -------------------------------------------------------------------------
@@ -694,8 +787,6 @@ if (isset($_POST['codigo'])) {
                         this.value = valorNumerico.toFixed(2).replace('.', ',');
                     else
                         this.value = "";
-
-                    calcularTroco();
                 });
             });
 
@@ -704,25 +795,166 @@ if (isset($_POST['codigo'])) {
 
             // atalhos para selecionar a forma de pagamento mais rápido (corrigir futuramente)
             function atalhoPagamento(e) {
-                const inputs = document.querySelectorAll('.forma');
-                const teclas = ['1', '2', '3', '4'];
+                if (document.activeElement.tagName === 'INPUT') 
+                    return;
 
-                if (document.activeElement.tagName === 'INPUT') return;
+                const teclas = {
+                    '1': 1, // Dinheiro
+                    '2': 2, // Crédito
+                    '3': 3, // Débito
+                    '4': 4  // PIX
+                };
 
-                if (teclas.includes(e.key)) {
-                    let index = parseInt(e.key) - 1;
-                    if (inputs[index]) {
-                        inputs.forEach(i => i.value = ""); // limpa todos
-                        inputs[index].value = valorTotal.toFixed(2).replace('.', ',');
-                        calcularTroco();
-                    }
+                if (!document.body.classList.contains('modal-open') && teclas[e.key]) {
+                    e.preventDefault(); 
+                    selecionarForma(teclas[e.key]);
                 }
 
-                if (e.key === "Escape") {
-                    popup.hide();
-                    document.removeEventListener('keydown', atalhoPagamento);
-                }
+                if (e.key === "Escape") 
+                    popupPagamento.hide();
             }
+
+            document.addEventListener('keydown', atalhoPagamento);
+
+            // -------------------------------------------------------------------------
+            // -------------------------------------------------------------------------
+            
+            // SCRIPT MODAL FUNCIONALIDADES
+            let tipoSelecionado = null;
+
+            function selecionarFuncionalidade(tipo) {
+                tipoSelecionado = tipo;
+
+                let titulo = tipo === 'entrada' ? 'Entrada de Dinheiro' : 'Sangria (Saída de Dinheiro)';
+                let placeholder = tipo === 'entrada' ? 'Valor da Entrada' : 'Valor da Sangria';
+
+                document.getElementById('funcionalidadesConteudo').innerHTML = `
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label">${titulo}</label>
+                        <div class="col-sm-8 d-flex align-items-center">
+                            <input type="number" step="0.01" min="0" class="form-control" id="valorMovimentacao" placeholder="R$ ${placeholder}">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-sm-4 col-form-label">Descrição</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" id="descricaoMovimentacao" placeholder="Ex: Reforço de caixa, sangria para cofre, etc">
+                        </div>
+                    </div>
+                `;
+                document.getElementById('funcionalidadesFooter').style.display = 'block';
+            }
+
+            function registrarMovimentacao() {
+                let valor = parseFloat(document.getElementById('valorMovimentacao').value);
+                let descricao = document.getElementById('descricaoMovimentacao').value.trim();
+
+                if (isNaN(valor) || valor <= 0) {
+                    document.getElementById('erroFuncionalidade').textContent = "Informe um valor válido.";
+                    return;
+                }
+
+                if (descricao === "") {
+                    document.getElementById('erroFuncionalidade').textContent = "Informe uma descrição para a movimentação.";
+                    return;
+                }
+
+                // Envia os dados via POST para o PHP
+                fetch('registrarmovimentacao.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: `tipo=${tipoSelecionado}&valor=${valor}&descricao=${encodeURIComponent(descricao)}`
+                })
+                .then(response => response.text())
+                .then(data => {
+                    if (data.trim() === 'ok') {
+                        mostrarToast('Movimentação registrada com sucesso!', 'success', 'Sucesso');
+                        location.reload();
+                    } 
+                    else {
+                        document.getElementById('erroFuncionalidade').textContent = data;
+                    }
+                });
+            }
+
+            // -------------------------------------------------------------------------
+            // -------------------------------------------------------------------------
+            
+            // confirmação senha de gerente
+            const modalGerente = new bootstrap.Modal(document.getElementById('modalGerente'));
+
+            function gerenciarItem(index, acao) {
+                document.getElementById('itemIndex').value = index;
+                document.getElementById('acaoGerente').value = acao;
+
+                document.getElementById('senhaGerente').value = '';
+                document.getElementById('erroSenha').textContent = '';
+
+                modalGerente.show();
+            }
+
+            function validarSenha() {
+                const senha = document.getElementById('senhaGerente').value;
+                const index = document.getElementById('itemIndex').value;
+                const acao = document.getElementById('acaoGerente').value;
+
+                if (senha === '') {
+                    document.getElementById('erroSenha').textContent = 'Por favor, insira a senha.';
+                    return;
+                }
+
+                fetch('../../dev/Exec/gerenciar_carrinho.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: `acao=${acao}&index=${index}&senha=${encodeURIComponent(senha)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.sucesso)
+                        location.reload();
+                    else
+                        document.getElementById('erroSenha').textContent = data.erro || 'Ocorreu um erro.';
+                });
+            }
+
+            // -------------------------------------------------------------------------
+            // -------------------------------------------------------------------------
+            
+            // Lógica para ativar o Toast
+            function mostrarToast(texto, tipo = 'success', titulo = 'Notificação') {
+                const toastLive = document.getElementById('liveToast');
+                const toastHeader = toastLive.querySelector('.toast-header');
+                
+                if (titulo === 'Notificação') 
+                    titulo = ucfirst(tipo === 'danger' ? 'Erro' : (tipo === 'warning' ? 'Atenção' : 'Sucesso'));
+                
+                const headerClass = `text-bg-${tipo}`;
+
+                document.getElementById('toastTitulo').innerText = titulo;
+                document.getElementById('toastCorpo').innerText = texto;
+                
+                // Remove classes de cor antigas e adiciona a nova
+                toastHeader.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning', 'text-bg-info');
+                toastHeader.classList.add(headerClass);
+
+                const toast = bootstrap.Toast.getOrCreateInstance(toastLive);
+                toast.show();
+            }
+
+            function ucfirst(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            }
+
+            <?php
+            if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {
+                $texto = addslashes($_SESSION['msg']['texto']);
+                $tipo = $_SESSION['msg']['tipo']; 
+                
+                echo "mostrarToast('{$texto}', '{$tipo}');";
+                
+                unset($_SESSION['msg']);
+            }
+            ?>
         </script>
     </body>
 </html>
