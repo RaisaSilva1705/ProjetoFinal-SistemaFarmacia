@@ -1,6 +1,6 @@
 <!-- Footer -->
 <footer class="text-center text-lg-start">
-    <div class="text-center p-2 bg-dark text-white">
+    <div class="text-center p-1 bg-dark text-white">
         <p>© 2025 <?php echo NOME?> - Todos os direitos reservados.</p>
     </div>
 </footer>

@@ -14,7 +14,7 @@ if ($index < 0 || !isset($_SESSION['carrinho'][$index])) {
     exit;
 }
 
-$stmt = $conn->prepare("SELECT U.Senha FROM USUARIOS U INNER JOIN FUNCIONARIOS F ON U.ID_Funcionario = F.ID_Funcionario INNER JOIN CARGOS_FUNCIONARIOS C ON F.ID_Cargo = C.ID_Cargo WHERE C.Cargo = 'Gerente' OR C.Cargo = 'Administrador'");
+$stmt = $conn->prepare("SELECT U.Senha FROM USUARIOS U INNER JOIN FUNCIONARIOS F ON U.ID_Funcionario = F.ID_Funcionario INNER JOIN CARGOS C ON F.ID_Cargo = C.ID_Cargo WHERE C.Cargo = 'Gerente' OR C.Cargo = 'Administrador'");
 $stmt->execute();
 $result = $stmt->get_result();
 $hashesDosGerentes = $result->fetch_all(MYSQLI_ASSOC);

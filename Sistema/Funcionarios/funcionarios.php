@@ -3,56 +3,49 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$cargo = $_SESSION['ID_Cargo'];
-/*if ($cargo != 4 || $cargo != 5 || $cargo != 9){
-    $_SESSION["msg"] = "<div class='alert alert-danger'>Você não tem acesso a essa área.</div>";
-    header('Location: http://localhost/htdocs/Farmácia/index2.php');
-    exit;
-}*/
+include "../../Dev/Exec/config.php";
+include DEV_PATH . 'Exec/conexao.php';
+include DEV_PATH . "Exec/validar_sessao.php";
+include DEV_PATH . "Exec/validar_acesso.php";
 
-// Incluir o arquivo de conexão
-include '../../dev/Exec/conexao.php';
-include "../../dev/Exec/validar_sessao.php";
+$busca_nome = $_GET['busca_nome'] ?? '';
+$status = $_GET['status'] ?? '';
 
-// Definir valores padrão para filtro e ordenação
-$order_by = "ID_Funcionario";
-$order_dir = "ASC";  // Ordem ascendente por padrão
-$status_filter = ""; // Sem filtro de status por padrão
+$sql = "SELECT 
+            F.ID_Funcionario, 
+            F.Nome, 
+            F.Telefone, 
+            F.Email, 
+            F.Status,
+            c.Cargo 
+        FROM FUNCIONARIOS F
+        JOIN CARGOS C ON F.ID_Cargo = C.ID_Cargo";
 
-// Verificar se o usuário selecionou algum critério de ordenação ou filtro
-if (isset($_GET['order_by'])) {
-    $order_by = $_GET['order_by']; // Capturar o critério de ordenação
+$conditions = [];
+$params = [];
+$types = '';
+
+if (!empty($busca_nome)) {
+    $conditions[] = "f.Nome LIKE ?";
+    $types .= 's';
+    $params[] = "%" . $busca_nome . "%";
+}
+if (!empty($status)) {
+    $conditions[] = "f.Status = ?";
+    $types .= 's';
+    $params[] = $status;
 }
 
-if (isset($_GET['order_dir']) && ($_GET['order_dir'] == 'ASC' || $_GET['order_dir'] == 'DESC')) {
-    $order_dir = $_GET['order_dir']; // Capturar a direção da ordenação
-}
+if (count($conditions) > 0) 
+    $sql .= " WHERE " . implode(' AND ', $conditions);
 
-if (isset($_GET['status'])) {
-    $status_filter = $_GET['status']; // Capturar o filtro de status (ativo/inativo)
-}
+$sql .= " ORDER BY f.Nome ASC";
 
-// Alternar entre ASC e DESC para o próximo clique
-$next_order_dir = $order_dir == "ASC" ? "DESC" : "ASC";
-
-// Construir a consulta SQL com base na ordenação e filtro
-$sql = "SELECT
-            F.ID_Funcionario,
-            F.Nome,
-            F.Tipo,
-            F.Documento,
-            F.Telefone,
-            C.Cargo,
-            F.Salario,
-            F.Data_Admissao,
-            F.Status
-        FROM FUNCIONARIOS F LEFT JOIN CARGOS_FUNCIONARIOS C ON F.ID_Cargo = C.ID_Cargo";
-if ($status_filter !== "") {
-    $sql .= " WHERE status = '$status_filter'";
-}
-$sql .= " ORDER BY $order_by $order_dir";
-
-$result = $conn->query($sql);
+$stmt = $conn->prepare($sql);
+if (!empty($params))
+    $stmt->bind_param($types, ...$params);
+$stmt->execute();
+$result = $stmt->get_result()
 ?>
 
 <!DOCTYPE html>
@@ -60,123 +53,117 @@ $result = $conn->query($sql);
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>LavanderPharma</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <style>
-            body {
-                display: flex;
-                flex-direction: column;
-                min-height: 100vh;
-            }
-            .content {
-                flex: 1;
-            }
-            footer {
-                bottom: 0;
-                width: 100%;
-                background-color: #f8f9fa;
-            }
-        </style>
+        <title>Funcionários</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
     <body>
         <!-- Navbar -->
-        <nav class='navbar navbar-expand-lg navbar-dark bg-dark'>
-            <div class='container-fluid'>
-                <a class='navbar-brand' href='#'>LavanderPharma</a>
-                <button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarNav' aria-controls='navbarNav' aria-expanded='false' aria-label='Toggle navigation'>
-                    <span class='navbar-toggler-icon'></span>
-                </button>
-                <div class='collapse navbar-collapse' id='navbarNav'>
-                    <ul class='navbar-nav ms-auto'>
-                        <a href="funcionario_cadastrar.php">
-                            <button class="btn btn-secondary" type="button">Cadastrar</button>
-                        </a>
-                        <li class='nav-item'><a class='nav-link active' href='../../index2.php'>Menu Funcionário</a></li>
-                        <li class='nav-item'><a class='nav-link' href="../../dev/Exec/sair.php">Sair</a></li>
-                    </ul>
+        <?php include_once DEV_PATH . 'Views/sidebar.php'?>
+
+       <div class="content d-flex flex-column min-vh-100">
+            <div class="content flex-grow-1">
+                <!-- Banner -->
+                <div class="container-fluid bg-secondary text-white text-center p-4">
+                    <h3>Gerenciamento de FUNCIONÁRIOS</h3>
+                </div>
+            
+                <div class="container p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="m-0">Lista de Funcionários</h2>
+                        <a href="cadastrar_funcionario.php" class="btn btn-primary">Cadastrar Novo Funcionário</a>
+                    </div>
+
+                    <div class="card card-body mb-4">
+                        <form method="GET" action="funcionarios.php">
+                            <div class="row align-items-end">
+                                <div class="col-md-6">
+                                    <label for="busca_nome" class="form-label">Buscar por Nome</label>
+                                    <input type="text" name="busca_nome" id="busca_nome" class="form-control" value="<?= htmlspecialchars($busca_nome) ?>">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select name="status" id="status" class="form-select">
+                                        <option value="">Todos</option>
+                                        <option value="Ativo" <?= $status == 'Ativo' ? 'selected' : '' ?>>Ativo</option>
+                                        <option value="Inativo" <?= $status == 'Inativo' ? 'selected' : '' ?>>Inativo</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover table-bordered">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Cargo</th>
+                                    <th>Telefone</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th class="text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if ($result->num_rows > 0): ?>
+                                    <?php while($row = $result->fetch_assoc()): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($row['Nome']) ?></td>
+                                            <td><?= htmlspecialchars($row['Cargo']) ?></td>
+                                            <td><?= ($row['Telefone']) ? htmlspecialchars($row['Telefone']) : 'Não cadastrado'?></td>
+                                            <td><?= htmlspecialchars($row['Email']) ?></td>
+                                            <td <?php $badge_class = $row['Status'] == 'Ativo' ? 'table-success' : 'table-danger'; echo "class='{$badge_class}'"?>> 
+                                                <?= htmlspecialchars($row['Status']) ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="detalhes_funcionario.php?id=<?= $row['ID_Funcionario'] ?>" class="btn btn-success btn-sm">Ver Detalhes</a>
+                                                <a href="editar_funcionario.php?id=<?= $row['ID_Funcionario'] ?>" class="btn btn-warning btn-sm">Editar</a>
+                                            </td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="6" class="text-center">Nenhum funcionário encontrado.</td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </nav>
-
-        <!-- Banner -->
-        <div class="container-fluid bg-secondary text-white text-center p-4">
-            <h3>Gerenciamento de FUNCIONÁRIOS</h3>
-            <?php
-                // Verifica se $_SESSION["msg"] não é nulo e imprime a mensagem
-                if(isset($_SESSION["msg"]) && $_SESSION["msg"] != null){
-                    echo $_SESSION["msg"];
-                    // Limpa a mensagem para evitar que seja exibida novamente
-                    $_SESSION["msg"] = null;
-                }
-            ?>
+            <!-- Footer -->
+            <?php include_once DEV_PATH . 'Views/footer.php'?>
         </div>
 
-        <!-- Filtros e Ordenação -->
-        <div class="container my-5">
-            <!-- Tabela de Clientes -->
-            <table class="table table-striped table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th scope="col">
-                            <a class="col" href="?order_by=ID_Funcionario&order_dir=<?= $next_order_dir ?>">Código</a>
-                        </th>
-                        <th scope="col">
-                            <a class="col" href="?order_by=Nome&order_dir=<?= $next_order_dir ?>">Nome Completo</a>
-                        </th>
-                        <th scope="col">
-                            <a class="col" href="?order_by=Tipo&order_dir=<?= $next_order_dir ?>">Tipo Pessoa</a>
-                        </th>
-                        <th scope="col">Documento</th>
-                        <th scope="col">Telefone</th>
-                        <th scope="col">Cargo</th>
-                        <th scope="col">
-                            <a class="col" href="?order_by=Salario&order_dir=<?= $next_order_dir ?>">Salário</a>
-                        </th>
-                        <th scope="col">
-                            <a class="col" href="?order_by=Data_Admissao&order_dir=<?= $next_order_dir ?>">Admissão</a>
-                        </th>
-                        <th scope="col">
-                            <a class="col" href="?order_by=Status&order_dir=<?= $next_order_dir ?>">Status</a>
-                        </th>
-                        <th scope="col">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) { // quebra de página após 20 resultados
-                            echo '<tr>';
-                            echo '<td>' . $row["ID_Funcionario"] . '</td>';
-                            echo '<td>' . $row["Nome"] . '</td>';
-                            echo '<td>' . $row["Tipo"] . '</td>';
-                            echo '<td>' . $row["Documento"] . '</td>';
-                            echo '<td>' . $row["Telefone"] . '</td>';
-                            echo '<td>' . $row["Cargo"] . '</td>';
-                            echo '<td>' . $row["Salario"] . '</td>';
-                            $dataAdmissao = new DateTime($row['Data_Admissao']);
-                            echo '<td>' . $dataAdmissao->format('d/m/Y') . '</td>';
-                            echo '<td>' . ($row["Status"] == '1' ? 'Ativo' : 'Inativo') . '</td>';
-                            echo '<td>
-                                    <a href="funcionario_editar.php?codigo=' . $row["ID_Funcionario"] . '" class="btn btn-info btn-sm">Editar</a>
-                                    <a href="funcionario_detalhes.php?codigo=' . $row["ID_Funcionario"] . '" class="btn btn-warning btn-sm">Ver Detalhes</a>
-                                </td>';
-                            echo '</tr>';
-                        }
-                    } else {
-                        echo '<tr><td colspan="10" class="text-center">Nenhum funcionário encontrado.</td></tr>';
-                    }
-                    ?>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Footer -->
-        <footer class="bg-light text-center text-lg-start">
-            <div class="text-center p-3 bg-dark text-white">
-                <p>© 2024 LavanderPharma - Todos os direitos reservados.</p>
+        <!-- Toast -->
+        <div class="toast-container position-fixed top-0 end-0 p-3">
+            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                <strong class="me-auto" id="toastTitulo">Notificação</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body" id="toastCorpo">
+                </div>
             </div>
-        </footer>
+        </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script>
+            <?php
+            if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {
+                $texto = addslashes($_SESSION['msg']['texto']);
+                $tipo = $_SESSION['msg']['tipo'];
+                
+                echo "mostrarToast('{$texto}', '{$tipo}');";
+
+                unset($_SESSION['msg']);
+            }
+            ?>
+        </script>
     </body>
 </html>

@@ -4,51 +4,41 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 include "../../Dev/Exec/config.php";
+include DEV_PATH . 'Exec/conexao.php';
+include DEV_PATH . "Exec/validar_sessao.php";
+include DEV_PATH . "Exec/validar_acesso.php";
 
-// Incluir o arquivo de conexão
-include '../../dev/Exec/conexao.php';
-include "../../dev/Exec/validar_sessao.php";
+$busca_texto = $_GET['busca_texto'] ?? '';
+$status = $_GET['status'] ?? '';
 
-// Definir valores padrão para filtro e ordenação
-$order_by = "ID_Cliente";
-$order_dir = "ASC";  // Ordem ascendente por padrão
-$status_filter = ""; // Sem filtro de status por padrão
+$sql = "SELECT ID_Cliente, Nome, Documento, Tel, Email, Status FROM CLIENTES";
 
-// Verificar se o usuário selecionou algum critério de ordenação ou filtro
-if (isset($_GET['order_by'])) {
-    $order_by = $_GET['order_by']; // Capturar o critério de ordenação
+$conditions = [];
+$params = [];
+$types = '';
+
+if (!empty($busca_texto)) {
+    $conditions[] = "(Nome LIKE ? OR Documento LIKE ?)";
+    $types .= 'ss';
+    $params[] = "%" . $busca_texto . "%";
+    $params[] = "%" . $busca_texto . "%";
+}
+if (!empty($status)) {
+    $conditions[] = "Status = ?";
+    $types .= 's';
+    $params[] = $status;
 }
 
-if (isset($_GET['order_dir']) && ($_GET['order_dir'] == 'ASC' || $_GET['order_dir'] == 'DESC')) {
-    $order_dir = $_GET['order_dir']; // Capturar a direção da ordenação
-}
+if (count($conditions) > 0) 
+    $sql .= " WHERE " . implode(' AND ', $conditions);
 
-if (isset($_GET['status'])) {
-    $status_filter = $_GET['status']; // Capturar o filtro de status (ativo/inativo)
-}
+$sql .= " ORDER BY Nome ASC";
 
-// Alternar entre ASC e DESC para o próximo clique
-$next_order_dir = $order_dir == "ASC" ? "DESC" : "ASC";
-
-// Construir a consulta SQL com base na ordenação e filtro
-$sql = "SELECT 
-            C.ID_Cliente, 
-            C.Nome, 
-            C.Tipo, 
-            C.Documento, 
-            C.Email, 
-            C.Tel, 
-            E.Cidade, 
-            E.Estado, 
-            C.Status
-        FROM CLIENTES C
-        LEFT JOIN CLI_ENDERECOS E ON C.ID_Cliente = E.ID_Cliente";
-if ($status_filter !== "") {
-    $sql .= " WHERE status = '$status_filter'";
-}
-$sql .= " ORDER BY $order_by $order_dir";
-
-$result = $conn->query($sql);
+$stmt = $conn->prepare($sql);
+if (!empty($params)) 
+    $stmt->bind_param($types, ...$params);
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -56,102 +46,117 @@ $result = $conn->query($sql);
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>LavanderPharma</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <style>
-            body {
-                display: flex;
-                flex-direction: column;
-                min-height: 100vh;
-            }
-            .content {
-                flex: 1;
-            }
-            footer {
-                bottom: 0;
-                width: 100%;
-                background-color: #f8f9fa;
-            }
-        </style>
+        <title>Clientes</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
     <body>
         <!-- Navbar -->
-        <?php include_once DEV_PATH . 'Views/header2.php'?>
+        <?php include_once DEV_PATH . 'Views/sidebar.php'?>
 
-        <!-- Banner -->
-        <div class="container-fluid bg-secondary text-white text-center p-4">
-            <h3>Gerenciamento de CLIENTES</h3>
+       <div class="content d-flex flex-column min-vh-100">
+            <div class="content flex-grow-1">
+                <!-- Banner -->
+                <div class="container-fluid bg-secondary text-white text-center p-4">
+                    <h3>Gerenciamento de CLIENTES</h3>
+                </div>
+            
+                <div class="container p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="m-0">Lista de Clientes</h2>
+                        <a href="cadastrar_cliente.php" class="btn btn-primary">Cadastrar Novo Cliente</a>
+                    </div>
+
+                    <div class="card card-body mb-4">
+                        <form method="GET" action="clientes.php">
+                            <div class="row align-items-end">
+                                <div class="col-md-6">
+                                    <label for="busca_texto" class="form-label">Buscar por Nome ou Documento (CPF/CNPJ)</label>
+                                    <input type="text" name="busca_texto" id="busca_texto" class="form-control" value="<?= htmlspecialchars($busca_texto) ?>">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select name="status" id="status" class="form-select">
+                                        <option value="">Todos</option>
+                                        <option value="Ativo" <?= $status == 'Ativo' ? 'selected' : '' ?>>Ativo</option>
+                                        <option value="Inativo" <?= $status == 'Inativo' ? 'selected' : '' ?>>Inativo</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover table-bordered">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Documento</th>
+                                    <th>Telefone</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th class="text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if ($result->num_rows > 0): ?>
+                                    <?php while($row = $result->fetch_assoc()): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($row['Nome']) ?></td>
+                                            <td><?= htmlspecialchars($row['Documento']) ?></td>
+                                            <td><?= htmlspecialchars($row['Tel']) ?></td>
+                                            <td><?= htmlspecialchars($row['Email']) ?></td>
+                                            <td <?php $badge_class = $row['Status'] == 'Ativo' ? 'table-success' : 'table-danger'; echo "class='{$badge_class}'"?>>
+                                                <?= htmlspecialchars($row['Status']) ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="detalhes_cliente.php?id=<?= $row['ID_Cliente'] ?>" class="btn btn-success btn-sm">Ver Detalhes</a>
+                                                <a href="editar_cliente.php?id=<?= $row['ID_Cliente'] ?>" class="btn btn-warning btn-sm">Editar</a>
+                                            </td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="6" class="text-center">Nenhum cliente encontrado.</td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- Footer -->
+            <?php include_once DEV_PATH . 'Views/footer.php'?>
+        </div>
+
+        <!-- Toast -->
+        <div class="toast-container position-fixed top-0 end-0 p-3">
+            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                <strong class="me-auto" id="toastTitulo">Notificação</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body" id="toastCorpo">
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script>
             <?php
-                // Verifica se $_SESSION["msg"] não é nulo e imprime a mensagem
-                if(isset($_SESSION["msg"]) && $_SESSION["msg"] != null){
-                    echo $_SESSION["msg"];
-                    // Limpa a mensagem para evitar que seja exibida novamente
-                    $_SESSION["msg"] = null;
-                }
+            if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {
+                $texto = addslashes($_SESSION['msg']['texto']);
+                $tipo = $_SESSION['msg']['tipo'];
+                
+                echo "mostrarToast('{$texto}', '{$tipo}');";
+
+                unset($_SESSION['msg']);
+            }
             ?>
-        </div>
-
-        <!-- Filtros e Ordenação -->
-        <div class="container my-5">
-            <!-- Tabela de Clientes -->
-            <table class="table table-striped table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th scope="col">
-                            <a class="col" href="?order_by=ID_Cliente&order_dir=<?= $next_order_dir ?>">Código</a>
-                        </th>
-                        <th scope="col">
-                            <a class="col" href="?order_by=Nome&order_dir=<?= $next_order_dir ?>">Nome Completo</a>
-                        </th>
-                        <th scope="col">
-                            <a class="col" href="?order_by=Tipo&order_dir=<?= $next_order_dir ?>">Tipo Pessoa</a>
-                        </th>
-                        <th scope="col">Documento</th>
-                        <th scope="col">E-mail</th>
-                        <th scope="col">Telefone</th>
-                        <th scope="col">
-                            <a class="col" href="?order_by=Cidade&order_dir=<?= $next_order_dir ?>">Cidade</a>
-                        </th>
-                        <th scope="col">
-                            <a class="col" href="?order_by=Estado&order_dir=<?= $next_order_dir ?>">Estado</a>
-                        </th>
-                        <th scope="col">
-                            <a class="col" href="?order_by=Status&order_dir=<?= $next_order_dir ?>">Status</a>
-                        </th>
-                        <th scope="col">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) { // quebra de página após 20 resultados
-                            echo '<tr>';
-                            echo '<td>' . $row["ID_Cliente"] . '</td>';
-                            echo '<td>' . $row["Nome"] . '</td>';
-                            echo '<td>' . $row["Tipo"] . '</td>';
-                            echo '<td>' . $row["Documento"] . '</td>';
-                            echo '<td>' . $row["Email"] . '</td>';
-                            echo '<td>' . $row["Tel"] . '</td>';
-                            echo '<td>' . $row["Cidade"] . '</td>';
-                            echo '<td>' . $row["Estado"] . '</td>';
-                            echo '<td>' . ($row["Status"] == 'Ativo' ? 'Ativo' : 'Inativo') . '</td>';
-                            echo '<td>
-                                    <a href="cliente_editar.php?codigo=' . $row["ID_Cliente"] . '" class="btn btn-info btn-sm">Editar</a>
-                                    <a href="cliente_detalhes.php?codigo=' . $row["ID_Cliente"] . '" class="btn btn-warning btn-sm">Ver Detalhes</a>
-                                </td>';
-                            echo '</tr>';
-                        }
-                    } else {
-                        echo '<tr><td colspan="10" class="text-center">Nenhum cliente encontrado.</td></tr>';
-                    }
-                    ?>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Footer -->
-        <?php include_once '../../dev/Views/footer.php'?>
-
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        </script>
     </body>
 </html>

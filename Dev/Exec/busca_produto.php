@@ -1,33 +1,33 @@
 <?php
-include "../../Dev/Exec/config.php";
+include "config.php";
 include DEV_PATH . "Exec/conexao.php";
 
 if (isset($_GET['codigo'])) { // POR CÓDIGO DE BARRAS
     $codigo = $_GET['codigo'];
 
     $stmt = $conn->prepare("SELECT P.Nome, 
-                                   L.Preco_Unitario, 
+                                   MAX(L.Preco_Venda) AS Preco_Venda,
                                    P.Foto 
                             FROM PRODUTOS P 
                             LEFT JOIN LOTES L ON P.ID_Produto = L.ID_Produto
-                            WHERE P.EAN_GTIN = ? LIMIT 1");
+                            WHERE P.EAN_GTIN = ?
+                            GROUP BY P.ID_Produto");
     $stmt->bind_param("s", $codigo);
     $stmt->execute();
-    $stmt->store_result();
+    $result = $stmt->get_result();
 
-    if ($stmt->num_rows > 0) {
-        $stmt->bind_result($nome, $preco, $foto);
-        $stmt->fetch();
+    if ($result->num_rows > 0) {
+        $produto= $result->fetch_assoc();
 
         echo json_encode([
             'success' => true,
-            'nome' => $nome,
-            'preco' => $preco ?: 0.00,
-            'foto' => $foto ?: 'sem-imagem.jpg'
+            'nome' => $produto['Nome'],
+            'preco' => $produto['Preco_Venda'] ?? 0.00,
+            'foto' => $produto['Foto'] ?? 'sem-imagem.jpg'
         ]);
-    } else {
+    } 
+    else
         echo json_encode(['success' => false, 'msg' => 'Produto não encontrado.']);
-    }
 
     $stmt->close();
     $conn->close();
@@ -35,13 +35,13 @@ if (isset($_GET['codigo'])) { // POR CÓDIGO DE BARRAS
 }
 
 if (isset($_GET['nome'])) { // PELO NOME DO PRODUTO
-    $nome = $_GET['nome'] . '%';
+    $nome = '%' . $_GET['nome'] . '%';
 
-    $stmt = $conn->prepare("SELECT P.EAN_GTIN, P.Nome 
+    $stmt = $conn->prepare("SELECT P.EAN_GTIN, P.Nome, P.ID_Produto
                             FROM PRODUTOS P
-                            WHERE P.Nome LIKE ?
-                            LIMIT 5");
-    $stmt->bind_param("s", $nome);
+                            WHERE P.Nome LIKE ? OR P.EAN_GTIN LIKE ?
+                            LIMIT 10");
+    $stmt->bind_param("ss", $nome, $nome);
     $stmt->execute();
     $result = $stmt->get_result();
 

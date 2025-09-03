@@ -49,9 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $foto_nome = uniqid() . "_" . basename($_FILES["foto"]["name"]);
         $foto_destino = DEV_PATH . "Imagens/" . $foto_nome;
 
-        if (move_uploaded_file($_FILES["foto"]["tmp_name"], $foto_destino)) {
+        if (move_uploaded_file($_FILES["foto"]["tmp_name"], $foto_destino))
             $foto = $foto_nome;
-        }
     }
 
     // Inserção na tabela PRODUTOS
@@ -69,16 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 
     if ($stmt->execute()) {
-        // Inserção na tabela PRODUTOS
         $id_produto = $stmt->insert_id;
-        $quantidadeEstoque = 0;
-        $sql = "INSERT INTO ESTOQUE 
-                    (ID_Produto, Quantidade, Data_Atualizacao) 
-                VALUES (?, ?, NOW())";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ii", $id_produto, $quantidadeEstoque);
-        $stmt->execute();
 
         // Se for medicamento, insere também na tabela MEDICAMENTOS
         if ($id_categoria == 1) {
@@ -94,14 +84,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt_medicamento->execute();
         }
 
-        $_SESSION["msg"] = "<div class='alert alert-primary'>Produto cadastrado com sucesso!</div>";
+        $_SESSION["msg"] = ['texto' => 'Produto cadastrado com sucesso!', 'tipo' => 'success'];
         header("Location: produtos.php");
         exit();
     }
     else {
-        echo "Erro ao inserir produto: " . $stmt->error;
+        $_SESSION["msg"] = ['texto' => "Erro ao inserir produto: " . $stmt->error, 'tipo' => 'danger'];
+        header("Location: produtos.php");
+        exit();
     }
 }
+
+$is_edit = false;
 ?>
 
 <!DOCTYPE html>
@@ -109,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Cadastro</title>
+        <title>Cadastrar Produto</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
         <style>
@@ -126,151 +120,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="content flex-grow-1">
                 <!-- Banner -->
                 <div class="container-fluid bg-secondary text-white text-center p-4">
-                    <h3>Cadastro de Produto</h3>
+                    <h3>Cadastrar novo Produto</h3>
                 </div>
     
-                <!-- Formulário de Edição -->
-                <div class="container p-5">
-                    <form action="#" method="POST" enctype="multipart/form-data">
-                        <h5>Informações do Produto</h5>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="nome" class="form-label">Nome do Produto</label>
-                                <input type="text" name="nome" class="form-control" required>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label for="marca" class="form-label">Marca</label>
-                                <input type="text" name="marca" class="form-control" required>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label for="id_categoria" class="form-label">Categoria</label>
-                                <select class="form-select" name="id_categoria" id="id_categoria" required>
-                                    <option value="">Selecione</option>
-                                    <?php while($cat = $categorias->fetch_assoc()): ?>
-                                        <option value="<?= $cat['ID_Categoria'] ?>"><?= $cat['Categoria'] ?></option>
-                                    <?php endwhile; ?>
-                                </select>
-                            </div>
-    
-                            <div class="col-md-6 mb-3">
-                                <label for="descricao" class="form-label">Descrição</label>
-                                <input type="text" name="descricao" class="form-control">
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label for="id_unidade" class="form-label">Unidade</label>
-                                <select class="form-select" name="id_unidade" id="id_unidade" required>
-                                    <option value="">Selecione</option>
-                                    <?php while($uni = $unidades->fetch_assoc()): ?>
-                                        <option value="<?= $uni['ID_Unidade'] ?>"><?= $uni['Unidade'] ?></option>
-                                    <?php endwhile; ?>
-                                </select>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label for="quant_minima" class="form-label">Quantidade Mínima</label>
-                                <input type="number" name="quant_minima" id="quant_minima" class="form-control" value="10">
-                            </div>
-    
-                            <div class="col-md-6 mb-3">
-                                <label for="obs" class="form-label">Observações</label>
-                                <textarea class="form-control" name="obs" id="obs" rows="1"></textarea>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label for="status" class="form-label">Status</label>
-                                <select name="status" class="form-select">
-                                    <option value="">Selecione</option>
-                                    <option value="Ativo">Ativo</option>
-                                    <option value="Inativo">Inativo</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label for="foto" class="form-label">Foto (URL ou nome do arquivo)</label>
-                                <input type="file" name="foto" class="form-control">
-                            </div>
-    
-                            <!-- Campos de Medicamento -->
-                            <div id="campos_medicamento" style="display: none;">
-                                <hr>
-                                
-                                <h5 class="mt-4">Informações do Medicamento</h5>
-                                <div class="row">
-                                    <div class="col-md-3 mb-3">
-                                        <label for="id_categoria_med" class="form-label">Categoria Medicamento</label>
-                                        <select class="form-select" name="id_categoria_med" id="id_categoria_med">
-                                            <option value="">Selecione</option>
-                                            <?php while($catMed = $categoriasMed->fetch_assoc()): ?>
-                                                <option value="<?= $catMed['ID_CategoriaMed'] ?>"><?= $catMed['Categoria_Med'] ?></option>
-                                            <?php endwhile; ?>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <label for="tipo_med" class="form-label">Tipo</label>
-                                        <select name="tipo_med" class="form-select" id="tipo_med">
-                                            <option value="">Selecione</option>
-                                            <option value="Genérico">Genérico</option>
-                                            <option value="Similar">Similar</option>
-                                            <option value="Referência">Referência</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <label for="id_tarja_med" class="form-label">Tarja</label>
-                                        <select class="form-select" name="id_tarja_med" id="id_tarja_med">
-                                            <option value="">Selecione</option>
-                                            <?php while($tjMed = $tarjaMed->fetch_assoc()): ?>
-                                                <option value="<?= $tjMed['ID_Tarja'] ?>"><?= $tjMed['Tarja'] ?></option>
-                                            <?php endwhile; ?>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <label for="prin_ativo" class="form-label">Princípio Ativo</label>
-                                        <input type="text" class="form-control" name="prin_ativo" id="prin_ativo">
-                                    </div>
-                                </div>
-                            </div>              
-                            
-                        </div>
-    
-                        <hr>
-    
-                        <h5>Informações Fiscais</h5>
-                        <div class="row">
-                            <div class="col-md-3 mb-3">
-                                <label for="ncm" class="form-label">NCM</label>
-                                <input type="text" name="ncm" class="form-control" maxlength="8" required>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label for="ean_gtin" class="form-label">EAN/GTIN</label>
-                                <input type="text" name="ean_gtin" class="form-control" maxlength="14" required>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label for="cbnef" class="form-label">CBENEF</label>
-                                <input type="text" name="cbenef" class="form-control">
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label for="cest" class="form-label">CEST</label>
-                                <input type="text" name="cest" class="form-control">
-                            </div>
-                            
-                            <div class="col-md-3 mb-3">
-                                <label for="extipi" class="form-label">EXTIPI</label>
-                                <input type="text" name="extipi" class="form-control">
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label for="cfop" class="form-label">CFOP</label>
-                                <input type="number" name="cfop" class="form-control">
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label for="mva" class="form-label">MVA</label>
-                                <input type="text" name="mva" class="form-control">
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label for="nfci" class="form-label">NFCI</label>
-                                <input type="text" name="nfci" class="form-control">
-                            </div>
-                        </div>
-    
-                        <button type="submit" class="btn btn-primary mt-4">Cadastrar Produto</button>
-                        <a href="produtos.php" class="btn btn-secondary mt-4 ms-2">Cancelar</a>
-                    </form>
+                <!-- Formulário de Cadastro -->
+                <div class="container p-4">
+                    <?php include '_form_produto.php'; ?>
                 </div>
             </div>
             
@@ -297,7 +152,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 const camposMedicamento = document.getElementById("campos_medicamento");
 
                 function toggleCamposMedicamento() {
-                    if (categoria.value == "1")
+                    const selectedOption = categoria.options[categoria.selectedIndex];
+                    const nomeCategoria = selectedOption.dataset.nomeCategoria || '';
+
+                    if (nomeCategoria.toLowerCase() === "medicamento") 
                         camposMedicamento.style.display = "block";
                     else
                         camposMedicamento.style.display = "none";

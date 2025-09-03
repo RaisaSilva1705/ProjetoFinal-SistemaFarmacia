@@ -9,59 +9,40 @@ include DEV_PATH . 'Exec/logs.php';
 include DEV_PATH . "Exec/validar_sessao.php";
 include DEV_PATH . "Exec/validar_acesso.php";
 
-$id_cliente = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-if (!$id_cliente) {
-    $_SESSION['msg'] = ['texto' => 'ID do cliente inválido.', 'tipo' => 'warning'];
-    header("Location: clientes.php");
-    exit();
-}
-
-$stmt = $conn->prepare("SELECT * FROM CLIENTES WHERE ID_Cliente = ?");
-$stmt->bind_param("i", $id_cliente);
-$stmt->execute();
-$result = $stmt->get_result();
-if ($result->num_rows === 1) 
-    $cliente = $result->fetch_assoc();
-else {
-    $_SESSION['msg'] = ['texto' => 'Cliente não encontrado.', 'tipo' => 'danger'];
-    header("Location: clientes.php");
-    exit();
-}
-
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Coleta os dados do formulário
-    $nome = $_POST['nome'];
-    $tipo = $_POST['tipo'];
-    $documento = $_POST['documento'];
+    $nome_fantasia = $_POST['nome_fantasia'];
+    $razao_social = $_POST['razao_social'];
+    $cnpj = $_POST['cnpj'];
     $tel = $_POST['tel'];
     $email = $_POST['email'];
+    $cep = $_POST['cep'];
+    $endereco = $_POST['endereco'];
+    $numero = $_POST['numero'];
+    $complemento = $_POST['complemento'];
+    $bairro = $_POST['bairro'];
+    $cidade = $_POST['cidade'];
+    $estado = $_POST['estado'];
     $status = $_POST['status'];
     $obs = $_POST['obs'];
 
-    // Lógica para atualizar a senha apenas se uma nova for fornecida
-    if (!empty($_POST['senha'])) {
-        $senha = password_hash($_POST['senha'], PASSWORD_DEFAULT);
-        $sql = "UPDATE CLIENTES SET Nome = ?, Tipo = ?, Documento = ?, Tel = ?, Email = ?, Senha = ?, Status = ?, OBS = ? WHERE ID_Cliente = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssssssssi", $nome, $tipo, $documento, $tel, $email, $senha, $status, $obs, $id_cliente);
-    } 
-    else {
-        $sql = "UPDATE CLIENTES SET Nome = ?, Tipo = ?, Documento = ?, Tel = ?, Email = ?, Status = ?, OBS = ? WHERE ID_Cliente = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sssssssi", $nome, $tipo, $documento, $tel, $email, $status, $obs, $id_cliente);
-    }
+    $sql = "INSERT INTO FORNECEDORES (Nome_Fantasia, Nome, CNPJ, Tel, Email, CEP, Endereco, End_Numero, Complemento, Bairro, Cidade, Estado, Status, OBS)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ssssssssssssss", $nome_fantasia, $razao_social, $cnpj, $tel, $email, $cep, $endereco, $numero, $complemento, $bairro, $cidade, $estado, $status, $obs);
 
     if ($stmt->execute()) {
-        registrar_log($conn, $_SESSION['ID_Usuario'], "Editou o cliente '{$nome}' (ID: {$id_cliente})");
-        $_SESSION['msg'] = ['texto' => 'Cliente atualizado com sucesso!', 'tipo' => 'success'];
-        header("Location: clientes.php");
+        $novo_fornecedor = $stmt->insert_id;
+        registrar_log($conn, $_SESSION['ID_Usuario'], "Cadastrou o fornecedor {$nome_fantasia} (ID: {$novo_fornecedor})");
+        $_SESSION['msg'] = ['texto' => 'Fornecedor cadastrado com sucesso!', 'tipo' => 'success'];
+        header("Location: fornecedores.php");
         exit();
     } 
     else 
-        $_SESSION['msg'] = ['texto' => 'Erro ao atualizar cliente: ' . $stmt->error, 'tipo' => 'danger'];
+        $_SESSION['msg'] = ['texto' => 'Erro ao cadastrar fornecedor: ' . $stmt->error, 'tipo' => 'danger'];
 }
 
-$is_edit = true; 
+$is_edit = false;
 ?>
 
 <!DOCTYPE html>
@@ -69,7 +50,7 @@ $is_edit = true;
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Edição de Cliente</title>
+        <title>Cadastro de Fornecedor</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
@@ -81,11 +62,11 @@ $is_edit = true;
             <div class="content flex-grow-1">
                 <!-- Banner -->
                 <div class="container-fluid bg-secondary text-white text-center p-4">
-                    <h3>Editar Cliente: <?= htmlspecialchars($cliente['Nome']) ?></h3>
+                    <h3>Cadastrar Novo Fornecedor</h3>
                 </div>
             
                 <div class="container p-5">
-                    <?php include '_form_cliente.php'; ?>
+                    <?php include '_form_fornecedor.php'; ?>
                 </div>
             </div>
         

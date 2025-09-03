@@ -3,154 +3,183 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$cargo = $_SESSION['Cargo_Funcionario'];
-if ($cargo == 'Gerente' || $cargo == 'Subgerente' || $cargo == 'RH'){
-    
-}
-else {
-    $_SESSION["msg"] = "<div class='alert alert-danger'>Você não tem acesso a essa área.</div>";
-    header('Location: http://localhost/htdocs/Farmácia/index2.php');
-    exit;
-}
+include "../../Dev/Exec/config.php";
+include DEV_PATH . 'Exec/conexao.php';
+include DEV_PATH . "Exec/validar_sessao.php";
+include DEV_PATH . "Exec/validar_acesso.php";
 
-// Incluir o arquivo de conexão
-include '../../dev/Exec/conexao.php';
-include "../../dev/Exec/validar_sessao.php";
-
-// Verificar se o parâmetro "codigo" foi passado pela URL
-if (isset($_GET['codigo'])) {
-    $codigo_funcionario = $_GET['codigo'];
-
-    // Consultar os dados do cliente no banco de dados
-    $sql = "SELECT * FROM FUNCIONARIOS WHERE ID_Funcionario = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $codigo_funcionario);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    // Verificar se o cliente foi encontrado
-    if ($result->num_rows > 0)
-        $funcionario = $result->fetch_assoc();
-    else{
-        echo "Funcionário não encontrado.";
-        exit();
-    }
-}
-else{
-    echo "Código do funcionário não fornecido.";
+if (!isset($_SESSION['Cargo']) || ($_SESSION['Cargo'] != 'Gerente' && $_SESSION['Cargo'] != 'Administrador')) {
+    $_SESSION['msg'] = ['texto' => 'Acesso negado.', 'tipo' => 'warning'];
+    header("Location: funcionarios.php");
     exit();
 }
+
+$id_funcionario = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+if (!$id_funcionario) {
+    header("Location: funcionarios.php"); 
+    exit();
+}
+
+$stmt = $conn->prepare("
+    SELECT F.*, U.Usuario, C.Cargo 
+    FROM FUNCIONARIOS F 
+    JOIN USUARIOS U ON F.ID_Funcionario = U.ID_Funcionario 
+    JOIN CARGOS C ON F.ID_Cargo = C.ID_Cargo 
+    WHERE F.ID_Funcionario = ?
+");
+$stmt->bind_param("i", $id_funcionario);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows === 0) {
+    $_SESSION['msg'] = ['texto' => 'Funcionário não encontrado.', 'tipo' => 'danger'];
+    header("Location: funcionarios.php"); 
+    exit();
+}
+$funcionario = $result->fetch_assoc();
+
+$stmtAtividades = $conn->prepare("
+    (SELECT 
+        ID_Venda as ID_Atividade, 
+        DataHora_Venda as Data, 
+        'Venda Realizada' as Tipo, 
+        Valor_Total as Valor 
+    FROM VENDAS 
+    WHERE ID_Funcionario = ?
+    ORDER BY DataHora_Venda DESC
+    LIMIT 5)
+    UNION ALL
+    (SELECT 
+        ID_MovimentacaoCaixa as ID_Atividade, 
+        Data_Movimentacao as Data, 
+        CONCAT('Mov. Caixa (', Tipo, ')') as Tipo, 
+        Valor 
+    FROM MOVIMENTACOES_CAIXA 
+    WHERE ID_Funcionario = ?
+    ORDER BY Data_Movimentacao DESC
+    LIMIT 5)
+    ORDER BY Data DESC
+    LIMIT 5
+");
+$stmtAtividades->bind_param("ii", $id_funcionario, $id_funcionario);
+$stmtAtividades->execute();
+$atividades = $stmtAtividades->get_result();
 ?>
 
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalhes do Funcionário</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <!-- Navbar -->
-    <nav class='navbar navbar-expand-lg navbar-dark bg-dark'>
-        <div class='container-fluid'>
-            <a class='navbar-brand' href='#'>LavanderPharma</a>
-            <button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarNav' aria-controls='navbarNav' aria-expanded='false' aria-label='Toggle navigation'>
-                <span class='navbar-toggler-icon'></span>
-            </button>
-            <div class='collapse navbar-collapse' id='navbarNav'>
-                <ul class='navbar-nav ms-auto'>
-                    <li class='nav-item'><a class='nav-link active' aria-current='page' href='index.php'>Voltar</a></li>
-                    <li class='nav-item'><a class='nav-link' href="../../../dev/Exec/sair.php">Sair</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Detalhes de Funcionário</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
+    </head>
+    <body>
+        <!-- Navbar -->
+        <?php include_once DEV_PATH . 'Views/sidebar.php'?>
 
-    <div class="container my-5">
-        <h3 class="text-center mb-4">Detalhes do Funcionário</h3>
-        <div class="row">
-            <div class="col-3">
-                <h5>Nome Completo:</h5>
-                <p><?php echo $funcionario['Nome_Funcionario']; ?></p>
-            </div>
-            <div class="col-3">
-                <h5>Tipo de Pessoa:</h5>
-                <p><?php echo $funcionario['Tipo_Funcionario']; ?></p>
-            </div>
-            <div class="col-3">
-                <h5>Documento:</h5>
-                <p><?php echo $funcionario['Documento_Funcionario']; ?></p>
-            </div>
-        </div>
+       <div class="content d-flex flex-column min-vh-100">
+            <div class="content flex-grow-1">
+                <!-- Banner -->
+                <div class="container-fluid bg-secondary text-white text-center p-4">
+                    <h3>Detalhes do Funcionário</h3>
+                </div>
+            
+                <div class="container p-5">
+                    <a href="funcionarios.php" class="btn btn-outline-secondary mb-4">
+                        <i class="bi bi-arrow-left"></i> Voltar para a Lista
+                    </a>
 
-        <h3 class="text-center mb-4 mt-5">Contato</h3>
-        <div class="row md-3">
-            <div class="col-3">
-                <h5>Telefone:</h5>
-                <p><?php echo $funcionario['Tel_Funcionario']; ?></p>
-            </div>
-            <div class="col-3">
-                <h5>E-mail:</h5>
-                <p><?php echo $funcionario['Email_Funcionario']; ?></p>
-            </div>
-        </div>
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="m-0"><?= htmlspecialchars($funcionario['Nome']) ?></h4>
+                            <a href="editar_funcionario.php?id=<?= $funcionario['ID_Funcionario'] ?>" class="btn btn-info btn-sm">Editar Cadastro</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong><i class="bi bi-person-badge-fill"></i>Cargo:</strong> <?= htmlspecialchars($funcionario['Cargo']) ?></p>
+                                    <p><strong><i class="bi bi-envelope-fill me-2"></i>Email:</strong> <?= htmlspecialchars($funcionario['Email']) ?></p>
+                                    <p><strong><i class="bi bi-telephone-fill me-2"></i>Telefone:</strong> <?= ($funcionario['Telefone']) ? htmlspecialchars($funcionario['Telefone']) : 'Telefone não cadastrado' ?></p>
+                                    <p><strong><i class="bi bi-calendar-check-fill"></i>Data de Admissão:</strong> <?= ($funcionario['Data_Admissao']) ? date('d/m/Y', strtotime($funcionario['Data_Admissao'])) : 'Sem data' ?></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Usuário de Acesso:</strong> <?= htmlspecialchars($funcionario['Usuario']) ?></p>
+                                    <p>
+                                        <?php
+                                        $badge_class = $funcionario['Status'] == 'Ativo' ? 'bg-success' : 'bg-danger';
+                                        echo "<strong>Status:</strong> <span class='badge {$badge_class}'>" . htmlspecialchars($funcionario['Status']) . "</span>";
+                                        ?>
+                                    </p>
+                                    <p><strong>Salário:</strong> R$ <?= number_format($funcionario['Salario'] ?? 0, 2, ',', '.') ?></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-        <h3 class="text-center mb-4 mt-5">Dados do Contrato</h3>
-        <div class="row md-3">
-            <div class="col-3">
-                <h5>Cargo:</h5>
-                <p><?php echo $funcionario['Cargo_Funcionario']; ?></p>
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="m-0">Atividades Recentes</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th>Tipo de Atividade</th>
+                                            <th class="text-end">Valor</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if ($atividades->num_rows > 0): ?>
+                                            <?php while($ativ = $atividades->fetch_assoc()): ?>
+                                                <tr>
+                                                    <td><?= date('d/m/Y H:i', strtotime($ativ['Data'])) ?></td>
+                                                    <td><?= htmlspecialchars($ativ['Tipo']) ?></td>
+                                                    <td class="text-end">R$ <?= number_format($ativ['Valor'], 2, ',', '.') ?></td>
+                                                </tr>
+                                            <?php endwhile; ?>
+                                        <?php else: ?>
+                                            <tr><td colspan="3" class="text-center">Nenhuma atividade recente registrada.</td></tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-3">
-                <h5>Salário:</h5>
-                <p><?php echo $funcionario['Salario_Funcionario']; ?></p>
-            </div>
-            <div class="col-3">
-                <h5>Data de Admissão:</h5>
-                <p>
-                    <?php 
-                        $dataAdmissao = new DateTime($funcionario['DataAdmissao_Funcionario']);
-                        echo $dataAdmissao->format('d/m/Y'); 
-                    ?>
-                </p>
-            </div>
-        </div>
-
-        <h3 class="text-center mb-4 mt-5">Outras Informações</h3>
-        <div class="row md-3">
-            <div class="col-3">
-                <h5>Status:</h5>
-                <p><?php echo ($funcionario['Status_Funcionario'] == '1') ? 'Ativo' : 'Inativo'; ?></p>
-            </div>
-            <div class="col-3">
-                <h5>Data de Cadastro:</h5>
-                <p>
-                    <?php 
-                        $dataCadastro = new DateTime($funcionario['DataCadastro_Funcionario']);
-                        echo $dataCadastro->format('d/m/Y H:i:s'); 
-                    ?>
-                </p>
-
-            </div>
-            <div class="col-3">
-                <h5>Última Alteração:</h5>
-                <p>
-                    <?php 
-                        if (!empty($funcionario['DataAlteracao_Funcionario'])) {
-                            $dataAlteracao = new DateTime($funcionario['DataAlteracao_Funcionario']);
-                            echo $dataAlteracao->format('d/m/Y H:i:s');
-                        } else {
-                            echo "Não alterado";
-                        }
-                    ?>
-                </p>
-            </div>
-        </div>
         
-        <a href="funcionario_editar.php?codigo=<?php echo $codigo_funcionario; ?>" class="btn btn-primary mt-3">Editar</a>
-    </div>
+            <!-- Footer -->
+            <?php include_once DEV_PATH . 'Views/footer.php'?>
+        </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+        <!-- Toast -->
+        <div class="toast-container position-fixed top-0 end-0 p-3">
+            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                <strong class="me-auto" id="toastTitulo">Notificação</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body" id="toastCorpo">
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script>
+            <?php
+            if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {
+                $texto = addslashes($_SESSION['msg']['texto']);
+                $tipo = $_SESSION['msg']['tipo'];
+                
+                echo "mostrarToast('{$texto}', '{$tipo}');";
+
+                unset($_SESSION['msg']);
+            }
+            ?>
+        </script>
+    </body>
 </html>

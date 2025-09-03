@@ -2,6 +2,7 @@
 session_start();
 include "../../Dev/Exec/config.php";
 include DEV_PATH . 'Exec/conexao.php';
+include DEV_PATH . 'Exec/logs.php';
 
 header('Content-Type: application/json');
 
@@ -57,36 +58,29 @@ try {
     $stmt->bind_param("iiidd", $id_funcionario, $id_caixaAberto, $id_cliente, $valor_total, $desconto);
     $stmt->execute();
 
-    // ------- ID DA VENDA -------
     $idVenda = $stmt->insert_id;
-
-    // ------- ID CAIXA -------
     $id_caixa = $_SESSION['ID_Caixa'];
     
-    // Prepara a inserção da movimentação de caixa
     $stmtMov = $conn->prepare("INSERT INTO MOVIMENTACOES_CAIXA (ID_Caixa, ID_Funcionario, Tipo, Valor, Descricao)
                                VALUES (?, ?, 'Entrada', ?, ?)");
     // Descrição  da movimentação
-    $descricaoMov = "Venda ID: $idVenda";
+    $descricaoMov = "Venda #$idVenda";
     $stmtMov->bind_param("iids", $id_caixa, $id_funcionario, $valor_total, $descricaoMov);
     $stmtMov->execute();
 
-
-    // Prepara a inserção dos itens da venda
     $stmtItem = $conn->prepare("INSERT INTO ITENS_VENDA (ID_Venda, ID_Produto, Quantidade, Valor_Total) 
                                 VALUES (?, ?, ?, ?)");
 
-    // Prepara a localização do estoque por lote (baixa inteligente)
-    $stmtLotes = $conn->prepare("SELECT E.ID_Estoque, E.Quantidade, L.Data_Validade 
-                                FROM ESTOQUE E LEFT JOIN LOTES L 
-                                    ON E.ID_Lote = L.ID_Lote 
-                                WHERE E.ID_Produto = ? AND E.Quantidade > 0 
-                                ORDER BY L.Data_Validade ASC, E.Data_Entrada ASC");
+    $sqlLotes = "SELECT L.ID_Lote, E.ID_Estoque, E.Quantidade
+                  FROM LOTES L
+                  JOIN ESTOQUE E ON L.ID_Lote = E.ID_Lote
+                  WHERE L.ID_Produto = ? AND E.Quantidade > 0
+                  ORDER BY L.Data_Validade ASC";
 
-    // Prepara a atualização do estoque        
+    $stmtLotes = $conn->prepare($sqlLotes);
+ 
     $stmtUpdateEstoque = $conn->prepare("UPDATE ESTOQUE SET Quantidade = Quantidade - ? WHERE ID_Estoque = ?");
 
-    // Prepara a inserção das formas de pagamento
     $stmtPag = $conn->prepare("INSERT INTO VENDA_PAGAMENTOS (ID_Venda, ID_Forma_Pag, Valor, Troco, Quant_Vezes)
                                VALUES (?, ?, ?, ?, ?)");
     
@@ -94,17 +88,17 @@ try {
     foreach($formas_pagamento as $pagamento) {
         $id_forma_pag = intval($pagamento['id_forma_pag']);
         $valor = number_format((float)$pagamento['valor'], 2, '.', '');
-        $troco = $total_pago - $valor_total;
+        $trocoCalculado = max(0, $total_pago - $valor_total);
+        $trocoReal = ($id_forma_pag == 1 ? $trocoCalculado : 0.00); 
         $quant_vezes = intval($pagamento['quant_vezes']);
         
-        $stmtPag->bind_param("iiddi", $idVenda, $id_forma_pag, $valor, $troco, $quant_vezes);
+        $stmtPag->bind_param("iiddi", $idVenda, $id_forma_pag, $valor, $trocoReal, $quant_vezes);
         $stmtPag->execute();
     }
 
     foreach ($_SESSION['carrinho'] as $item) {
         $codigo = $item['codigo'];
 
-        // buscando ID_Produto
         $stmtProduto = $conn->prepare("SELECT ID_Produto FROM PRODUTOS WHERE EAN_GTIN = ?");
         $stmtProduto->bind_param("s", $codigo);
         $stmtProduto->execute();
@@ -118,7 +112,6 @@ try {
         $stmtItem->bind_param("iiid", $idVenda, $id_produto, $quantidade, $valor_total_item);
         $stmtItem->execute();
 
-        // Atualizar estoque por lote
         $stmtLotes->bind_param("i", $id_produto);
         $stmtLotes->execute();
         $lotes = $stmtLotes->get_result();
@@ -150,12 +143,12 @@ try {
 
         }
 
-        if ($qtdRestante > 0) {
-            throw new Exception("Estoque insuficiente por lote para o produto $codigo");
-        }
+        if ($qtdRestante > 0) 
+            throw new Exception("Estoque insuficiente por lote para o produto ID: {$id_produto}.");
     }
 
     $conn->commit();
+    registrar_log($conn, $_SESSION['ID_Usuario'], "Realizou a venda {$idVenda} (ID Caixa Aberto: {$id_caixaAberto})");
     echo json_encode(['sucesso' => true, 'id_venda' => $idVenda]);
     unset($_SESSION['carrinho']);
 } 

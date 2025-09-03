@@ -3,16 +3,11 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$cargo = $_SESSION['ID_Cargo'];
-if ($cargo == 7){
-    $_SESSION["msg"] = "<div class='alert alert-danger'>Você não tem acesso a essa área.</div>";
-    header('Location: http://localhost/htdocs/Farmácia/index2.php');
-    exit;
-}
+include "../../Dev/Exec/config.php";
 
-// Incluir o arquivo de conexão
-include '../../dev/Exec/conexao.php';
-include "../../dev/Exec/validar_sessao.php";
+include DEV_PATH . 'Exec/conexao.php';
+include DEV_PATH . "Exec/validar_sessao.php";
+include DEV_PATH . "Exec/validar_acesso.php";
 
 // Construir a consulta SQL
 $sql = "SELECT
@@ -130,7 +125,8 @@ $result = $conn->query($sql);
                             echo '<td>' . $row["Nome_Func"] . '</td>';
                             echo '</tr>';
                         }
-                    } else {
+                    } 
+                    else {
                         echo '<tr><td colspan="10" class="text-center">Nenhuma movimentação cadastrada.</td></tr>';
                     }
                     ?>

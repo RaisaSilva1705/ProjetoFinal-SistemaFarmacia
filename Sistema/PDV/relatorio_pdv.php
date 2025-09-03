@@ -99,7 +99,7 @@ $resultVendas = $stmtVendas->get_result();
                 <div class="container-fluid bg-secondary text-white text-center p-4">
                     <h3>Relatório Vendas</h3>
                 </div>
-                <div class="container-fluid px-4">
+                <div class="container-fluid p-4">
                     <h1 class="mt-4">Consultar Vendas</h1>
     
                     <!-- Filtros -->

@@ -19,9 +19,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                    U.Senha,
                                    U.Status,
                                    F.ID_Cargo,
+                                   C.Cargo,
                                    F.Nome
-                            FROM USUARIOS U LEFT JOIN FUNCIONARIOS F
-                            ON U.ID_Funcionario = F.ID_Funcionario
+                            FROM USUARIOS U 
+                            LEFT JOIN FUNCIONARIOS F ON U.ID_Funcionario = F.ID_Funcionario
+                            LEFT JOIN CARGOS C ON F.ID_Cargo = C.ID_Cargo
                             WHERE Usuario = ?");
     $stmt->bind_param("s", $user);
     $stmt->execute();
@@ -37,6 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['ID_Funcionario'] = $dados['ID_Funcionario'];
                 $_SESSION['Nome'] = $dados['Nome'];
                 $_SESSION['ID_Cargo'] = $dados['ID_Cargo'];
+                $_SESSION['Cargo'] = $dados['Cargo'];
                 $_SESSION['expire'] = strtotime('+60 minutes', strtotime('now'));
                 $_SESSION["msg"] = ['texto' => "Olá " . $_SESSION['Nome'] . ". Login efetuado com sucesso!", 'tipo' => 'success'];
                 mysqli_close($conn);                    

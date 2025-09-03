@@ -1,34 +1,29 @@
 WEB GERAL
 1- utilizar datatables.js para tabelas interativas em relatórios e listagens ou Chart.js para gráficos
-2- Trocar os botões de ação para imagens
 
 FUNCIONÁRIOS
 1- Implementar controle de entrada e saída de funcionários
-2- criar tabela usuários -> parar de usar tabela funcionários para login
-3- Método de pesquisar digitando o funcionário
+2- Método de pesquisar digitando o funcionário
 
 USUÁRIOS
 1- senha padrão (quando cria) = mudar123
-2- ter um usuário admin (acesso total)
 
 CLIENTE
 1- Método de pesquisar digitando o funcionário
+2- Mostrar modal de sugestão para o cliente com base no histório de compras dele no caixa
 
 ESTOQUE
-1- (WEB) passar como parâmetro o id do produto, fazer aparecer automaticamente o valor e o nome
-2- (WEB) fazer filtro no index e no histório
-3- (WEB) sinalizar no Index os produtos que estão igual ou abaixo do mínimo
+1- permitir entrada por xml
 
 RELATÓRIOS
+2- relatórios em cada módulo
 
 PRODUTO
 1- unidades
 
 CAIXA
-1- Adicionar outra forma de pesquisa de produto (caso o código de barras não funcione)
+1- Permitir consulta de Preço
 
-FORMAS PAGAMENTOS
-1- Quando for cadastrar crédito, novas abas de "Quant. Max Parcelas", "Quant. Padrão de Parcelas"
 
 
 

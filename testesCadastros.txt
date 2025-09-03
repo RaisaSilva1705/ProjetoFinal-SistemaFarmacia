@@ -1,0 +1,25 @@
+---- Produto ---- 
+
+
+---- Fornecedor ----
+Nome Fantasia: BelaVita Cosméticos
+Razão Social: BelaVita Comércio de Cosméticos EIRELI
+CNPJ: 25.123.456/0001-80
+Telefone: (19) 3232-4050
+Email: comercial@belavitacosmeticos.com.br
+CEP: 13013000
+
+---- Entrada Estoque ---- 
+BelaVita
+123456
+Creme
+L202506C
+12,60
+22,90
+
+---- Cliente ---- 
+
+
+---- Funcionário ---- 
+
+

@@ -3,175 +3,132 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$cargo = $_SESSION['Cargo_Funcionario'];
-if ($cargo == 'Gerente' || $cargo == 'Subgerente' || $cargo == 'RH'){
-    
+include "../../Dev/Exec/config.php";
+include DEV_PATH . 'Exec/conexao.php';
+include DEV_PATH . 'Exec/logs.php';
+include DEV_PATH . "Exec/validar_sessao.php";
+include DEV_PATH . "Exec/validar_acesso.php";
+
+$id_funcionario = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+if (!$id_funcionario) {
+    header("Location: funcionarios.php"); exit();
 }
+
+// Busca os dados do funcionário e do usuário
+$stmt = $conn->prepare("SELECT F.*, U.Usuario FROM FUNCIONARIOS F JOIN USUARIOS U ON F.ID_Funcionario = U.ID_Funcionario WHERE F.ID_Funcionario = ?");
+$stmt->bind_param("i", $id_funcionario);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows === 1) {
+    $funcionario = $result->fetch_assoc();
+    $usuario = ['Usuario' => $funcionario['Usuario']]; 
+} 
 else {
-    $_SESSION["msg"] = "<div class='alert alert-danger'>Você não tem acesso a essa área.</div>";
-    header('Location: http://localhost/htdocs/Farmácia/index2.php');
-    exit;
-}
-
-// Incluir o arquivo de conexão
-include '../../dev/Exec/conexao.php';
-include "../../dev/Exec/validar_sessao.php";
-
-// Verificar se o parâmetro "codigo" foi passado pela URL
-if (isset($_GET['codigo'])) {
-    $codigo_funcionario = $_GET['codigo'];
-
-    // Consultar os dados do cliente no banco de dados
-    $sql = "SELECT * FROM FUNCIONARIOS WHERE ID_Funcionario = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $codigo_funcionario);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    // Verificar se o cliente foi encontrado
-    if ($result->num_rows > 0)
-        $funcionario = $result->fetch_assoc();
-    else{
-        echo "Funcionário não encontrado.";
-        exit();
-    }
-}
-else{
-    echo "Código do funcionário não fornecido.";
+    $_SESSION['msg'] = ['texto' => 'Funcionário não encontrado.', 'tipo' => 'danger'];
+    header("Location: funcionarios.php"); 
     exit();
 }
 
-// Verificar se o formulário foi enviado
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nome_completo = $_POST['Nome_Funcionario'];
-    $tipo_funcionario = $_POST['Tipo_Funcionario'];
-    $documento = $_POST['Documento_Funcionario'];
-    $email = $_POST['Email_Funcionario'];
-    $telefone = $_POST['Tel_Funcionario'];
-    $cargo = $_POST['Cargo_Funcionario'];
-    $salario = $_POST['Salario_Funcionario'];
-    $data_adimissao = $_POST['DataAdmissao_Funcionario'];
-    //$obs = $_POST['obs'];
-    $status = $_POST['Status_Funcionario'];
+    $nome = $_POST['nome'];
+    $documento = $_POST['documento'];
+    $telefone = $_POST['telefone'];
+    $email = $_POST['email'];
+    $id_cargo = $_POST['id_cargo'];
+    $salario = $_POST['salario'];
+    $data_admissao = $_POST['data_admissao'];
+    $status = $_POST['status'];
+    $obs = $_POST['obs'];
 
-    // Atualizar os dados do funcionário no banco de dados
-    $sql = "UPDATE FUNCIONARIOS SET 
-                Nome_Funcionario = ?, Tipo_Funcionario = ?, Documento_Funcionario = ?, 
-                Email_Funcionario = ?, Tel_Funcionario = ?, Cargo_Funcionario = ?, Salario_Funcionario = ?, 
-                DataAdmissao_Funcionario = ?, Status_Funcionario = ?, DataAlteracao_Funcionario = NOW() 
-            WHERE ID_Funcionario = ?";
-    
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssssssisss", 
-        $nome_completo, $tipo_funcionario, $documento, $email, $telefone,
-        $cargo, $salario, $data_adimissao, $status, $codigo_funcionario);
+    $conn->begin_transaction();
+    try {
+        $sqlFunc = "UPDATE FUNCIONARIOS SET Nome = ?, Documento = ?, Telefone = ?, Email = ?, ID_Cargo = ?, Salario = ?, Data_Admissao = ?, Status = ?, OBS = ? WHERE ID_Funcionario = ?";
+        $stmtFunc = $conn->prepare($sqlFunc);
+        $stmtFunc->bind_param("ssssidsssi", $nome, $documento, $telefone, $email, $id_cargo, $salario, $data_admissao, $status, $obs, $id_funcionario);
+        $stmtFunc->execute();
 
-    if ($stmt->execute()) {
-        session_start();
-        $_SESSION["msg"] = "<div class='alert alert-primary' role='aviso'>
-                                Dados atualizados com sucesso!
-                            </div>";
-        header("Location: index.php"); // Redirecionar para a listagem de funcionários
+        if (!empty($_POST['senha'])) {
+            $senha = password_hash($_POST['senha'], PASSWORD_DEFAULT);
+            $sqlUser = "UPDATE USUARIOS SET Senha = ?, Status = ? WHERE ID_Funcionario = ?";
+            $stmtUser = $conn->prepare($sqlUser);
+            $stmtUser->bind_param("ssi", $senha, $status, $id_funcionario);
+        } 
+        else {
+            $sqlUser = "UPDATE USUARIOS SET Status = ? WHERE ID_Funcionario = ?";
+            $stmtUser = $conn->prepare($sqlUser);
+            $stmtUser->bind_param("si", $status, $id_funcionario);
+        }
+        $stmtUser->execute();
+
+        $conn->commit();
+        registrar_log($conn, $_SESSION['ID_Usuario'], "Editou o funcionário {$nome} (ID: {$id_funcionario})");
+        $_SESSION['msg'] = ['texto' => 'Funcionário atualizado com sucesso!', 'tipo' => 'success'];
+        header("Location: funcionarios.php");
         exit();
-    } else {
-        echo "Erro ao atualizar os dados: " . $conn->error;
+    } 
+    catch (Exception $e) {
+        $conn->rollback();
+        $_SESSION['msg'] = ['texto' => 'Erro ao atualizar funcionário: ' . $e->getMessage(), 'tipo' => 'danger'];
     }
 }
+
+$is_edit = true;
 ?>
 
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Funcionário</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <!-- Navbar -->
-    <nav class='navbar navbar-expand-lg navbar-dark bg-dark'>
-        <div class='container-fluid'>
-            <a class='navbar-brand' href='../../index2.php'>LavanderPharma</a>
-            <button class='navbar-toggler' type='button' data-bs-toggle='collapse' data-bs-target='#navbarNav' aria-controls='navbarNav' aria-expanded='false' aria-label='Toggle navigation'>
-                <span class='navbar-toggler-icon'></span>
-            </button>
-            <div class='collapse navbar-collapse' id='navbarNav'>
-                <ul class='navbar-nav ms-auto'>
-                    <li class='nav-item'><a class='nav-link active' aria-current='page' href='index.php'>Voltar</a></li>
-                    <li class='nav-item'><a class='nav-link' href="../../../dev/Exec/sair.php">Sair</a></li>
-                </ul>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Edição de Funcionário</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
+    </head>
+    <body>
+        <!-- Navbar -->
+        <?php include_once DEV_PATH . 'Views/sidebar.php'?>
+
+       <div class="content d-flex flex-column min-vh-100">
+            <div class="content flex-grow-1">
+                <!-- Banner -->
+                <div class="container-fluid bg-secondary text-white text-center p-4">
+                    <h3>Editar Funcionário</h3>
+                </div>
+            
+                <div class="container p-5">
+                    <?php include '_form_funcionario.php'; ?>
+                </div>
+            </div>
+        
+            <!-- Footer -->
+            <?php include_once DEV_PATH . 'Views/footer.php'?>
+        </div>
+
+        <!-- Toast -->
+        <div class="toast-container position-fixed top-0 end-0 p-3">
+            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                <strong class="me-auto" id="toastTitulo">Notificação</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body" id="toastCorpo">
+                </div>
             </div>
         </div>
-    </nav>
 
-    <!-- Formulário de Edição -->
-    <div class="container my-5">
-        <h3 class="text-center mb-4">Editar Funcionário</h3>
-        <form method="post" action="">
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="Nome_Funcionario" class="form-label">Nome Completo</label>
-                    <input type="text" class="form-control" id="Nome_Funcionario" name="Nome_Funcionario" value="<?php echo htmlspecialchars($funcionario['Nome_Funcionario']); ?>" required>
-                </div>
-                <div class="col-md-3">
-                    <label for="Tipo_Funcionario" class="form-label">Tipo de Pessoa</label>
-                    <select class="form-select" id="Tipo_Funcionario" name="Tipo_Funcionario" required>
-                        <option value="PF" <?php if ($funcionario['Tipo_Funcionario'] == 'PF') echo 'selected'; ?>>Pessoa Física</option>
-                        <option value="PJ" <?php if ($funcionario['Tipo_Funcionario'] == 'PJ') echo 'selected'; ?>>Pessoa Jurídica</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="Documento_Funcionario" class="form-label">Documento</label>
-                    <input type="text" class="form-control" id="Documento_Funcionario" name="Documento_Funcionario" value="<?php echo htmlspecialchars($funcionario['Documento_Funcionario']); ?>" required>
-                </div>
-            </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script>
+            <?php
+            if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {
+                $texto = addslashes($_SESSION['msg']['texto']);
+                $tipo = $_SESSION['msg']['tipo'];
+                
+                echo "mostrarToast('{$texto}', '{$tipo}');";
 
-            <div class="row mb-3">
-                <div class="col-md-3">
-                    <label for="Email_Funcionario" class="form-label">E-mail</label>
-                    <input type="email" class="form-control" id="Email_Funcionario" name="Email_Funcionario" value="<?php echo htmlspecialchars($funcionario['Email_Funcionario']); ?>" required>
-                </div>
-                <div class="col-md-3">
-                    <label for="Tel_Funcionario" class="form-label">Telefone</label>
-                    <input type="text" class="form-control" id="Tel_Funcionario" name="Tel_Funcionario" value="<?php echo htmlspecialchars($funcionario['Tel_Funcionario']); ?>" required>
-                </div>
-                <div class="col-md-3">
-                    <label for="Cargo_Funcionario" class="form-label">Cargo</label>
-                    <select class="form-select" id="Cargo_Funcionario" name="Cargo_Funcionario" required>
-                        <option value="Farmacêutico" <?php if ($funcionario['Cargo_Funcionario'] == 'Farmacêutico') echo 'selected'; ?>>Farmacêutico</option>
-                        <option value="Auxilizar de Farmácia" <?php if ($funcionario['Cargo_Funcionario'] == 'Auxilizar de Farmácia') echo 'selected'; ?>>Auxilizar de Farmácia</option>
-                        <option value="Atendente de Farmácia" <?php if ($funcionario['Cargo_Funcionario'] == 'Atendente de Farmácia') echo 'selected'; ?>>Atendente de Farmácia</option>
-                        <option value="Gerente" <?php if ($funcionario['Cargo_Funcionario'] == 'Gerente') echo 'selected'; ?>>Gerente</option>
-                        <option value="Subgerente" <?php if ($funcionario['Cargo_Funcionario'] == 'Subgerente') echo 'selected'; ?>>Subgerente</option>
-                        <option value="RH" <?php if ($funcionario['Cargo_Funcionario'] == 'RH') echo 'selected'; ?>>RH</option>
-                        <option value="Auxiliar Administrativo" <?php if ($funcionario['Cargo_Funcionario'] == 'Auxiliar Administrativo') echo 'selected'; ?>>Auxiliar Administrativo</option>
-                        <option value="Auxiliar de Limpeza" <?php if ($funcionario['Cargo_Funcionario'] == 'Auxiliar de Limpeza') echo 'selected'; ?>>Auxiliar de Limpeza</option>
-                        <option value="Consultor(a) de Dermocosméticos" <?php if ($funcionario['Cargo_Funcionario'] == 'Consultor(a) de Dermocosméticos') echo 'selected'; ?>>Consultor(a) de Dermocosméticos</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="Salario_Funcionario" class="form-label">Salário</label>
-                    <input type="number" class="form-control" id="Salario_Funcionario" name="Salario_Funcionario" value="<?php echo htmlspecialchars($funcionario['Salario_Funcionario']); ?>" required>
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-3">
-                    <label for="DataAdmissao_Funcionario" class="form-label">Data de Admissão</label>
-                    <input type="date" class="form-control" id="DataAdmissao_Funcionario" name="DataAdmissao_Funcionario" value="<?php echo htmlspecialchars($funcionario['DataAdmissao_Funcionario'] ?? ''); ?>" required>
-                </div>
-                <div class="col-md-3">
-                    <label for="Status_Funcionario" class="form-label">Status</label>
-                    <select class="form-select" id="Status_Funcionario" name="Status_Funcionario" required>
-                        <option value="1" <?php if ($funcionario['Status_Funcionario'] == '1') echo 'selected'; ?>>Ativo</option>
-                        <option value="0" <?php if ($funcionario['Status_Funcionario'] == '0') echo 'selected'; ?>>Inativo</option>
-                    </select>
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary mt-3">Salvar Alterações</button>
-            <a href="index.php" class="btn btn-secondary mt-3">Cancelar</a>
-        </form>
-    </div>
-</body>
+                unset($_SESSION['msg']);
+            }
+            ?>
+        </script>
+    </body>
 </html>

@@ -13,3 +13,9 @@ footer {
     left: 0;
     width: 100%;
 }
+.content {
+    flex-grow: 1;
+    background-color: #f8f9fa;
+    overflow-y: auto;
+    flex-direction: column;
+}

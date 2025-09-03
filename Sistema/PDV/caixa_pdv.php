@@ -4,20 +4,17 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 include "../../Dev/Exec/config.php";
-
-// Incluir o arquivo de conexão
 include DEV_PATH . 'Exec/conexao.php';
+include DEV_PATH . 'Exec/logs.php';
 include DEV_PATH . "Exec/validar_sessao.php";
 include DEV_PATH . "Exec/validar_acesso.php";
 
-// Busca caixas
 $sqlCaixas = "SELECT ID_Caixa,
                      Caixa,
                      Status
               FROM CAIXAS";
 $caixas = $conn->query($sqlCaixas);
 
-// Busca turnos
 $sqlTurnos = "SELECT ID_Turno,
                      Turno
               FROM TURNOS";
@@ -71,6 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
             $_SESSION['ID_CaixaAberto'] = $stmt->insert_id;
             $_SESSION['ID_Caixa'] = $id_caixa;
             $_SESSION['Saldo_Inicial'] = $saldoInicial;
+            
+            registrar_log($conn, $_SESSION['ID_Usuario'], "Abriu o caixa {$_SESSION['ID_CaixaAberto']} com R$ {$saldoInicial}. (ID Caixa: {$id_caixa})");
             header("Location: pdv.php");
             exit();
         }
@@ -93,8 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
     <head>
         <meta charset="UTF-8">
         <title>Seleção de Caixa</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
         <style>
             select > option:first-child {
@@ -168,33 +166,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
             </div>
         </div>
         
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
-            // Lógica para ativar o Toast
             <?php
             if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {
                 $texto = addslashes($_SESSION['msg']['texto']);
-                $tipo = $_SESSION['msg']['tipo']; // ex: 'success', 'danger', 'warning'
+                $tipo = $_SESSION['msg']['tipo'];
                 
-                // Define o título e a cor do cabeçalho baseado no tipo
-                $titulo = ucfirst($tipo === 'danger' ? 'Erro' : ($tipo === 'warning' ? 'Atenção' : 'Sucesso'));
-                $headerClass = "text-bg-" . ($tipo === 'danger' ? 'danger' : ($tipo === 'warning' ? 'warning' : 'success'));
-                
-                echo "
-                document.addEventListener('DOMContentLoaded', function() {
-                    const toastLiveExample = document.getElementById('liveToast');
-                    const toastHeader = toastLiveExample.querySelector('.toast-header');
-                    
-                    document.getElementById('toastTitulo').innerText = '{$titulo}';
-                    document.getElementById('toastCorpo').innerText = '{$texto}';
-                    
-                    // Remove classes de cor antigas e adiciona a nova
-                    toastHeader.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning');
-                    toastHeader.classList.add('{$headerClass}');
+                echo "mostrarToast('{$texto}', '{$tipo}');";
 
-                    const toast = new bootstrap.Toast(toastLiveExample);
-                    toast.show();
-                });
-                ";
                 unset($_SESSION['msg']);
             }
             ?>

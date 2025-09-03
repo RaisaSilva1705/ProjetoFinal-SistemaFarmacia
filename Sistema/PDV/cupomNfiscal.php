@@ -71,14 +71,14 @@ $sqlTabelaItens = "SELECT IV.Quantidade,
                           P.Nome AS 'Nome_Produto',
                           P.EAN_GTIN AS 'CodBarras',
                           U.Abreviacao,
-                          L.Preco_Unitario
+                          L.Preco_Venda
                 FROM ITENS_VENDA IV LEFT JOIN PRODUTOS P 
                     ON IV.ID_Produto = P.ID_Produto
                 LEFT JOIN UNIDADES U
                     ON P.ID_Unidade = U.ID_Unidade
                 LEFT JOIN (
                     SELECT L1.ID_Produto,
-                        L1.Preco_Unitario
+                        L1.Preco_Venda
                     FROM LOTES L1
                     INNER JOIN (
                         SELECT ID_Produto, 
@@ -162,7 +162,7 @@ $dataHora = date('d/m/Y H:i:s', strtotime($dadosVenda['DataHora_Venda']));
             <?php 
                 $cont = 1;
                 foreach($tabItens as $item):
-                    $preco_un = number_format($item['Preco_Unitario'], 2, ',', '.');
+                    $preco_un = number_format($item['Preco_Venda'], 2, ',', '.');
                     $vl_total = number_format($item['Valor_Total'], 2, ',', '.');
 
                     $nomeProduto = strlen($item['Nome_Produto']) > 20 ? substr($item['Nome_Produto'], 0, 20) . '...' : $item['Nome_Produto'];

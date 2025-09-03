@@ -39,22 +39,22 @@ if (isset($_POST['codigo'])) {
     $codigo = $_POST['codigo'];
 
     $stmt = $conn->prepare("SELECT P.Nome, 
-                                   L.Preco_Unitario, 
+                                   MAX(L.Preco_Venda) AS Preco_Venda,
                                    P.Foto 
-                            FROM PRODUTOS P LEFT JOIN LOTES L 
-                                ON P.ID_Produto = L.ID_Produto
-                            WHERE EAN_GTIN = ?");
+                            FROM PRODUTOS P 
+                            LEFT JOIN LOTES L ON P.ID_Produto = L.ID_Produto
+                            WHERE EAN_GTIN = ?
+                            GROUP BY P.ID_Produto");
     $stmt->bind_param("s", $codigo);
     $stmt->execute();
-    $stmt->store_result();
+    $result = $stmt->get_result();
 
-    if ($stmt->num_rows > 0) {
-        $stmt->bind_result($nome, $preco, $foto);
-        $stmt->fetch();
+    if ($result->num_rows > 0) {
+        $produto = $result->fetch_assoc();
         $quantidade = max(1, intval($_POST['quantidade']));
 
         // Verificação se o valor do produto não é nulo ou 0
-        if ($preco === null || $preco <= 0) {
+        if ($produto['Preco_Venda'] === null || $produto['Preco_Venda'] <= 0) {
             $_SESSION['msg'] = ['texto' => 'Produto sem preço!', 'tipo' => 'danger'];
             header("Location: " . $_SERVER['PHP_SELF']);
             exit;
@@ -74,18 +74,18 @@ if (isset($_POST['codigo'])) {
         if (!$produtoEncontrado) {
             $_SESSION['carrinho'][] = [
                 'codigo' => $codigo,
-                'nome' => $nome,
-                'preco' => $preco,
-                'foto' => $foto ?: 'sem-imagem.png',
+                'nome' => $produto['Nome'],
+                'preco' => $produto['Preco_Venda'],
+                'foto' => $produto['Foto'] ?? 'sem-imagem.png',
                 'quantidade' => $quantidade
             ];
         }
 
         // Salva info do último produto
         $_SESSION['ultimo_produto'] = [
-            'descricao' => $nome,
-            'preco' => $preco,
-            'foto' => $foto
+            'descricao' => $produto['Nome'],
+            'preco' => $produto['Preco_Venda'],
+            'foto' => $produto['Foto']
         ];
 
         header("Location: " . $_SERVER['PHP_SELF']);
@@ -106,9 +106,8 @@ if (isset($_POST['codigo'])) {
     <head>
         <meta charset="UTF-8">
         <title>Frente de Caixa</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
         <style>
             .modalPix{
@@ -429,7 +428,9 @@ if (isset($_POST['codigo'])) {
                 </div>
             </div>
         </div>
-
+        
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script> 
             // MUDAR OS VALORES POR CÓDIGO DE BARRAS
             document.getElementById('codigo').addEventListener('change', function () {
@@ -444,7 +445,8 @@ if (isset($_POST['codigo'])) {
                             document.getElementById('descricao').value = data.nome;
                             document.getElementById('preco').value = "R$ " + parseFloat(data.preco).toFixed(2).replace('.', ',');
                             document.getElementById('foto').src = '../../Dev/Imagens/imgProdutos/' + data.foto;
-                        } else {
+                        } 
+                        else {
                             mostrarToast('Produto não existe', 'warning', 'Erro');
                             console.log(data.msg);
                             document.getElementById('descricao').value = '';
@@ -736,7 +738,7 @@ if (isset($_POST['codigo'])) {
                         window.open(`cupomNfiscal.php?ID_Venda=${data.id_venda}`, '_blank');
                         location.reload();
                     }
-                    else {
+                    else { 
                         console.error('Erro ao finalizar:', data);
                         mostrarToast('Erro ao finalizar venda: ' + (data.erro || 'Desconhecido'), 'warning', 'Atenção');
                     }
@@ -921,30 +923,6 @@ if (isset($_POST['codigo'])) {
             // -------------------------------------------------------------------------
             
             // Lógica para ativar o Toast
-            function mostrarToast(texto, tipo = 'success', titulo = 'Notificação') {
-                const toastLive = document.getElementById('liveToast');
-                const toastHeader = toastLive.querySelector('.toast-header');
-                
-                if (titulo === 'Notificação') 
-                    titulo = ucfirst(tipo === 'danger' ? 'Erro' : (tipo === 'warning' ? 'Atenção' : 'Sucesso'));
-                
-                const headerClass = `text-bg-${tipo}`;
-
-                document.getElementById('toastTitulo').innerText = titulo;
-                document.getElementById('toastCorpo').innerText = texto;
-                
-                // Remove classes de cor antigas e adiciona a nova
-                toastHeader.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning', 'text-bg-info');
-                toastHeader.classList.add(headerClass);
-
-                const toast = bootstrap.Toast.getOrCreateInstance(toastLive);
-                toast.show();
-            }
-
-            function ucfirst(string) {
-                return string.charAt(0).toUpperCase() + string.slice(1);
-            }
-
             <?php
             if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {
                 $texto = addslashes($_SESSION['msg']['texto']);

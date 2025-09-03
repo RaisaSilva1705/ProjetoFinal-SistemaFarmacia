@@ -1,8 +1,11 @@
 <?php
 session_start();
-header('Content-Type: text/html; charset=utf-8');
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 include "../../Dev/Exec/config.php";
 include DEV_PATH . 'Exec/conexao.php';
+include DEV_PATH . 'Exec/logs.php';
 
 if (!isset($_SESSION['ID_Caixa'], $_SESSION['ID_CaixaAberto'], $_SESSION['Saldo_Inicial'])) {
     $_SESSION['msg'] = ['texto' => 'Nenhum caixa para conferir', 'tipo' => 'warning'];
@@ -102,6 +105,8 @@ if (isset($_GET['acao']) && $_GET['acao'] == 'confirmar_fechamento') {
     $stmt->bind_param("sddi", $dataAtual, $dinheiroEmCaixa, $valor_total, $id_caixaAberto);
     
     if($stmt->execute() && $stmtFechar->execute()){
+        registrar_log($conn, $_SESSION['ID_Usuario'], "Fechou o caixa aberto {$id_caixaAberto} (ID Caixa: {$id_caixa})");
+        
         unset(
             $_SESSION['ID_Caixa'],
             $_SESSION['ID_CaixaAberto'],
@@ -130,8 +135,7 @@ $conn->close();
     <head>
         <meta charset="UTF-8">
         <title>Relatório - Caixa</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
         <style>
             .resumoCaixa {
@@ -241,6 +245,8 @@ $conn->close();
             </div>
         </div>
 
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
             function sangria() {
                 document.getElementById('btnSangria').disabled = true; // Desabilita o botão
@@ -297,58 +303,13 @@ $conn->close();
                 });
             }
 
-            // Lógica para ativar o Toast
-            function mostrarToast(texto, tipo = 'success', titulo = 'Notificação') {
-                const toastLiveExample = document.getElementById('liveToast');
-                const toastHeader = toastLiveExample.querySelector('.toast-header');
-                
-                // Define o título padrão baseado no tipo, se não for fornecido
-                if (titulo === 'Notificação') {
-                    titulo = ucfirst(tipo === 'danger' ? 'Erro' : (tipo === 'warning' ? 'Atenção' : 'Sucesso'));
-                }
-                const headerClass = `text-bg-${tipo}`;
-
-                document.getElementById('toastTitulo').innerText = titulo;
-                document.getElementById('toastCorpo').innerText = texto;
-                
-                // Remove classes de cor antigas e adiciona a nova
-                toastHeader.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning', 'text-bg-info');
-                toastHeader.classList.add(headerClass);
-
-                const toast = new bootstrap.Toast(toastLiveExample);
-                toast.show();
-            }
-
-            // Função auxiliar para deixar a primeira letra maiúscula (o PHP faz isso, o JS não)
-            function ucfirst(string) {
-                return string.charAt(0).toUpperCase() + string.slice(1);
-            }
-
             <?php
             if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {
                 $texto = addslashes($_SESSION['msg']['texto']);
-                $tipo = $_SESSION['msg']['tipo']; // ex: 'success', 'danger', 'warning'
+                $tipo = $_SESSION['msg']['tipo'];
                 
-                // Define o título e a cor do cabeçalho baseado no tipo
-                $titulo = ucfirst($tipo === 'danger' ? 'Erro' : ($tipo === 'warning' ? 'Atenção' : 'Sucesso'));
-                $headerClass = "text-bg-" . ($tipo === 'danger' ? 'danger' : ($tipo === 'warning' ? 'warning' : 'success'));
-                
-                echo "
-                document.addEventListener('DOMContentLoaded', function() {
-                    const toastLiveExample = document.getElementById('liveToast');
-                    const toastHeader = toastLiveExample.querySelector('.toast-header');
-                    
-                    document.getElementById('toastTitulo').innerText = '{$titulo}';
-                    document.getElementById('toastCorpo').innerText = '{$texto}';
-                    
-                    // Remove classes de cor antigas e adiciona a nova
-                    toastHeader.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning');
-                    toastHeader.classList.add('{$headerClass}');
+                echo "mostrarToast('{$texto}', '{$tipo}');";
 
-                    const toast = new bootstrap.Toast(toastLiveExample);
-                    toast.show();
-                });
-                ";
                 unset($_SESSION['msg']);
             }
             ?>
