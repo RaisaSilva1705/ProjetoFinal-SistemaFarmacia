@@ -98,10 +98,10 @@ INSERT INTO CATEGORIAS_MEDICAMENTOS (Categoria_Med) VALUES
 ('Antipirético'),
 ('Anti-hipertensivo');
 
-INSERT INTO UNIDADES (Unidade, Abreviacao, Tipo) VALUES
-('Caixa', 'cx', 'Contagem'),
-('Comprimido', 'cp', 'Contagem'),
-('Frasco', 'fr', 'Volume');
+INSERT INTO UNIDADES (Unidade, Abreviacao) VALUES
+('Caixa', 'cx'),
+('Comprimido', 'cp'),
+('Frasco', 'fr');
 
 INSERT INTO FORNECEDORES (Nome_Fantasia, Nome, CNPJ, Tel, Email, CEP, Endereco, End_Numero, Complemento, Bairro, Cidade, Estado, Status) VALUES 
 ('MedCenter Distribuidora', 'MedCenter Distribuidora de Medicamentos Ltda.', '12.345.678/0001-90', '(11) 4004-1234', 'contato@medcenterdist.com.br', '01311000', 'Avenida Paulista', '1000', 'Conjunto 501', 'Bela Vista', 'São Paulo', 'SP', 'Ativo'),

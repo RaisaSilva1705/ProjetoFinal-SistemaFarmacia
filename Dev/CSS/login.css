@@ -1,0 +1,67 @@
+html, body {
+    height: 100%;
+}
+
+.container-fluid, .row {
+    height: 100%;
+}
+
+.left-panel {
+    background: linear-gradient(45deg, #adb5bd 0%, rgb(116, 116, 116) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    color: white;
+    text-align: center;
+}
+
+.right-panel {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.logo-img {
+    max-width: 150px;
+    margin-bottom: 2rem;
+}
+
+.login-form {
+    width: 100%;
+    max-width: 400px;
+}
+
+.btn-pill {
+    border-radius: 50px;
+    padding: 0.75rem 1.5rem;
+    font-weight: bold;
+}
+
+.btn-custom-login {
+    background-color: #adb5bd;
+    border-color: #adb5bd;
+    color: white;
+}
+
+.btn-custom-login:hover {
+    background-color: rgb(116, 116, 116);
+    border-color: rgb(116, 116, 116);
+    color: white;
+}
+
+.input-group .form-control {
+    border-right: 0;
+}
+
+.input-group .input-group-text {
+    background-color: white;
+    border-left: 0;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(70, 94, 251, 0.25);
+    border-color: #ced4da;
+}

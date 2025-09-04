@@ -3,12 +3,15 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-include_once 'config.php';
+include 'config.php';
 include 'conexao.php';
+include 'logs.php'; 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($conn->connect_error) {
-        die("Erro na conexão com o banco de dados: " . $conn->connect_error);
+        $_SESSION["msg"] = ['texto' => 'Erro ao conectar ao banco. Por favor, tente novamente', 'tipo' => 'danger'];
+        mysqli_close($conn);
+        header('Location' . SISTEMA_URL .'index.php');
     }
 
     $user = $_POST["user"];
@@ -42,6 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['Cargo'] = $dados['Cargo'];
                 $_SESSION['expire'] = strtotime('+60 minutes', strtotime('now'));
                 $_SESSION["msg"] = ['texto' => "Olá " . $_SESSION['Nome'] . ". Login efetuado com sucesso!", 'tipo' => 'success'];
+                registrar_log($conn, $_SESSION['ID_Usuario'], "Usuário '{$_SESSION['Nome']}' logou no sistema.");
                 mysqli_close($conn);                    
                 header('Location:' . SISTEMA_URL .'dashboard.php');
                 exit();
@@ -54,6 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
         else {
+            registrar_log($conn, $dados['ID_Usuario'], "Usuário inativo '{$dados['Nome']}' tentou logar no sistema.");
             $_SESSION["msg"] = ['texto' => 'Usuário não está ativo', 'tipo' => 'danger'];
             mysqli_close($conn);
             header('Location' . SISTEMA_URL .'index.php');

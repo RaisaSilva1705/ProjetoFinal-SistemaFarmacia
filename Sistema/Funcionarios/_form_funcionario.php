@@ -39,7 +39,7 @@ $usuario_login = htmlspecialchars($usuario['Usuario'] ?? '');
             <select name="id_cargo" id="id_cargo" class="form-select" required>
                 <option value="">Selecione...</option>
                 <?php
-                $cargos_result = $conn->query("SELECT ID_Cargo, Cargo FROM CARGOS ORDER BY Cargo");
+                $cargos_result = $conn->query("SELECT ID_Cargo, Cargo FROM CARGOS WHERE Status = 'Ativo' ORDER BY Cargo");
                 while ($cargo = $cargos_result->fetch_assoc()) {
                     $selected = ($id_cargo == $cargo['ID_Cargo']) ? 'selected' : '';
                     echo "<option value='{$cargo['ID_Cargo']}' {$selected}>{$cargo['Cargo']}</option>";

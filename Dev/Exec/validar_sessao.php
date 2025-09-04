@@ -6,14 +6,16 @@ if($_SESSION['Nome'] != null){
     $restaSessao = $_SESSION['expire'] - strtotime('now');
 
     if ($restaSessao < 1) {
+        registrar_log($conn, $_SESSION['ID_Usuario'], "foi deslogado do sistema devido expiração da sessão.");
         session_destroy();
-        $_SESSION["msg"] = "<div class='alert alert-danger'>Sua sessão expirou. Faça login novamente.</div>";
-        header('Location: http://localhost/htdocs/Farmácia/Sistema/index.php');
+        session_start();
+        $_SESSION["msg"] = ['texto' => 'Sua sessão expirou. Faça login novamente', 'tipo' => 'warning'];
+        header('Location:' . SISTEMA_URL . 'index.php');
         exit;
     }
 }
 else{
-    header('Location: http://localhost/htdocs/Farmácia/Sistema/index.php');
+    header('Location:' . SISTEMA_URL . 'index.php');
     exit;
 }
 ?>

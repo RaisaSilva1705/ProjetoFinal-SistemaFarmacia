@@ -72,7 +72,8 @@ CREATE TABLE IF NOT EXISTS `CLI_ENDERECOS` (
 CREATE TABLE IF NOT EXISTS `CARGOS` (
     `ID_Cargo` INT AUTO_INCREMENT PRIMARY KEY,
     `Cargo` VARCHAR(255) NOT NULL UNIQUE,
-    `Descricao` VARCHAR(255) DEFAULT NULL
+    `Descricao` VARCHAR(255) DEFAULT NULL,
+    `Status` ENUM('Ativo', 'Inativo') DEFAULT 'Ativo'
 ) ENGINE = InnoDB;
 /* drop table CARGOS; */
 /* select * from CARGOS; */
@@ -181,7 +182,7 @@ CREATE TABLE IF NOT EXISTS `UNIDADES` (
     `ID_Unidade` INT AUTO_INCREMENT PRIMARY KEY,
     `Unidade` VARCHAR(255) NOT NULL,
     `Abreviacao` VARCHAR(10) DEFAULT NULL,
-    `Tipo` VARCHAR(20) DEFAULT NULL
+    `Status` ENUM('Ativo', 'Inativo') DEFAULT 'Ativo'
 ) ENGINE = InnoDB;
 /* drop table UNIDADES; */
 /* select * from UNIDADES; */
@@ -298,7 +299,8 @@ CREATE TABLE IF NOT EXISTS `TURNOS` (
 CREATE TABLE IF NOT EXISTS `CAIXAS` (
     `ID_Caixa` INT AUTO_INCREMENT PRIMARY KEY,
     `Caixa` VARCHAR(255) NOT NULL,
-    `Status` ENUM('Aberto', 'Fechado') NOT NULL DEFAULT 'Fechado'
+    `Status` ENUM('Aberto', 'Fechado') NOT NULL DEFAULT 'Fechado',
+    `StatusCadastrado` ENUM('Ativo', 'Inativo') NOT NULL DEFAULT 'Ativo'
 ) ENGINE = InnoDB;
 /* drop table CAIXAS; */
 /* select * from CAIXAS; */
@@ -345,7 +347,8 @@ CREATE TABLE IF NOT EXISTS `MOVIMENTACOES_CAIXA` (
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `FORMAS_PAGAMENTO` (
     `ID_Forma_Pag` INT AUTO_INCREMENT PRIMARY KEY,
-    `Tipo` VARCHAR(255) NOT NULL
+    `Tipo` VARCHAR(255) NOT NULL,
+    `Status` ENUM('Ativo', 'Inativo') DEFAULT 'Ativo'
 ) ENGINE = InnoDB;
 /* drop table FORMAS_PAGAMENTO; */
 /* select * from FORMAS_PAGAMENTO; */

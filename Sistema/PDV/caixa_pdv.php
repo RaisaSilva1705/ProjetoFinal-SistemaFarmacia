@@ -12,7 +12,8 @@ include DEV_PATH . "Exec/validar_acesso.php";
 $sqlCaixas = "SELECT ID_Caixa,
                      Caixa,
                      Status
-              FROM CAIXAS";
+              FROM CAIXAS
+              WHERE StatusCadastro = 'Ativo'";
 $caixas = $conn->query($sqlCaixas);
 
 $sqlTurnos = "SELECT ID_Turno,
@@ -41,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
     $sqlStatus = "SELECT 
                     Status 
                   FROM CAIXAS 
-                  WHERE ID_Caixa = ?";
+                  WHERE ID_Caixa = ? AND StatusCadastro = 'Ativo'";
     $stmtStatus = $conn->prepare($sqlStatus);
     $stmtStatus->bind_param("i", $id_caixa);
     $stmtStatus->execute();
@@ -155,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         </div>
 
         <!-- Toast -->
-         <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div class="toast-container position-fixed top-0 end-0 p-3">
             <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="toast-header">
                 <strong class="me-auto" id="toastTitulo">Notificação</strong>
