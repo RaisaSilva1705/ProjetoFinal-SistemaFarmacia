@@ -7,6 +7,9 @@ include "../../Dev/Exec/config.php";
 include DEV_PATH . 'Exec/conexao.php';
 include DEV_PATH . "Exec/validar_sessao.php";
 include DEV_PATH . "Exec/validar_acesso.php";
+
+$result_margem = $conn->query("SELECT Margem_Lucro_Padrao FROM CONFIGURACOES WHERE ID_Config = 1");
+$margem_lucro = $result_margem->fetch_assoc()['Margem_Lucro_Padrao'];
 ?>
 
 <!DOCTYPE html>
@@ -22,7 +25,7 @@ include DEV_PATH . "Exec/validar_acesso.php";
         <!-- Navbar -->
         <?php include_once DEV_PATH . 'Views/sidebar.php'?>
 
-       <div class="content d-flex flex-column min-vh-100">
+        <div class="content d-flex flex-column min-vh-100">
             <div class="content flex-grow-1">
                 <!-- Banner -->
                 <div class="container-fluid bg-secondary text-white text-center p-4">
@@ -30,6 +33,20 @@ include DEV_PATH . "Exec/validar_acesso.php";
                 </div>
             
                 <div class="container p-4">
+                    <div class="card card-body mb-4 bg-light">
+                        <h5 class="card-title">Importar via XML da Nota Fiscal (NFe)</h5>
+                        <p class="card-text text-muted small">Faça o upload do arquivo .xml da sua nota fiscal para preencher os itens automaticamente.</p>
+                        <form action="processa_xml.php" method="POST" enctype="multipart/form-data">
+                            <div class="input-group">
+                                <input type="file" class="form-control" name="arquivo_xml" id="arquivo_xml" accept=".xml" required>
+                                <button class="btn btn-primary" type="submit">Processar XML</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <hr>
+                    <h4 class="text-center mb-4">OU</h4>
+
                     <form action="processa_entrada.php" method="POST">
                         <div class="card card-body mb-4">
                             <h5 class="card-title">Dados da Nota Fiscal</h5>
@@ -60,7 +77,7 @@ include DEV_PATH . "Exec/validar_acesso.php";
                         <div class="card card-body mb-4">
                             <h5 class="card-title">Adicionar Produto à Nota</h5>
                             <div class="row align-items-end">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <label for="busca_produto" class="form-label">Buscar Produto (Nome ou EAN)</label>
                                     <input type="text" id="busca_produto" class="form-control" autocomplete="off">
                                     <input type="hidden" id="produto_id">
@@ -81,6 +98,12 @@ include DEV_PATH . "Exec/validar_acesso.php";
                                 <div class="col-md-1">
                                     <label for="preco_custo" class="form-label">Custo</label>
                                     <input type="text" id="preco_custo" class="form-control" placeholder="0,00">
+                                </div>
+                                <div class="col-md-1">
+                                    <label for="margem_lucro" class="form-label">Marg. (%)</label>
+                                    <div class="input-group">
+                                        <input type="text" id="margem_lucro" class="form-control" value="<?= $margem_lucro ?? '100.00' ?>">
+                                    </div>
                                 </div>
                                 <div class="col-md-1">
                                     <label for="preco_venda" class="form-label">Venda</label>
@@ -136,6 +159,47 @@ include DEV_PATH . "Exec/validar_acesso.php";
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
+            const margemLucroPadrao = <?= $margem_lucro ?? 100 ?>;
+
+            const campoCusto = document.getElementById('preco_custo');
+            const campoMargem = document.getElementById('margem_lucro');
+            const campoVenda = document.getElementById('preco_venda');
+
+            function formatarMoeda(valor) {
+                if (isNaN(valor) || valor === null) return '';
+                return valor.toFixed(2).replace('.', ',');
+            }
+
+            campoCusto.addEventListener('blur', function() {
+                let custo = parseFloat(this.value.replace(',', '.'));
+                let margem = parseFloat(campoMargem.value.replace(',', '.'));
+                if (!isNaN(custo) && !isNaN(margem)) {
+                    let vendaCalculada = custo * (1 + (margem / 100));
+                    campoVenda.value = formatarMoeda(vendaCalculada);
+                }
+                this.value = formatarMoeda(custo); 
+            });
+
+            campoMargem.addEventListener('blur', function() {
+                let custo = parseFloat(campoCusto.value.replace(',', '.'));
+                let margem = parseFloat(this.value.replace(',', '.'));
+                if (!isNaN(custo) && !isNaN(margem)) {
+                    let vendaCalculada = custo * (1 + (margem / 100));
+                    campoVenda.value = formatarMoeda(vendaCalculada);
+                }
+                this.value = formatarMoeda(margem); 
+            });
+
+            campoVenda.addEventListener('blur', function() {
+                let custo = parseFloat(campoCusto.value.replace(',', '.'));
+                let venda = parseFloat(this.value.replace(',', '.'));
+                if (!isNaN(custo) && !isNaN(venda) && custo > 0) {
+                    let margemCalculada = ((venda / custo) - 1) * 100;
+                    campoMargem.value = formatarMoeda(margemCalculada);
+                }
+                this.value = formatarMoeda(venda); 
+            });
+            
             // --- BUSCA DE PRODUTOS ---
             const campoBusca = document.getElementById('busca_produto');
             const campoProdutoId = document.getElementById('produto_id');

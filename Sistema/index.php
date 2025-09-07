@@ -33,7 +33,7 @@ include "../Dev/Exec/config.php";
     
                     <form action="../Dev/Exec/index-loginexec.php" method="POST">
                         <div class="mb-3">
-                            <label for="user" class="form-label">Usuário ou Email</label>
+                            <label for="user" class="form-label">Usuário</label>
                             <div class="input-group">
                                 <input type="text" class="form-control" id="user" name="user" required>
                                 <span class="input-group-text"><i class="bi bi-person"></i></span>

@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS `CONFIGURACOES` (
     `Estado` CHAR(2) NOT NULL,
     `Valor_Min_Parcelas` DECIMAL(10,2) NOT NULL,
     `Quant_Max_Parcelas` INT NOT NULL,
+    `Margem_Lucro_Padrao` DECIMAL(10,2) DEFAULT 100.00,
     `Data_Alteracao` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
 /* drop table CONFIGURACOES; */
@@ -435,4 +436,4 @@ CREATE TABLE IF NOT EXISTS `LOGS` (
   FOREIGN KEY (`ID_Usuario`) REFERENCES `USUARIOS`(`ID_Usuario`)
 ) ENGINE = InnoDB;
 /* drop table LOGS; */
-/* select * from LOGS; */ 
+/* select * from LOGS; */

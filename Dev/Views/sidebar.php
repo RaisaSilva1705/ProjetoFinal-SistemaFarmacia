@@ -106,7 +106,7 @@
     <div class="nav-item dropdown">
       <a class="dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-gear-fill"></i>Configurações</a>
       <ul class="dropdown-menu">
-        <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Configuracoes/empresa.php">Dados da Empresa</a></li>
+        <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Configuracoes/configuracoes.php">Dados da Empresa</a></li>
       </ul>
     </div>
   </div>

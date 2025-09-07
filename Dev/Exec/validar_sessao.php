@@ -6,7 +6,7 @@ if($_SESSION['Nome'] != null){
     $restaSessao = $_SESSION['expire'] - strtotime('now');
 
     if ($restaSessao < 1) {
-        registrar_log($conn, $_SESSION['ID_Usuario'], "foi deslogado do sistema devido expiração da sessão.");
+        registrar_log($conn, $_SESSION['ID_Usuario'], "Foi deslogado do sistema devido expiração da sessão.");
         session_destroy();
         session_start();
         $_SESSION["msg"] = ['texto' => 'Sua sessão expirou. Faça login novamente', 'tipo' => 'warning'];

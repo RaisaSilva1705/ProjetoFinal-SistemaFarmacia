@@ -21,7 +21,7 @@ $sqlTurnos = "SELECT ID_Turno,
               FROM TURNOS";
 $turnos = $conn->query($sqlTurnos);
 
-// Pega a hora atual no formato 24h (ex: "08", "15", "22")
+// Pega a hora atual 
 $horaAtual = date('H');
 
 $idTurnoAutomatico = null;

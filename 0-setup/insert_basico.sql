@@ -1,6 +1,6 @@
-INSERT INTO CONFIGURACOES (Nome_RazaoSocial, Nome_Fantasia, Slogan, Documento, Loja, CEP, Endereco, End_Numero, Bairro, Cidade, Estado, Valor_Min_Parcelas, Quant_Max_Parcelas) VALUES
+INSERT INTO CONFIGURACOES (Nome_RazaoSocial, Nome_Fantasia, Slogan, Documento, Loja, CEP, Endereco, End_Numero, Bairro, Cidade, Estado, Valor_Min_Parcelas, Quant_Max_Parcelas, Margem_Lucro_Padrao) VALUES
 ('Farmácia LavenderPharma', 'LavenderPharma', 'Cuidando de Você!', 'XX.XXX.XXX/0001-99', '01', 
-'01000000', 'Rua das Flores', '123', 'Centro', 'São Paulo', 'SP', 120.00, 3);
+'01000000', 'Rua das Flores', '123', 'Centro', 'São Paulo', 'SP', 120.00, 3, 100.00);
 
 INSERT INTO CARGOS (Cargo, Descricao) VALUES 
 ('Administrador', 'Acesso irrestrito ao sistema.'),
@@ -104,8 +104,8 @@ INSERT INTO UNIDADES (Unidade, Abreviacao) VALUES
 ('Frasco', 'fr');
 
 INSERT INTO FORNECEDORES (Nome_Fantasia, Nome, CNPJ, Tel, Email, CEP, Endereco, End_Numero, Complemento, Bairro, Cidade, Estado, Status) VALUES 
-('MedCenter Distribuidora', 'MedCenter Distribuidora de Medicamentos Ltda.', '12.345.678/0001-90', '(11) 4004-1234', 'contato@medcenterdist.com.br', '01311000', 'Avenida Paulista', '1000', 'Conjunto 501', 'Bela Vista', 'São Paulo', 'SP', 'Ativo'),
-('FarmaLog Logística', 'FarmaLog Logistica e Transporte Farmacêutico S.A.', '98.765.432/0001-10', '(21) 3003-5678', 'vendas@farmalog.com.br', '20040030', 'Avenida Rio Branco', '156', 'Torre B, Andar 20', 'Centro', 'Rio de Janeiro', 'RJ', 'Ativo');
+('MedCenter Distribuidora', 'MedCenter Distribuidora de Medicamentos Ltda.', '12345678000190', '(11) 4004-1234', 'contato@medcenterdist.com.br', '01311000', 'Avenida Paulista', '1000', 'Conjunto 501', 'Bela Vista', 'São Paulo', 'SP', 'Ativo'),
+('FarmaLog Logística', 'FarmaLog Logistica e Transporte Farmacêutico S.A.', '98765432000110', '(21) 3003-5678', 'vendas@farmalog.com.br', '20040030', 'Avenida Rio Branco', '156', 'Torre B, Andar 20', 'Centro', 'Rio de Janeiro', 'RJ', 'Ativo');
 
 INSERT INTO PRODUTOS (ID_Categoria, Nome, ID_Unidade, NCM, EAN_GTIN, Foto) VALUES
 (1, 'Paracetamol 750mg 20cp', 2, '30049099', '7896422500080', 'paracetamol750mg20cp.webp'),

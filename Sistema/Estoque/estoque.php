@@ -90,7 +90,7 @@ $result = $stmt->get_result();
                         <h2>Lista de Produtos</h2>
                         <div>
                             <a href="entrada_estoque.php" class="btn btn-primary">Entrada</a>
-                            <a href="movimentacao_estoque.php?mov=S" class="btn btn-danger">Saída</a>
+                            <a href="saida_estoque.php" class="btn btn-danger">Saída</a>
                         </div>
                     </div>
 

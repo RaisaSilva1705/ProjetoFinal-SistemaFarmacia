@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<NFe xmlns="http://www.portalfiscal.inf.br/nfe">
+    <infNFe versao="4.00">
+        <ide>
+            <nNF>12345</nNF> 
+        </ide>
+        <emit>
+            <CNPJ>12345678000190</CNPJ>
+            <xNome>MedCenter Distribuidora de Medicamentos Ltda.</xNome>
+        </emit>
+        <dest>
+            <CNPJ>55268487000180</CNPJ>
+            <xNome>Sua Farmacia Ltda</xNome>
+        </dest>
+        
+        <det nItem="1">
+            <prod>
+                <cProd>001</cProd>
+                <cEAN>7896422500080</cEAN> <xProd>Paracetamol 750mg 20cp</xProd>
+                <NCM>30049099</NCM>
+                <CFOP>5102</CFOP>
+                <uCom>CX</uCom>
+                <qCom>10.0000</qCom> <vUnCom>15.50</vUnCom> <vProd>155.00</vProd>
+            </prod>
+        </det>
+
+        <det nItem="2">
+            <prod>
+                <cProd>002</cProd>
+                <cEAN>7891010246124</cEAN> <xProd>Creme Hidratante Neutrogena 200ml</xProd>
+                <NCM>33049990</NCM>
+                <CFOP>5102</CFOP>
+                <uCom>UN</uCom>
+                <qCom>25.0000</qCom> <vUnCom>8.75</vUnCom> <vProd>218.75</vProd>
+            </prod>
+        </det>
+
+        <det nItem="3">
+            <prod>
+                <cProd>003</cProd>
+                <cEAN>7891111111111</cEAN> 
+                <xProd>Produto Fictício (Não Cadastrado)</xProd>
+                <NCM>33049910</NCM>
+                <CFOP>5102</CFOP>
+                <uCom>UN</uCom>
+                <qCom>5.0000</qCom>
+                <vUnCom>30.00</vUnCom>
+                <vProd>150.00</vProd>
+            </prod>
+        </det>
+        
+        <det nItem="4">
+            <prod>
+                <cProd>004</cProd>
+                <cEAN>SEM GTIN</cEAN> 
+                <xProd>Produto Genérico (Sem EAN)</xProd>
+                <NCM>33049910</NCM>
+                <CFOP>5102</CFOP>
+                <uCom>UN</uCom>
+                <qCom>1.0000</qCom>
+                <vUnCom>5.00</vUnCom>
+                <vProd>5.00</vProd>
+            </prod>
+        </det>
+
+    </infNFe>
+</NFe>
