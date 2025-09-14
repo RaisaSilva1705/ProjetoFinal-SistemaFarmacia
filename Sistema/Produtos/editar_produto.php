@@ -8,11 +8,9 @@ include DEV_PATH . 'Exec/conexao.php';
 include DEV_PATH . "Exec/validar_sessao.php";
 include DEV_PATH . "Exec/validar_acesso.php";
 
-// Verificar se o parâmetro "codigo" foi passado pela URL
 if (isset($_GET['codigo'])) {
     $id_produto = intval($_GET['codigo']);
 
-    // Buscar dados do produto
     $sqlProduto = "SELECT * FROM PRODUTOS WHERE ID_Produto = ?";
     $stmt = $conn->prepare($sqlProduto);
     $stmt->bind_param("i", $id_produto);
@@ -22,7 +20,6 @@ if (isset($_GET['codigo'])) {
     if ($result->num_rows > 0) {
         $produto = $result->fetch_assoc();
 
-        // Se for medicamento, buscar também os dados
         $medicamento = null;
         if ($produto['ID_Categoria'] == 1) {
             $sqlMedicamento = "SELECT * FROM MEDICAMENTOS WHERE ID_Produto = ?";
@@ -62,9 +59,7 @@ else {
     exit();
 }
 
-// Verificar se o formulário foi enviado
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Recebe dados do produto
     $nome = $_POST['nome'];
     $id_fornecedor = $_POST['id_fornecedor'];
     $descricao = $_POST['descricao'];
@@ -81,8 +76,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $cfop = $_POST['cfop'];
     $mva = $_POST['mva'];
     $nfci = $_POST['nfci'];
+    $cst_icms = $_POST['cst_icms'];
+    $cst_pis = $_POST['cst_pis'];
+    $cst_cofins = $_POST['cst_cofins'];
 
-    // Atualiza foto se enviada
     $foto = $produto['Foto'];
     if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
         $foto_nome = uniqid() . "_" . basename($_FILES["foto"]["name"]);
@@ -92,17 +89,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $foto = $foto_nome;
     }
 
-    // Atualiza tabela PRODUTOS
     $sqlUpdate = "UPDATE PRODUTOS 
                   SET ID_Categoria = ?, Nome = ?, ID_Fornecedor = ?, Descricao = ?, ID_Unidade = ?, 
                       Quant_Minima = ?, Status = ?, OBS = ?, NCM = ?, EAN_GTIN = ?, CBENEF = ?, 
-                      CEST = ?, EXTIPI = ?, CFOP = ?, MVA = ?, NFCI = ?, Foto = ?
+                      CEST = ?, EXTIPI = ?, CFOP = ?, MVA = ?, NFCI = ?, CST_ICMS = ?, CST_PIS = ?, 
+                      CST_COFINS = ?, Foto = ?
                   WHERE ID_Produto = ?";
     $stmtUpdate = $conn->prepare($sqlUpdate);
-    $stmtUpdate->bind_param("isisiisssssssidssi",
+    $stmtUpdate->bind_param("isisiisssssssidsssssi",
         $id_categoria, $nome, $id_fornecedor, $descricao, $id_unidade,
-        $quant_minima, $status, $obs, $ncm, $ean_gtin, $cbenef, $cest,
-        $extipi, $cfop, $mva, $nfci, $foto, $id_produto
+        $quant_minima, $status, $obs, $ncm, $ean_gtin, $cbenef, 
+        $cest, $extipi, $cfop, $mva, $nfci, $cst_icms, $cst_pis, 
+        $cst_cofins, $foto, $id_produto
     );
 
     if ($stmtUpdate->execute()) {
@@ -152,9 +150,9 @@ $is_edit = true;
 <html lang="pt-BR">
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Editar Produto</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
         <style>
             select > option:first-child {
@@ -163,6 +161,7 @@ $is_edit = true;
         </style>
     </head>
     <body>
+        <!-- Sidebar -->
         <?php include_once DEV_PATH . 'Views/sidebar.php'; ?>
 
         <div class="content d-flex flex-column min-vh-100">
@@ -178,6 +177,7 @@ $is_edit = true;
                 </div>
             </div>
 
+            <!-- Footer -->
             <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
 
@@ -193,7 +193,8 @@ $is_edit = true;
             </div>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
             document.addEventListener("DOMContentLoaded", function () {
                 const categoria = document.getElementById("id_categoria");
@@ -234,7 +235,7 @@ $is_edit = true;
                 toast.show();
             }
 
-            // Função auxiliar para deixar a primeira letra maiúscula (o PHP faz isso, o JS não)
+            // Função auxiliar para deixar a primeira letra maiúscula 
             function ucfirst(string) {
                 return string.charAt(0).toUpperCase() + string.slice(1);
             }

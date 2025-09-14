@@ -3,17 +3,15 @@ WEB GERAL
 
 FUNCIONÁRIOS
 1- Implementar controle de entrada e saída de funcionários
-2- Método de pesquisar digitando o funcionário
 
 USUÁRIOS
 1- senha padrão (quando cria) = mudar123
 
 CLIENTE
-1- Método de pesquisar digitando o funcionário
 2- Mostrar modal de sugestão para o cliente com base no histório de compras dele no caixa
 
 ESTOQUE
-1- permitir entrada por xml
+1- adicionar campos de obs e fotos em Saída
 
 RELATÓRIOS
 2- relatórios em cada módulo
@@ -59,3 +57,9 @@ CAIXA
    - Aplicar Preço de Venda
    - Gerar Pedido / Nota
 
+
+
+
+documentação:
+XML: https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=BMPFMBoln3w=
+Modelo usado: Esquema XML NF-e/NFC-e - Pacote de Liberação nº 010b v. 1.21 (Novo leiaute da NF-e, NT 2025.002 v.1.20, NT 2024.003 e NT 2025.001) (ZIP). Publicado em 20/08/2025

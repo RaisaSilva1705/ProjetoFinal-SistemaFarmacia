@@ -56,7 +56,7 @@
   }
 </style>
 
-<div class="sidebar">
+<div class="sidebar no-print">
   <div class="sidebar-header">
     <a href="<?php echo SISTEMA_URL ?>dashboard.php" class="text-white text-decoration-none"><?php echo NOME ?></a>
   </div>

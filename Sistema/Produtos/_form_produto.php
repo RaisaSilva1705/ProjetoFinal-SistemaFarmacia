@@ -57,7 +57,7 @@
         </div>
         <div class="col-md-3 mb-3">
             <label for="foto" class="form-label">Foto do Produto</label>
-            <input type="file" name="foto" class="form-control">
+            <input type="file" name="foto" id="foto" class="form-control">
             <?php if (!empty($produto['Foto'])): ?>
                 <small class="form-text text-muted">Atual: <?= htmlspecialchars($produto['Foto']) ?></small>
             <?php endif; ?>
@@ -117,38 +117,64 @@
     <div class="row">
         <div class="col-md-3 mb-3">
             <label for="ncm" class="form-label">NCM</label>
-            <input type="text" name="ncm" class="form-control" maxlength="8" required value="<?= htmlspecialchars($produto['NCM'] ?? '') ?>">
+            <input type="text" name="ncm" id="ncm" class="form-control" maxlength="8" required value="<?= htmlspecialchars($produto['NCM'] ?? '') ?>">
         </div>
         <div class="col-md-3 mb-3">
             <label for="ean_gtin" class="form-label">EAN/GTIN</label>
-            <input type="text" name="ean_gtin" class="form-control" maxlength="14" value="<?= htmlspecialchars($produto['EAN_GTIN'] ?? '') ?>">
+            <input type="text" name="ean_gtin" id="ean_gtin" class="form-control" maxlength="14" value="<?= htmlspecialchars($produto['EAN_GTIN'] ?? '') ?>">
         </div>
         <div class="col-md-3 mb-3">
             <label for="cbenef" class="form-label">CBENEF</label>
-            <input type="text" name="cbenef" class="form-control" value="<?= htmlspecialchars($produto['CBENEF'] ?? '') ?>">
+            <input type="text" name="cbenef" id="cbenef" class="form-control" value="<?= htmlspecialchars($produto['CBENEF'] ?? '') ?>">
         </div>
         <div class="col-md-3 mb-3">
             <label for="cest" class="form-label">CEST</label>
-            <input type="text" name="cest" class="form-control" value="<?= htmlspecialchars($produto['CEST'] ?? '') ?>">
+            <input type="text" name="cest" id="cest" class="form-control" value="<?= htmlspecialchars($produto['CEST'] ?? '') ?>">
         </div>
         <div class="col-md-3 mb-3">
             <label for="extipi" class="form-label">EXTIPI</label>
-            <input type="text" name="extipi" class="form-control" value="<?= htmlspecialchars($produto['EXTIPI'] ?? '') ?>">
+            <input type="text" name="extipi" id="extipi" class="form-control" value="<?= htmlspecialchars($produto['EXTIPI'] ?? '') ?>">
         </div>
         <div class="col-md-3 mb-3">
             <label for="cfop" class="form-label">CFOP</label>
-            <input type="number" name="cfop" class="form-control" value="<?= htmlspecialchars($produto['CFOP'] ?? '') ?>">
+            <input type="number" name="cfop" id="cfop" class="form-control" value="<?= htmlspecialchars($produto['CFOP'] ?? '') ?>">
+        </div>
+        <div class="col-md-3 mb-3">
+            <label for="cst_icms" class="form-label">CST ICMS (Saída)</label>
+            <select name="cst_icms" id="cst_icms" class="form-select">
+                <option value="">Selecione</option>
+                <option value="102" <?= (($produto['CST_ICMS'] ?? '') == '102') ? 'selected' : '' ?>>102 - Trib. s/ perm. de crédito</option>
+                <option value="500" <?= (($produto['CST_ICMS'] ?? '') == '500') ? 'selected' : '' ?>>500 - ICMS cobrado por ST</option>
+            </select>
+        </div>
+        <div class="col-md-3 mb-3">
+            <label for="cst_pis" class="form-label">CST PIS (Saída)</label>
+            <select name="cst_pis" id="cst_pis" class="form-select">
+                <option value="">Selecione</option>
+                <option value="01" <?= (($produto['CST_PIS'] ?? '') == '01') ? 'selected' : '' ?>>01 - Op. Tributável</option>
+                <option value="07" <?= (($produto['CST_PIS'] ?? '') == '07') ? 'selected' : '' ?>>07 - Op. Isenta</option>
+            </select>
+        </div>
+        <div class="col-md-3 mb-3">
+            <label for="cst_cofins" class="form-label">CST COFINS (Saída)</label>
+            <select name="cst_cofins" id="cst_cofins" class="form-select">
+                <option value="">Selecione</option>
+                <option value="01" <?= (($produto['COFINS'] ?? '') == '01') ? 'selected' : '' ?>>01 - Op. Tributável</option>
+                <option value="07" <?= (($produto['COFINS'] ?? '') == '07') ? 'selected' : '' ?>>07 - Op. Isenta</option>
+            </select>
         </div>
         <div class="col-md-3 mb-3">
             <label for="mva" class="form-label">MVA</label>
-            <input type="text" name="mva" class="form-control" value="<?= htmlspecialchars($produto['MVA'] ?? '') ?>">
+            <input type="text" name="mva" id="mva" class="form-control" value="<?= htmlspecialchars($produto['MVA'] ?? '') ?>">
         </div>
         <div class="col-md-3 mb-3">
             <label for="nfci" class="form-label">NFCI</label>
-            <input type="text" name="nfci" class="form-control" value="<?= htmlspecialchars($produto['NFCI'] ?? '') ?>">
+            <input type="text" name="nfci" id="nfci" class="form-control" value="<?= htmlspecialchars($produto['NFCI'] ?? '') ?>">
         </div>
     </div>
 
-    <button type="submit" class="btn btn-primary mt-4"><?= $is_edit ? 'Salvar Alterações' : 'Cadastrar Produto' ?></button>
-    <a href="produtos.php" class="btn btn-secondary mt-4 ms-2">Cancelar</a>
+    <div class="text-end">
+        <a href="produtos.php" class="btn btn-secondary mt-4 ms-2">Cancelar</a>
+        <button type="submit" class="btn btn-primary mt-4"><?= $is_edit ? 'Salvar Alterações' : 'Cadastrar Produto' ?></button>
+    </div>
 </form>

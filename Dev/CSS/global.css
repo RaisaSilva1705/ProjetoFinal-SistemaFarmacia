@@ -19,3 +19,27 @@ footer {
     overflow-y: auto;
     flex-direction: column;
 }
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    body {
+        display: block !important;
+        background-color: #fff !important; 
+    }
+    .content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+        flex-grow: unset !important; 
+    }
+    .card {
+        border: 1px solid #dee2e6 !important;
+        box-shadow: none !important;
+        page-break-inside: avoid; 
+    }
+    a {
+        text-decoration: none !important;
+        color: #000 !important;
+    }
+}
