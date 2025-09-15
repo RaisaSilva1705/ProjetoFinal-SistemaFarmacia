@@ -112,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                     <h3>Seleção de Caixa</h3>
                 </div>
 
-                <div class="container mt-3 p-4">
+                <div class="container mt-3 p-5">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h2>Selecione para Continuar</h2>
                         <div>

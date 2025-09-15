@@ -68,7 +68,7 @@ $total_vendedores_ativos = count($funcionarios_ranking);
                 <div class="container-fluid bg-secondary text-white text-center p-4 no-print">
                     <h3>Relatório de Desempenho de Funcionários</h3>
                 </div>
-                <div class="container p-4">
+                <div class="container p-5">
                     <div class="card card-body mb-4 no-print">
                         <form method="GET" action="relatorio_funcionarios.php">
                             <div class="row align-items-end">

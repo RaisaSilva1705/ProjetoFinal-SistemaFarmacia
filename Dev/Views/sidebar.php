@@ -68,7 +68,7 @@
       <a class="dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-shop-window"></i>Frente de Loja</a>
       <ul class="dropdown-menu">
         <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>PDV/pdv.php">Nova Venda (PDV)</a></li>
-        <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Caixas/caixas.php">Situação do Caixa</a></li>
+        <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Caixas/caixas.php">Situação do Caixa</a></li>
         <hr class="dropdown-divider" style="border-color: #495057;">
         <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Relatorios/relatorio_pdv.php">Relatório de Vendas</a></li>
       </ul>

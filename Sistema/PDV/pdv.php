@@ -125,7 +125,7 @@ if (isset($_POST['codigo'])) {
     </head>
     <body class="bg-light">
 
-        <div class="content align-items-center justify-content-center">
+        <div class="content align-items-center justify-content-center mt-4">
             <div class="container mt-4">
 
                 <!-- TOPO -->

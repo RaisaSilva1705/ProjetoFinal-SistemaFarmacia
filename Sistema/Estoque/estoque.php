@@ -85,7 +85,7 @@ $result = $stmt->get_result();
                     <h3>Gerenciamento de ESTOQUE</h3>
                 </div>
             
-                <div class="container p-4">
+                <div class="container p-5">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h2>Lista de Produtos</h2>
                         <div>

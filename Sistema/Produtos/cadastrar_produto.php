@@ -127,7 +127,7 @@ $is_edit = false;
                 </div>
     
                 <!-- Formulário de Cadastro -->
-                <div class="container p-4">
+                <div class="container p-5">
                     <?php include '_form_produto.php'; ?>
                 </div>
             </div>

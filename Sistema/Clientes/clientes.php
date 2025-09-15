@@ -61,7 +61,7 @@ $result = $stmt->get_result();
                     <h3>Gerenciamento de CLIENTES</h3>
                 </div>
             
-                <div class="container p-4">
+                <div class="container p-5">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2 class="m-0">Lista de Clientes</h2>
                         <div>

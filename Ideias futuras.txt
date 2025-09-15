@@ -20,6 +20,11 @@ RELATÓRIOS
 CAIXA
 1- Permitir consulta de Preço
 
+PEDIDOS
+1- devo Implementar??
+
+Prescrições
+1- fazer junto com dispensão de medicamento controlado
 
 
 

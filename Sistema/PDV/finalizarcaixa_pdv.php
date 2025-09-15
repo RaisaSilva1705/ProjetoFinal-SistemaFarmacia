@@ -174,7 +174,7 @@ $conn->close();
                     <h3>Relatório de Caixa</h3>
                 </div>
                 
-                <div class="container mt-3 p-4">
+                <div class="container mt-3 p-5">
                     <div class="d-flex justify-content-between mb-3">
                         <div class="col">
                             <div class="resumoCaixa">

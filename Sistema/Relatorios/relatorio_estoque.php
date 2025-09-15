@@ -86,7 +86,7 @@ $lucro_bruto_potencial = $valor_total_venda - $valor_total_custo;
                 <div class="container-fluid bg-secondary text-white text-center p-4 no-print">
                     <h3>Relatório de Posição de Estoque</h3>
                 </div>
-                <div class="container p-4">
+                <div class="container p-5">
                     <div class="card card-body mb-4 no-print">
                         <form action="relatorio_estoque.php" method="GET">
                             <div class="row align-items-end">

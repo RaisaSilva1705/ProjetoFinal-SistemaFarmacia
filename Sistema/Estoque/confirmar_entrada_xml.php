@@ -48,7 +48,7 @@ unset($_SESSION['entrada_xml']);
                 <div class="container-fluid bg-secondary text-white text-center p-4">
                     <h3>Revisão da Nota Fiscal (XML)</h3>
                 </div>
-                <div class="container p-4">
+                <div class="container p-5">
                     <form action="processa_entrada.php" method="POST">
                         
                         <?php if ($fornecedor_db): ?>

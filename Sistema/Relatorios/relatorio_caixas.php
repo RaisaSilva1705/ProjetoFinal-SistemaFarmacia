@@ -75,7 +75,7 @@ $numero_fechamentos = count($caixas_fechados);
                 <div class="container-fluid bg-secondary text-white text-center p-4 no-print">
                     <h3>Relatório de Caixas Fechados</h3>
                 </div>
-                <div class="container p-4">
+                <div class="container p-5">
                     <div class="card card-body mb-4 no-print">
                         <form method="GET" action="relatorio_caixas.php">
                             <div class="row align-items-end">

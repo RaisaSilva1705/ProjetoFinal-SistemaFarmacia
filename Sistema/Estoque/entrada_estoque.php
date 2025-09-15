@@ -32,7 +32,7 @@ $margem_lucro = $result_margem->fetch_assoc()['Margem_Lucro_Padrao'];
                     <h3>Registrar Entrada de Estoque</h3>
                 </div>
             
-                <div class="container p-4">
+                <div class="container p-5">
                     <div class="card card-body mb-4 bg-light">
                         <h5 class="card-title">Importar via XML da Nota Fiscal (NFe)</h5>
                         <p class="card-text text-muted small">Faça o upload do arquivo .xml da sua nota fiscal para preencher os itens automaticamente.</p>

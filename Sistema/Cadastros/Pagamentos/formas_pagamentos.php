@@ -59,7 +59,7 @@ $result = $stmt->get_result();
                 <div class="container-fluid bg-secondary text-white text-center p-4">
                     <h3>Gestão de FORMAS DE PAGAMENTOS</h3>
                 </div>
-                <div class="container p-4">
+                <div class="container p-5">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2 class="m-0">Lista de Formas de Pagamentos</h2>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalFormasPagamento">

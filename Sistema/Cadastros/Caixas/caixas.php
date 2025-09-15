@@ -10,9 +10,9 @@ include DEV_PATH . "Exec/validar_acesso.php";
 
 $busca_texto = $_GET['busca_texto'] ?? '';
 $status = $_GET['status'] ?? '';
-$statusCadastro = $_GET['status_cadastro'] ?? '';
+$statusCadastrado = $_GET['status_cadastrado'] ?? '';
 
-$sql = "SELECT ID_Caixa, Caixa, Status, StatusCadastro FROM CAIXAS";
+$sql = "SELECT ID_Caixa, Caixa, Status, StatusCadastrado FROM CAIXAS";
 
 $conditions = [];
 $params = [];
@@ -28,10 +28,10 @@ if (!empty($status)) {
     $types .= 's';
     $params[] = $status;
 }
-if (!empty($statusCadastro)) {
-    $conditions[] = "StatusCadastro = ?";
+if (!empty($statusCadastrado)) {
+    $conditions[] = "StatusCadastrado = ?";
     $types .= 's';
-    $params[] = $statusCadastro;
+    $params[] = $statusCadastrado;
 }
 
 if (count($conditions) > 0)
@@ -65,7 +65,7 @@ $result = $stmt->get_result();
                 <div class="container-fluid bg-secondary text-white text-center p-4">
                     <h3>Gestão de CAIXAS</h3>
                 </div>
-                <div class="container p-4">
+                <div class="container p-5">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2 class="m-0">Lista de Caixas</h2>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCaixa">
@@ -89,11 +89,11 @@ $result = $stmt->get_result();
                                     </select>
                                 </div>
                                 <div class="col-md-3">
-                                    <label for="status_cadastro" class="form-label">Status Cadastrado</label>
-                                    <select name="status_cadastro" id="status_cadastro" class="form-select">
+                                    <label for="status_cadastrado" class="form-label">Status Cadastrado</label>
+                                    <select name="status_cadastrado" id="status_cadastrado" class="form-select">
                                         <option value="">Todos</option>
-                                        <option value="Ativo" <?= $statusCadastro == 'Ativo' ? 'selected' : '' ?>>Ativo</option>
-                                        <option value="Inativo" <?= $statusCadastro == 'Inativo' ? 'selected' : '' ?>>Inativo</option>
+                                        <option value="Ativo" <?= $statusCadastrado == 'Ativo' ? 'selected' : '' ?>>Ativo</option>
+                                        <option value="Inativo" <?= $statusCadastado == 'Inativo' ? 'selected' : '' ?>>Inativo</option>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
@@ -121,8 +121,8 @@ $result = $stmt->get_result();
                                             <td <?php $class = $row['Status'] == 'Aberto' ? 'table-info' : 'table-warning'; echo "class='{$class}'"?>> 
                                                 <?= htmlspecialchars($row['Status']) ?>
                                             </td>
-                                            <td <?php $class = $row['StatusCadastro'] == 'Ativo' ? 'table-success' : 'table-danger'; echo "class='{$class}'"?>> 
-                                                <?= htmlspecialchars($row['StatusCadastro']) ?>
+                                            <td <?php $class = $row['StatusCadastrado'] == 'Ativo' ? 'table-success' : 'table-danger'; echo "class='{$class}'"?>> 
+                                                <?= htmlspecialchars($row['StatusCadastrado']) ?>
                                             </td>
                                             <td class="text-center">
                                                 <button type="button" class="btn btn-warning btn-sm btn-edit"
@@ -131,13 +131,13 @@ $result = $stmt->get_result();
                                                         data-caixa="<?= htmlspecialchars($row['Caixa']) ?>">
                                                     Editar
                                                 </button>
-                                                <button type="button" class="btn btn-sm <?= $row['StatusCadastro'] == 'Ativo' ? 'btn-danger' : 'btn-success' ?>"
+                                                <button type="button" class="btn btn-sm <?= $row['StatusCadastrado'] == 'Ativo' ? 'btn-danger' : 'btn-success' ?>"
                                                         data-bs-toggle="modal" data-bs-target="#modalConfirmStatus"
                                                         data-id="<?= $row['ID_Caixa'] ?>"
                                                         data-caixa="<?= htmlspecialchars($row['Caixa']) ?>"
-                                                        data-status-atual="<?= $row['StatusCadastro'] ?>"
+                                                        data-status-atual="<?= $row['StatusCadastrado'] ?>"
                                                         data-status-op="<?= $row['Status'] ?>">
-                                                    <?= $row['StatusCadastro'] == 'Ativo' ? 'Inativar' : 'Ativar' ?>
+                                                    <?= $row['StatusCadastrado'] == 'Ativo' ? 'Inativar' : 'Ativar' ?>
                                                 </button>
                                             </td>
                                         </tr>

@@ -172,7 +172,7 @@ $is_edit = true;
                 </div>
     
                 <!-- Formulário de Edição -->
-                <div class="container p-4">
+                <div class="container p-5">
                     <?php include '_form_produto.php'; ?>
                 </div>
             </div>

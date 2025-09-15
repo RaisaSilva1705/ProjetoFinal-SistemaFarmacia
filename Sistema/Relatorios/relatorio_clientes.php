@@ -15,7 +15,7 @@ $data_fim = $_GET['data_fim'] ?? date('Y-m-d');
 
 $sql = "SELECT
             C.ID_Cliente,
-            C.Nome AS Nome_Cliente,
+            C.Nome,
             C.Documento,
             COUNT(V.ID_Venda) AS Total_Compras,
             SUM(V.Valor_Total) AS Total_Gasto
@@ -49,7 +49,7 @@ $result = $stmt->get_result();
 $clientes_ranking = $result->fetch_all(MYSQLI_ASSOC);
 
 // ----- CARDS DE RESUMO -----
-$cliente_destaque = $clientes_ranking[0] ?? ['Nome_Cliente' => 'N/A', 'Total_Gasto' => 0];
+$cliente_destaque = $clientes_ranking[0] ?? ['Nome' => 'N/A', 'Total_Gasto' => 0];
 $total_clientes_unicos = count($clientes_ranking);
 ?>
 
@@ -71,7 +71,7 @@ $total_clientes_unicos = count($clientes_ranking);
                 <div class="container-fluid bg-secondary text-white text-center p-4 no-print">
                     <h3>Relatório de Desempenho de Clientes</h3>
                 </div>
-                <div class="container p-4">
+                <div class="container p-5">
                     <div class="card card-body mb-4 no-print">
                         <form method="GET" action="relatorio_clientes.php">
                             <div class="row align-items-end">
