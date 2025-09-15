@@ -13,7 +13,7 @@ $sqlCaixas = "SELECT ID_Caixa,
                      Caixa,
                      Status
               FROM CAIXAS
-              WHERE StatusCadastro = 'Ativo'";
+              WHERE StatusCadastrado = 'Ativo'";
 $caixas = $conn->query($sqlCaixas);
 
 $sqlTurnos = "SELECT ID_Turno,
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
     $sqlStatus = "SELECT 
                     Status 
                   FROM CAIXAS 
-                  WHERE ID_Caixa = ? AND StatusCadastro = 'Ativo'";
+                  WHERE ID_Caixa = ? AND StatusCadastrado = 'Ativo'";
     $stmtStatus = $conn->prepare($sqlStatus);
     $stmtStatus->bind_param("i", $id_caixa);
     $stmtStatus->execute();
@@ -111,43 +111,53 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                 <div class="container-fluid bg-secondary text-white text-center p-4">
                     <h3>Seleção de Caixa</h3>
                 </div>
-                <div class="container flex-column d-flex justify-content-center align-items-center mt-5">
-                    <form action="#" method="POST">
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label for="id_caixa" class="form-label">Selecione o Caixa</label>
-                                <select class="form-select" name="id_caixa" id="id_caixa" required>
-                                    <option value="">Selecione</option>
-                                    <?php while($caixa = $caixas->fetch_assoc()): ?>
-                                        <option value="<?= $caixa['ID_Caixa'] ?>"><?= $caixa['Caixa'] ?></option>
-                                    <?php endwhile; ?>
-                                </select>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="id_turno" class="form-label">Turno</label>
-                                <select class="form-select" name="id_turno" id="id_turno" required disabled>
-                                    <?php 
-                                    $turnos->data_seek(0);
-                                    while($turno = $turnos->fetch_assoc()): 
-                                        $selected = ($turno['ID_Turno'] == $idTurnoAutomatico ? 'selected' : '')
-                                    ?>
-                                        <option value="<?= $turno['ID_Turno'] ?>" <?= $selected ?>><?= $turno['Turno'] ?></option>
-                                    <?php endwhile; ?>
-                                </select>
-                                <input type="hidden" name="id_turno" value="<?= $idTurnoAutomatico ?>">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label" for="saldo_inicial">Saldo Inicial</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">R$</span>
-                                    <input class="form-control" type="number" name="saldo_inicial" id="saldo_inicial" required placeholder="0,00">
+
+                <div class="container mt-3 p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2>Selecione para Continuar</h2>
+                        <div>
+                            <a href="../Relatorios/relatorio_caixas.php" class="btn btn-outline-secondary">Ver Relatório</a>
+                        </div>
+                    </div>
+                    
+                    <div class="card card-body mb-4">
+                        <form action="#" method="POST">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label for="id_caixa" class="form-label">Selecione o Caixa</label>
+                                    <select class="form-select" name="id_caixa" id="id_caixa" required>
+                                        <option value="">Selecione</option>
+                                        <?php while($caixa = $caixas->fetch_assoc()): ?>
+                                            <option value="<?= $caixa['ID_Caixa'] ?>"><?= $caixa['Caixa'] ?></option>
+                                        <?php endwhile; ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="id_turno" class="form-label">Turno</label>
+                                    <select class="form-select" name="id_turno" id="id_turno" required disabled>
+                                        <?php 
+                                        $turnos->data_seek(0);
+                                        while($turno = $turnos->fetch_assoc()): 
+                                            $selected = ($turno['ID_Turno'] == $idTurnoAutomatico ? 'selected' : '')
+                                        ?>
+                                            <option value="<?= $turno['ID_Turno'] ?>" <?= $selected ?>><?= $turno['Turno'] ?></option>
+                                        <?php endwhile; ?>
+                                    </select>
+                                    <input type="hidden" name="id_turno" value="<?= $idTurnoAutomatico ?>">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label" for="saldo_inicial">Saldo Inicial</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R$</span>
+                                        <input class="form-control" type="number" name="saldo_inicial" id="saldo_inicial" required placeholder="0,00">
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3 text-center">
+                                    <button type="submit" class="btn btn-primary mt-4 px-5">Abrir Caixa</button>
                                 </div>
                             </div>
-                        </div>
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-primary mt-4 px-5">Abrir Caixa</button>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
 

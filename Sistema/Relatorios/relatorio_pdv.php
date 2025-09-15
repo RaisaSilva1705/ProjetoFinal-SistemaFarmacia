@@ -97,7 +97,7 @@ $ticket_medio = ($numero_vendas > 0) ? $total_faturado / $numero_vendas : 0;
         <div class="content d-flex flex-column min-vh-100">
             <div class="content flex-grow-1">
                 <!-- Banner -->
-                <div class="container-fluid bg-secondary text-white text-center p-4">
+                <div class="container-fluid bg-secondary text-white text-center p-4 no-print">
                     <h3>Relatório de Vendas</h3>
                 </div>
                 <div class="container p-4">
@@ -117,9 +117,9 @@ $ticket_medio = ($numero_vendas > 0) ? $total_faturado / $numero_vendas : 0;
                                     <select name="id_caixa" class="form-select">
                                         <option value="">Selecione</option>
                                         <?php while($caixa = $caixas->fetch_assoc()): 
-                                            $selected = ($id_caixa == $caixa['ID_Caixa']) ? 'selected' : '';    
+                                            $selected = ($id_caixa == $caixa['ID_Caixa']) ? 'selected' : '';
+                                            echo "<option value='{$caixa['ID_Caixa']}' {$selected}>{$caixa['Caixa']}</option>";
                                         ?>
-                                            <option value="<?= $caixa['ID_Caixa'] ?> <?= $selected ?>"><?= $caixa['Caixa'] ?></option>
                                         <?php endwhile; ?>
                                     </select>
                                 </div>  
@@ -128,9 +128,9 @@ $ticket_medio = ($numero_vendas > 0) ? $total_faturado / $numero_vendas : 0;
                                     <select name="id_funcionario" class="form-select">
                                         <option value="">Selecione</option>
                                         <?php while($funcionario = $funcionarios->fetch_assoc()): 
-                                            $selected = ($id_funcionario == $funcionario['ID_Funcionario']) ? 'selected' : '';    
+                                            $selected = ($id_funcionario == $funcionario['ID_Funcionario']) ? 'selected' : ''; 
+                                            echo "<option value='{$funcionario['ID_Funcionario']}' {$selected}>{$funcionario['Nome']}</option>"; 
                                         ?>
-                                            <option value="<?= $funcionario['ID_Funcionario'] ?> <?= $selected ?>"><?= $funcionario['Nome'] ?></option>
                                         <?php endwhile; ?>
                                     </select>
                                 </div>

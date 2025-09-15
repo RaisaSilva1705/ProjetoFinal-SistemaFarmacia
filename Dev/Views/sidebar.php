@@ -69,6 +69,8 @@
       <ul class="dropdown-menu">
         <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>PDV/pdv.php">Nova Venda (PDV)</a></li>
         <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Caixas/caixas.php">Situação do Caixa</a></li>
+        <hr class="dropdown-divider" style="border-color: #495057;">
+        <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Relatorios/relatorio_pdv.php">Relatório de Vendas</a></li>
       </ul>
     </div>
 
@@ -96,18 +98,11 @@
     </div>
 
     <div class="nav-item dropdown">
-      <a class="dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-bar-chart-line-fill"></i>Relatórios</a>
-      <ul class="dropdown-menu">
-        <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>PDV/relatorio_pdv.php">Relatório de Vendas</a></li>
-        <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Estoque/relatorio_estoque.php">Relatório de Estoque</a></li>
-      </ul>
+      <a href="<?php echo SISTEMA_URL ?>Relatorios/relatorios.php"><i class="bi bi-bar-chart-line-fill"></i>Relatórios</a>
     </div>
 
     <div class="nav-item dropdown">
-      <a class="dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-gear-fill"></i>Configurações</a>
-      <ul class="dropdown-menu">
-        <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Configuracoes/configuracoes.php">Dados da Empresa</a></li>
-      </ul>
+      <a href="<?php echo SISTEMA_URL ?>Configuracoes/configuracoes.php"><i class="bi bi-gear-fill"></i>Configurações</a>
     </div>
   </div>
 

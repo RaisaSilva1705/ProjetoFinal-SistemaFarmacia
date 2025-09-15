@@ -88,7 +88,10 @@ $result = $stmt->get_result();
                 <div class="container mt-3 p-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h2>Lista de Produto</h2>
-                        <a href="cadastrar_produto.php" class="btn btn-primary">Cadastrar</a>
+                        <div>
+                            <a href="cadastrar_produto.php" class="btn btn-primary">Cadastrar</a>
+                            <a href="../Relatorios/relatorio_produtos.php" class="btn btn-outline-secondary">Ver Relatório</a>
+                        </div>
                     </div>
     
                     <div class="card card-body mb-4">

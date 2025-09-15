@@ -2,22 +2,20 @@ WEB GERAL
 1- utilizar datatables.js para tabelas interativas em relatórios e listagens ou Chart.js para gráficos
 
 FUNCIONÁRIOS
-1- Implementar controle de entrada e saída de funcionários
+1- Implementar sistema de "notas" para funcionários dados pelos clientes
 
 USUÁRIOS
 1- senha padrão (quando cria) = mudar123
 
 CLIENTE
-2- Mostrar modal de sugestão para o cliente com base no histório de compras dele no caixa
+1- Mostrar modal de sugestão para o cliente com base no histório de compras dele no caixa
+2- Criar módulo para permitir cliente dar nota aos funcionários
 
 ESTOQUE
 1- adicionar campos de obs e fotos em Saída
 
 RELATÓRIOS
-2- relatórios em cada módulo
-
-PRODUTO
-1- unidades
+1- relatórios em cada módulo
 
 CAIXA
 1- Permitir consulta de Preço

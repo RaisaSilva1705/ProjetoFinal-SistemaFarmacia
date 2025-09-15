@@ -91,6 +91,7 @@ $result = $stmt->get_result();
                         <div>
                             <a href="entrada_estoque.php" class="btn btn-primary">Entrada</a>
                             <a href="saida_estoque.php" class="btn btn-danger">Saída</a>
+                            <a href="../Relatorios/relatorio_estoque.php" class="btn btn-outline-secondary">Ver Relatório</a>
                         </div>
                     </div>
 

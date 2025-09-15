@@ -71,7 +71,10 @@ $result = $stmt->get_result()
                 <div class="container p-4">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2 class="m-0">Lista de Funcionários</h2>
-                        <a href="cadastrar_funcionario.php" class="btn btn-primary">Cadastrar Novo Funcionário</a>
+                        <div>
+                            <a href="cadastrar_funcionario.php" class="btn btn-primary">Cadastrar Novo Funcionário</a>
+                            <a href="../Relatorios/relatorio_funcionarios.php" class="btn btn-outline-secondary">Ver Relatório</a>
+                        </div>
                     </div>
 
                     <div class="card card-body mb-4">

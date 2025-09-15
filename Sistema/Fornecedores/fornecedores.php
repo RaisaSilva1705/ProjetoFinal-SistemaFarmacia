@@ -71,6 +71,7 @@ $result = $stmt->get_result();
                         <h2>Lista de Fornecedores</h2>
                         <div>
                             <a href="cadastrar_fornecedor.php" class="btn btn-primary">Cadastrar</a>
+                            <a href="../Relatorios/relatorio_fornecedores.php" class="btn btn-outline-secondary">Ver Relatório</a>
                         </div>
                     </div>
 
