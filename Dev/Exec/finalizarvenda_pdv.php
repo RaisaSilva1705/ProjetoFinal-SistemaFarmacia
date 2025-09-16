@@ -1,8 +1,8 @@
 <?php
 session_start();
-include "../../Dev/Exec/config.php";
-include DEV_PATH . 'Exec/conexao.php';
-include DEV_PATH . 'Exec/logs.php';
+include "config.php";
+include 'conexao.php';
+include 'logs.php';
 
 header('Content-Type: application/json');
 
@@ -10,14 +10,12 @@ header('Content-Type: application/json');
 $dadosJSON = file_get_contents('php://input');
 $dados = json_decode($dadosJSON, true);
 
-// verificação
 if (!$dados) {
     http_response_code(400);
     echo json_encode(['erro' => 'Dados inválidos ou malformados']);
     exit;
 }
 
-// atribuição dos valores
 $valor_total = isset($dados['valor_total']) ? number_format($dados['valor_total'], 2, '.', '') : null;
 $total_pago = isset($dados['total_pago']) ? number_format($dados['total_pago'], 2, '.', ',') : null;
 $total_itens = isset($dados['total_itens']) ? intval($dados['total_itens']) : null;
@@ -32,7 +30,6 @@ if (empty($formas_pagamento)) {
     exit;
 }
 
-// Verifica se há itens no carrinho
 if (empty($_SESSION['carrinho'])) {
     $_SESSION['msg'] = ['texto' => 'Carrinho vazio. Nenhuma venda registrada.', 'tipo' => 'warning'];
     header("Location: pdv.php");

@@ -7,6 +7,7 @@ include "../../Dev/Exec/config.php";
 
 // Incluir o arquivo de conexão
 include DEV_PATH . 'Exec/conexao.php';
+include DEV_PATH . 'Exec/logs.php';
 include DEV_PATH . "Exec/validar_sessao.php";
 include DEV_PATH . "Exec/validar_acesso.php";
 
@@ -109,24 +110,11 @@ if (isset($_POST['codigo'])) {
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
-        <style>
-            .modalPix{
-                display:none; 
-                position:fixed; 
-                top:0; 
-                left:0; 
-                width:100%; 
-                height:100%; 
-                background-color:rgba(0,0,0,0.5); 
-                justify-content:center; 
-                align-items:center;
-            }
-        </style>
     </head>
     <body class="bg-light">
 
-        <div class="content align-items-center justify-content-center mt-4">
-            <div class="container mt-4">
+        <div class="content d-flex align-items-center justify-content-center">
+            <div class="container">
 
                 <!-- TOPO -->
                 <div class="row mb-3">
@@ -139,18 +127,9 @@ if (isset($_POST['codigo'])) {
                         <input type="text" name="data" id="data" class="form-control" value="<?= date('d/m/Y H:i') ?>" readonly>
                     </div>
                     <div class="col-md-3">
-                        <?php 
-                            // Busca clientes
-                            $sqlCli = "SELECT ID_Cliente, Nome FROM CLIENTES";
-                            $clientes = $conn->query($sqlCli);
-                        ?>
-                        <label for="id_cliente" class="form-label">Cliente:</label>
-                        <select class="form-select" name="id_cliente" id="id_cliente" required>
-                            <option value="">Selecione</option>
-                            <?php while($cliente = $clientes->fetch_assoc()): ?>
-                                <option value="<?= $cliente['ID_Cliente'] ?>"><?= htmlspecialchars($cliente['Nome']) ?></option>
-                            <?php endwhile; ?>
-                        </select>
+                        <label for="busca_cliente_cpf" class="form-label">CPF/CNPJ do Cliente</label>
+                        <input type="text" id="busca_cliente_cpf" class="form-control" placeholder="Digite o documento...">
+                        <input type="hidden" id="id_cliente_consulta" name="id_cliente_consulta" value="">
                     </div>
                     <div class="col-md-3">
                         <label for="funcionario" class="form-label">Vendedor:</label>
@@ -159,41 +138,41 @@ if (isset($_POST['codigo'])) {
                 </div>
 
                 <!-- CENTRO -->
-                <div class="row mb-3 mt-4">
+                <div class="row mt-4 mb-4">
                     <!-- COLUNA PRODUTO -->
                     <div class="col-md-7 border p-2">
                         <form action="#" method="POST">
                             <div class="row">
                                 <!-- COLUNA IMAGEM -->
-                                <div class="col-md-5 m-2">
-                                    <div class="col-md-5 text-center">
-                                        <img src='<?php echo DEV_URL?>Imagens/ImgSistema/sem-imagem.jpg' id="foto" name="foto" class="product-img mb-2" alt="Imagem da Embalagem do Produto" height="300px" width="300px">
+                                <div class="col-md-6 p-3">
+                                    <div class="col-md-5 text-center ">
+                                        <img src='<?php echo DEV_URL?>Imagens/ImgSistema/sem-imagem.jpg' id="foto" name="foto" class="product-img" alt="Imagem da Embalagem do Produto" height="380px" width="380px">
                                     </div>
                                 </div>
                                 <!-- COLUNA INFO -->
-                                <div class="col-md-6 m-2 mt-4">
-                                    <div class="col-md-10">
+                                <div class="col-md-6 p-3 mt-4">
+                                    <div class="col-md-12">
                                         <label for="descricao">Descrição:</label>
                                         <input type="text" id="descricao" name="descricao" class="form-control input-big" autocomplete="off">
                                         <div id="sugestoes_nome" class="list-group mt-1" style="position: absolute; z-index: 1000;"></div>
                                     </div>
-                                    <div class="row mt-4">
-                                        <div class="col-5">
+                                    <div class="row mt-12 mt-4">
+                                        <div class="col-6">
                                             <label for="quantidade">Quantidade:</label>
                                             <input type="number" id="quantidade" name="quantidade" class="form-control input-big" value="1" min="1">
                                         </div>
-                                        <div class="col-5">
+                                        <div class="col-6">
                                             <label for="preco">Preço Unitário:</label>
                                             <input type="text" id="preco" name="preco" class="form-control" value="R$ 0,00" readonly>
                                         </div>
                                     </div>
-                                    <div class="row mt-4">
+                                    <div class="row mt-12 mt-4">
                                         <div class="col-md-6">
                                             <label for="codigo">Código Barras:</label>
                                             <input type="text" id="codigo" name="codigo" class="form-control">
                                         </div>
-                                        <div class="col-md-4 mt-4" >
-                                            <button type="submit" class="btn btn-primary w-100">Adicionar</button>
+                                        <div class="col-md-4 mt-4">
+                                            <button type="submit" class="btn btn-primary">Adicionar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -201,7 +180,7 @@ if (isset($_POST['codigo'])) {
                         </form>
                     </div>
 
-                    <div class="col-md-5 border p-1" style="height: 350px; overflow-y: auto;">
+                    <div class="col-md-5 border p-1" style="height: 430px; overflow-y: auto;">
                         <!-- COLUNA VALORES/LOGO -->
                         <table class="table table-bordered table-striped table-sm">
                             <thead class="table-dark text-center">
@@ -217,7 +196,7 @@ if (isset($_POST['codigo'])) {
                                 <?php
                                     $totalGeral = 0;
                                     $totalItens = 0;
-                                    $linhasDesejadas = 8; // Número total de linhas que você quer
+                                    $linhasDesejadas = 11; // Número total de linhas que você quer
                                     $linhasOcupadas = 0;
 
                                     if (!empty($_SESSION['carrinho'])):
@@ -282,7 +261,7 @@ if (isset($_POST['codigo'])) {
 
                 <!-- RODAPÉ -->
                 <div class="row">
-                    <div class="col-md-2">
+                    <div class="col-md-1">
                         <label>Total Bruto:</label>
                         <input type="text" id="total_bruto" class="form-control" value="R$ <?= number_format($totalGeral, 2, ',', '.') ?>" readonly>
                     </div>
@@ -291,30 +270,38 @@ if (isset($_POST['codigo'])) {
                         <input type="text" class="form-control" value="<?= $totalItens ?>" readonly>
                     </div>
 
-                    <div class="col-md-4 d-flex align-items-center gap-2">
+                    <div class="col-md-4 d-flex align-items-center gap-2 mt-4">
                         <button type="button" class="btn btn-success" onclick="selecionarForma(1)">(1) Dinheiro</button>
                         <button type="button" class="btn btn-success" onclick="selecionarForma(2)">(2) Crédito</button>
                         <button type="button" class="btn btn-success" onclick="selecionarForma(3)">(3) Débito</button>
                         <button type="button" class="btn btn-success" onclick="selecionarForma(4)">(4) Pix</button>
                     </div>
 
-                    <div class="col-md-5 d-flex align-items-center justify-content-end gap-2">
-                        <form action="pdv.php" method="POST">
+                    <div class="col-md-6 d-flex align-items-center justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalConsultaPreco" id="btnConsultarPreco">
+                            Consultar Preço
+                        </button>
+                        <form action="pdv.php" method="POST" id="formCancelarVenda">
                             <input type="hidden" name="cancelar_venda" value="1">
                             <button class="btn btn-danger" type="submit">Cancelar Venda</button>
                         </form>
-                        <form action="finalizarcaixa_pdv.php" method="POST">
+                        <form action="finalizarcaixa_pdv.php" method="POST" id="formFecharCaixa">
                             <input type="hidden" name="finalizar_caixa" value="1">
                             <button class="btn btn-secondary" type="submit">Fechar Caixa</button>
                         </form>
-                        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#popupFuncionalidades">
+                        <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#popupFuncionalidades" id="btnFuncionalidades">
                             Funcionalidades
                         </button>
                     </div>
                 </div>
 
-                <div class="row mt-3">
-                    
+                <div id="caixaSugestoes" class="alert alert-info mt-3" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="m-0"><i class="bi bi-star-fill"></i> Sugestões para este cliente:</h6>
+                        <button type="button" class="btn-close" id="fecharSugestoes"></button>
+                    </div>
+                    <hr>
+                    <div id="listaSugestoes" class="list-group"></div>
                 </div>
 
             </div>
@@ -359,12 +346,42 @@ if (isset($_POST['codigo'])) {
             </div>
 
             <!-- Modal PIX -->
-            <div id="modalPix" class="modalPix">
-                <div style="background:white; padding:20px; border-radius:10px; text-align:center;">
-                    <h3>Escaneie o QR Code PIX:</h3>
-                    <img id="pixImg" src="" width="300">
-                    <br><br>
-                    <button id="fecharModalPix">Confirmar pagamento</button>
+            <div class="modal fade" id="modalPix" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Pagamento via PIX</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <p>Escaneie o QR Code abaixo para pagar:</p>
+                            <img src="" alt="QRCode pagamento via PIX" id="pixImg" width="300">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary w-100" id="btnConfirmarPix">Pagamento Confirmado</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal de Consulta de Preço -->
+            <div class="modal fade" id="modalConsultaPreco" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Consulta Rápida de Preço</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <label for="inputConsulta" class="form-label">Digite o nome ou código de barras do produto:</label>
+                            <input type="text" id="inputConsulta" class="form-control" autocomplete="off" placeholder="Inicie a digitação...">
+                            
+                            <div id="resultadoConsulta" class="text-center mt-3" style="min-height: 150px;"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -391,7 +408,7 @@ if (isset($_POST['codigo'])) {
             </div>
         </div>
         
-        <!-- Modal de confirmação -->
+        <!-- Modal de confirmação para remoção de produtos no carrinho -->
         <div class="modal fade" id="modalGerente" tabindex="-1">
             <div class="modal-dialog modal-sm modal-dialog-centered">
                 <div class="modal-content">
@@ -655,16 +672,15 @@ if (isset($_POST['codigo'])) {
                             const qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=Pagamento_PIX_VALOR_' + encodeURIComponent(forma.valor);
 
                             // Abre o Modal do PIX
-                            const modalPix = document.getElementById('modalPix');
+                            const pixModal = new bootstrap.Modal(document.getElementById('modalPix'));
                             const pixImg = document.getElementById('pixImg');
                             pixImg.src = qrCodeUrl;
 
-                            modalPix.style.display = 'flex';
-                            modalPix.style.zIndex = 9999;
+                            pixModal.show();
 
                             await new Promise((resolve) => {
-                                document.getElementById('fecharModalPix').onclick = function(){
-                                    modalPix.style.display = 'none';
+                                document.getElementById('btnConfirmarPix').onclick = function(){
+                                    pixModal.hide();
                                     resolve();
                                 }
                             })
@@ -716,13 +732,13 @@ if (isset($_POST['codigo'])) {
                     valor_total: <?= $totalGeral ?>,
                     total_pago: calcularTotalPago(),
                     total_itens: <?= $totalItens ?>,
-                    id_cliente: document.getElementById('id_cliente').value || null,
+                    id_cliente: document.getElementById('id_cliente_hidden').value || null,
                     id_funcionario: <?= $_SESSION['ID_Funcionario'] ?> || null,
                     desconto: 0.00,
                     formas_pagamento: formas_pagamento
                 };
 
-                fetch('finalizarvenda_pdv.php', { 
+                fetch('../../Dev/Exec/finalizarvenda_pdv.php', { 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dadosVenda)
@@ -795,28 +811,178 @@ if (isset($_POST['codigo'])) {
             // -------------------------------------------------------------------------
             // -------------------------------------------------------------------------
 
-            // atalhos para selecionar a forma de pagamento mais rápido (corrigir futuramente)
-            function atalhoPagamento(e) {
-                if (document.activeElement.tagName === 'INPUT') 
-                    return;
+            function gerenciarAtalhos(e) {
+                const isModalOpen = document.body.classList.contains('modal-open');
+                const isTyping = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
 
-                const teclas = {
-                    '1': 1, // Dinheiro
-                    '2': 2, // Crédito
-                    '3': 3, // Débito
-                    '4': 4  // PIX
-                };
-
-                if (!document.body.classList.contains('modal-open') && teclas[e.key]) {
-                    e.preventDefault(); 
-                    selecionarForma(teclas[e.key]);
+                // Atalhos de pagamento (1, 2, 3, 4) - só funcionam com modal fechado e se não estiver digitando em algum campo
+                const teclasPagamento = {'1': 1, '2': 2, '3': 3, '4': 4};
+                if (teclasPagamento[e.key]) {
+                        if (!isModalOpen && !isTyping) {
+                        e.preventDefault();
+                        selecionarForma(teclasPagamento[e.key]);
+                        return;
+                    }
                 }
 
-                if (e.key === "Escape") 
-                    popupPagamento.hide();
+                switch (e.key) {
+                    case 'F2': // Foca no campo de código de barras
+                        e.preventDefault();
+                        document.getElementById('codigo').focus();
+                        break;
+
+                    case 'F3': // Abre modal de consulta de preços
+                        e.preventDefault();
+                        document.getElementById('btnConsultarPreco').click();
+                        break;
+
+                    case 'F4': // Foca no campo para buscar cliente
+                        e.preventDefault();
+                        document.getElementById('busca_cliente_cpf').focus();
+                        break;
+                    
+                    case 'F8': // cancelamento de venda
+                        e.preventDefault();
+                        document.getElementById('formCancelarVenda').submit();
+                        break;
+
+                    case 'F9': // Abre modal de funcionalidades
+                        e.preventDefault();
+                        document.getElementById('btnFuncionalidades').click(); 
+                        break;
+                    
+                    case 'F10': // fechamento de caixa
+                        e.preventDefault();
+                        document.getElementById('formFecharCaixa').submit();
+                        break;
+                    
+                    case 'Escape':
+                        break;
+                }
             }
 
-            document.addEventListener('keydown', atalhoPagamento);
+            document.addEventListener('keydown', gerenciarAtalhos);
+
+            // -------------------------------------------------------------------------
+            // -------------------------------------------------------------------------
+
+            // BUSCA DE CLIENTE POR CPF/CNPJ
+            document.addEventListener('DOMContentLoaded', function() {
+                const campoBuscaCliente = document.getElementById('busca_cliente_cpf');
+                const campoIdCliente = document.getElementById('id_cliente_consulta');
+                const caixaSugestoes = document.getElementById('caixaSugestoes');
+                const listaSugestoes = document.getElementById('listaSugestoes');
+                const btnFecharSugestoes = document.getElementById('fecharSugestoes');
+
+                btnFecharSugestoes.addEventListener('click', function() {
+                    caixaSugestoes.style.display = 'none';
+                });
+
+                campoBuscaCliente.addEventListener('change', function() { 
+                    const documento = this.value.trim();
+                    caixaSugestoes.style.display = 'none'; 
+                    listaSugestoes.innerHTML = '';
+
+                    if (documento === '') {
+                        campoIdCliente.value = '';
+                        return;
+                    }
+
+                    fetch(`../../Dev/Exec/busca_cliente.php?documento=${encodeURIComponent(documento)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.sucesso) {
+                                campoIdCliente.value = data.id_cliente;
+                                document.getElementById('id_cliente_hidden').value = data.id_cliente;
+                                campoBuscaCliente.value = data.nome_cliente;
+                                buscarSugestoes(data.id_cliente);
+                            }
+                            else {
+                                campoIdCliente.value = '';
+                                document.getElementById('id_cliente_hidden').value = '';
+                                campoBuscaCliente.value = '';
+                                mostrarToast('Cliente não encontrado!', 'warning');
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Erro ao buscar cliente:', err);
+                            mostrarToast('Erro de comunicação ao buscar cliente.', 'danger');
+                        });
+                });
+
+                function buscarSugestoes(idCliente) {
+                    fetch(`../../Dev/Exec/busca_sugestoes.php?id_cliente=${idCliente}`)
+                        .then(response => response.json())
+                        .then(sugestoes => {
+                            if (sugestoes.length > 0) {
+                                sugestoes.forEach(sugestao => {
+                                    const item = document.createElement('a');
+                                    item.href = '#';
+                                    item.classList.add('list-group-item', 'list-group-item-action', 'list-group-item-info');
+                                    item.textContent = sugestao.Nome;
+                                    
+                                    // Adiciona evento de clique para adicionar o produto ao carrinho
+                                    item.addEventListener('click', function(e) {
+                                        e.preventDefault();
+                                        document.getElementById('codigo').value = sugestao.EAN_GTIN;
+                                        // Dispara o evento 'change' para acionar a busca e adição do produto
+                                        document.getElementById('codigo').dispatchEvent(new Event('change'));
+                                    });
+                                    listaSugestoes.appendChild(item);
+                                });
+                                caixaSugestoes.style.display = 'block'; // Mostra a caixa de sugestões
+                            }
+                        });
+                }
+            });
+            
+            // -------------------------------------------------------------------------
+            // -------------------------------------------------------------------------
+
+            // LÓGICA DA CONSULTA DE PREÇO
+            const modalConsulta = document.getElementById('modalConsultaPreco');
+            const inputConsulta = document.getElementById('inputConsulta');
+            const resultadoConsultaDiv = document.getElementById('resultadoConsulta');
+
+            // Limpa o resultado sempre que o modal for fechado
+            modalConsulta.addEventListener('hidden.bs.modal', function () {
+                inputConsulta.value = '';
+                resultadoConsultaDiv.innerHTML = '';
+            });
+
+            modalConsulta.addEventListener('shown.bs.modal', function() {
+                inputConsulta.focus();
+            })
+
+            inputConsulta.addEventListener('input', function() {
+                const termo = this.value.trim();
+
+                if (termo.length < 2) {
+                    resultadoConsultaDiv.innerHTML = '<p class="text-muted">Aguardando digitação...</p>';
+                    return;
+                }
+
+                fetch('../../Dev/Exec/busca_produto.php?codigo=' + encodeURIComponent(termo))
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const precoFormatado = parseFloat(data.preco).toFixed(2).replace('.', ',');
+                            const fotoUrl = `../../Dev/Imagens/imgProdutos/${data.foto || 'sem-imagem.jpg'}`;
+
+                            resultadoConsultaDiv.innerHTML = `
+                                <img src="${fotoUrl}" class="img-thumbnail mb-2" style="max-height: 100px;">
+                                <h5>${data.nome}</h5>
+                                <p class="fs-3 text-success fw-bold">R$ ${precoFormatado}</p>
+                            `;
+                        } 
+                        else 
+                            resultadoConsultaDiv.innerHTML = '<p class="text-danger mt-4">Produto não encontrado.</p>';
+                    })
+                    .catch(err => {
+                        console.error('Erro na consulta de preço:', err);
+                        resultadoConsultaDiv.innerHTML = '<p class="text-danger mt-4">Erro ao buscar o produto.</p>';
+                    });
+            });
 
             // -------------------------------------------------------------------------
             // -------------------------------------------------------------------------
@@ -862,7 +1028,7 @@ if (isset($_POST['codigo'])) {
                 }
 
                 // Envia os dados via POST para o PHP
-                fetch('registrarmovimentacao.php', {
+                fetch('../../Dev/Exec/registrar_movimentacao.php', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                     body: `tipo=${tipoSelecionado}&valor=${valor}&descricao=${encodeURIComponent(descricao)}`
@@ -905,7 +1071,7 @@ if (isset($_POST['codigo'])) {
                     return;
                 }
 
-                fetch('../../dev/Exec/gerenciar_carrinho.php', {
+                fetch('../../Dev/Exec/gerenciar_carrinho.php', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                     body: `acao=${acao}&index=${index}&senha=${encodeURIComponent(senha)}`

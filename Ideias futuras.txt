@@ -15,10 +15,10 @@ ESTOQUE
 1- adicionar campos de obs e fotos em Saída
 
 RELATÓRIOS
-1- relatórios em cada módulo
+1- adicionar opção de relatório em "cupom não fiscal"
 
 CAIXA
-1- Permitir consulta de Preço
+1- 
 
 PEDIDOS
 1- devo Implementar??

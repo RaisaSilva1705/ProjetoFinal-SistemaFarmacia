@@ -112,7 +112,7 @@ $resultMovimentacoes = $conn->query($sqlMovimentacoes);
                 </div>
     
                 <!-- Dashboard Cards -->
-                <div class="container mt-4">
+                <div class="container mt-2 p-4">
                     <div class="row justify-content-center">
                         <div class="col-md-3 mb-3">
                             <div class="card text-white bg-success shadow">

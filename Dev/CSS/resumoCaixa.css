@@ -1,0 +1,23 @@
+.resumoCaixa {
+    background: white;
+    max-width: 425px;
+    margin: 7px auto;
+    padding: 20px;
+    border: 1px dashed #000;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.resumoCaixa hr {
+    border: none;
+    border-top: 1px dashed #000;
+    margin: 5px 0;
+}
+
+.resumoCaixa .text-center {
+    text-align: center;
+}
+
+.resumoCaixa .small {
+    font-size: 0.8em;
+    font-family: monospace;
+}

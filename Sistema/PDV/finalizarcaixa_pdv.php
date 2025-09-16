@@ -137,31 +137,7 @@ $conn->close();
         <title>Relatório - Caixa</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
-        <style>
-            .resumoCaixa {
-                background: white;
-                max-width: 425px;
-                margin: 7px auto;
-                padding: 20px;
-                border: 1px dashed #000;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            }
-
-            .resumoCaixa hr {
-                border: none;
-                border-top: 1px dashed #000;
-                margin: 5px 0;
-            }
-
-            .resumoCaixa .text-center {
-                text-align: center;
-            }
-
-            .resumoCaixa .small {
-                font-size: 0.8em;
-                font-family: monospace;
-            }
-        </style>
+        <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/resumoCaixa.css">
     </head>
     <body class="bg-light">
         <!-- Navbar -->
@@ -287,7 +263,7 @@ $conn->close();
                     return;
                 }
 
-                fetch('registrarmovimentacao.php', {
+                fetch('../../Dev/Exec/registrar_movimentacao.php', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                     body: `tipo=${registroSangria}&valor=${valor}&descricao=${encodeURIComponent(descricao)}`

@@ -105,35 +105,7 @@ $dataHora = date('d/m/Y H:i:s', strtotime($dadosVenda['DataHora_Venda']));
     <meta charset="UTF-8">
     <title>Cupom Fiscal #<?= $id_venda ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: monospace;
-        }
-        .cupom {
-            background: white;
-            background-image: url('../../Dev/Imagens/imgSistema/mascaraCNF.jpg');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-            max-width: 365px;
-            margin: 30px auto;
-            padding: 20px;
-            border: 1px dashed #000;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        hr {
-            border: none;
-            border-top: 1px dashed #000;
-            margin: 5px 0;
-        }
-        .text-center {
-            text-align: center;
-        }
-        .small {
-            font-size: 0.8em;
-        }
-    </style>
+    <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/cupomNfiscal.css">
 </head>
 <body>
 

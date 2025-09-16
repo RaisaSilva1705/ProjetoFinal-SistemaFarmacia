@@ -1,7 +1,7 @@
 <?php
 session_start();
-include "../../Dev/Exec/config.php";
-include DEV_PATH . 'Exec/conexao.php';
+include "config.php";
+include 'conexao.php';
 
 $tipo = $_POST['tipo'];
 $valor = floatval($_POST['valor']);
