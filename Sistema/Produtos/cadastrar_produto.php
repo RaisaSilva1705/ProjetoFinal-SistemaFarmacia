@@ -121,7 +121,6 @@ $is_edit = false;
 
         <div class="content d-flex flex-column min-vh-100">
             <div class="content flex-grow-1">
-                <!-- Banner -->
                 <div class="container-fluid bg-secondary text-white text-center p-4">
                     <h3>Cadastrar novo Produto</h3>
                 </div>
@@ -182,7 +181,6 @@ $is_edit = false;
                 document.getElementById('toastTitulo').innerText = titulo;
                 document.getElementById('toastCorpo').innerText = texto;
                 
-                // Remove classes de cor antigas e adiciona a nova
                 toastHeader.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning', 'text-bg-info');
                 toastHeader.classList.add(headerClass);
 

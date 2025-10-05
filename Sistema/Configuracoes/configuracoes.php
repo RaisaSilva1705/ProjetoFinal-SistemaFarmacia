@@ -97,6 +97,14 @@ $config = $result->fetch_assoc();
                                 <label for="documento" class="form-label">CNPJ</label>
                                 <input type="text" name="documento" id="documento" class="form-control" value="<?= htmlspecialchars($config['Documento']) ?>" required>
                             </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="cnes" class="form-label">CNES</label>
+                                <input type="text" name="cnes" id="cnes" class="form-control" value="<?= htmlspecialchars($config['CNES']) ?>" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="telefone" class="form-label">Telefone</label>
+                                <input type="text" name="telefone" id="telefone" class="form-control" value="<?= htmlspecialchars($config['Telefone']) ?>" required>
+                            </div>
                         </div>
                         
                         <hr>

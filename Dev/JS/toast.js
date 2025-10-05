@@ -4,7 +4,7 @@ function mostrarToast(texto, tipo = 'success', titulo = 'Notificação') {
     
     // Define o título padrão baseado no tipo, se não for fornecido
     if (titulo === 'Notificação') 
-        titulo = ucfirst(tipo === 'danger' ? 'Erro' : (tipo === 'warning' ? 'Atenção' : 'Sucesso'));
+        titulo = ucfirst(tipo === 'danger' ? 'Erro' : (tipo === 'warning' ? 'Atenção' : (tipo === 'success' ? 'Sucesso' : 'Informação')));
     
     const headerClass = `text-bg-${tipo}`;
 
@@ -19,7 +19,7 @@ function mostrarToast(texto, tipo = 'success', titulo = 'Notificação') {
     toast.show();
 }
 
-// Função auxiliar para deixar a primeira letra maiúscula (o PHP faz isso, o JS não)
+// Função auxiliar para deixar a primeira letra maiúscula 
 function ucfirst(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }

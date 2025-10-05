@@ -15,7 +15,7 @@ if (empty($documento_limpo)) {
 }
 
 $stmt = $conn->prepare("
-    SELECT ID_Cliente, Nome 
+    SELECT ID_Cliente, Nome, Data_Nascimento, Sexo
     FROM CLIENTES 
     WHERE REPLACE(REPLACE(REPLACE(Documento, '.', ''), '/', ''), '-', '') = ? 
     AND Status = 'Ativo'
@@ -29,7 +29,9 @@ if ($result->num_rows > 0) {
     echo json_encode([
         'sucesso' => true,
         'id_cliente' => $cliente['ID_Cliente'],
-        'nome_cliente' => $cliente['Nome']
+        'nome_cliente' => $cliente['Nome'],
+        'data_nascimento' => $cliente['Data_Nascimento'],
+        'sexo' => $cliente['Sexo']
     ]);
 } 
 else 

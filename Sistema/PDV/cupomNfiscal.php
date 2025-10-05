@@ -4,11 +4,10 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 include "../../Dev/Exec/config.php";
-
-// Incluir o arquivo de conexão
 include DEV_PATH . 'Exec/conexao.php';
 
 if (!isset($_GET['ID_Venda'])){
+    $_SESSION['msg'] = ['texto' => 'ID da venda não fornecido.', 'tipo' => 'warning'];
     header("Location: pdv.php");
     exit();
 }
@@ -62,38 +61,46 @@ $resultDadosPagamento = $stmtDadosPagamento->get_result();
 $dadosPagamento = $resultDadosPagamento->fetch_all(MYSQLI_ASSOC);
 
 if (!$dadosVenda) {
-    die('Venda não encontrada.');
+    $_SESSION['msg'] = ['texto' => 'Venda não encontrada', 'tipo' => 'danger'];
+    header("Location: pdv.php");
+    exit();
 }
 
 // Itens da venda
-$sqlTabelaItens = "SELECT IV.Quantidade,
-                          IV.Valor_Total,
-                          P.Nome AS 'Nome_Produto',
-                          P.EAN_GTIN AS 'CodBarras',
-                          U.Abreviacao,
-                          L.Preco_Venda
-                FROM ITENS_VENDA IV LEFT JOIN PRODUTOS P 
-                    ON IV.ID_Produto = P.ID_Produto
-                LEFT JOIN UNIDADES U
-                    ON P.ID_Unidade = U.ID_Unidade
-                LEFT JOIN (
-                    SELECT L1.ID_Produto,
-                        L1.Preco_Venda
-                    FROM LOTES L1
-                    INNER JOIN (
-                        SELECT ID_Produto, 
-                                MIN(Data_Validade) AS 'Data_Validade'
-                        FROM LOTES
-                        GROUP BY ID_Produto
-                    ) L2 
-                    ON L1.ID_Produto = L2.ID_Produto AND L1.Data_Validade = L2.Data_Validade
-                ) L ON P.ID_Produto = L.ID_Produto
-                WHERE IV.ID_Venda = ?";
+$sqlTabelaItens = "
+    -- Seleciona os PRODUTOS da venda
+    (SELECT 
+        'produto' AS TipoItem,
+        P.Nome AS Nome,
+        P.EAN_GTIN AS Codigo,
+        IV.Quantidade AS Quantidade,
+        (IV.Valor_Total / IV.Quantidade) AS Valor_Unitario,
+        IV.Valor_Total AS Valor_Total
+    FROM ITENS_VENDA IV
+    JOIN PRODUTOS P ON IV.ID_Produto = P.ID_Produto
+    WHERE IV.ID_Venda = ?)
+
+    UNION ALL
+
+    -- Seleciona os SERVIÇOS da venda (via Pré-Venda)
+    (SELECT 
+        'servico' AS TipoItem,
+        SF.Nome_Servico AS Nome,
+        CONCAT('SERV', SF.ID_Servico) AS Codigo,
+        PVI.Quantidade AS Quantidade,
+        PVI.Valor_Unitario AS Valor_Unitario,
+        (PVI.Valor_Unitario * PVI.Quantidade) AS Valor_Total
+    FROM PRE_VENDAS PV
+    JOIN PRE_VENDAS_ITENS PVI ON PV.ID_PreVenda = PVI.ID_PreVenda
+    JOIN SERVICOS_FARMACEUTICOS SF ON PVI.ID_Servico = SF.ID_Servico
+    WHERE PV.ID_Venda = ? AND PVI.ID_Servico IS NOT NULL)
+";
+
 $stmtTabItens = $conn->prepare($sqlTabelaItens);
-$stmtTabItens->bind_param("i", $id_venda);
+// Precisamos passar o ID da venda duas vezes, uma para cada parte da UNION
+$stmtTabItens->bind_param("ii", $id_venda, $id_venda);
 $stmtTabItens->execute();
-$resultTabItens = $stmtTabItens->get_result();
-$tabItens = $resultTabItens->fetch_all(MYSQLI_ASSOC);
+$tabItens = $stmtTabItens->get_result()->fetch_all(MYSQLI_ASSOC);
 
 $dataHora = date('d/m/Y H:i:s', strtotime($dadosVenda['DataHora_Venda']));
 
@@ -104,7 +111,7 @@ $dataHora = date('d/m/Y H:i:s', strtotime($dadosVenda['DataHora_Venda']));
 <head>
     <meta charset="UTF-8">
     <title>Cupom Fiscal #<?= $id_venda ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/cupomNfiscal.css">
 </head>
 <body>
@@ -134,14 +141,14 @@ $dataHora = date('d/m/Y H:i:s', strtotime($dadosVenda['DataHora_Venda']));
             <?php 
                 $cont = 1;
                 foreach($tabItens as $item):
-                    $preco_un = number_format($item['Preco_Venda'], 2, ',', '.');
+                    $preco_un = number_format($item['Valor_Unitario'], 2, ',', '.');
                     $vl_total = number_format($item['Valor_Total'], 2, ',', '.');
-
-                    $nomeProduto = strlen($item['Nome_Produto']) > 20 ? substr($item['Nome_Produto'], 0, 20) . '...' : $item['Nome_Produto'];
+                    $nomeItem = strlen($item['Nome']) > 20 ? substr($item['Nome'], 0, 20) . '...' : $item['Nome'];
+                    $unidade = $item['TipoItem'] === 'produto' ? 'UN' : 'SERV';
             ?>
             <div class="small">
-                <?= $cont ?> | <?= $item['CodBarras'] ?> | <?= $nomeProduto ?><br>
-                <div style="text-align: right;"><?= $item['Quantidade'] ?> | <?= $item['Abreviacao'] ?> | <?= $preco_un ?> | <?= $vl_total ?></div>
+                <?= $cont ?> | <?= $item['Codigo'] ?> | <?= $nomeItem ?><br>
+                <div style="text-align: right;"><?= $item['Quantidade'] ?> | <?= $unidade ?> | <?= $preco_un ?> | <?= $vl_total ?></div>
             </div>
             <?php $cont++; endforeach; ?>
         </div>

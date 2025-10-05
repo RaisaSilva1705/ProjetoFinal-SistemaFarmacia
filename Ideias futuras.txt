@@ -1,21 +1,19 @@
 WEB GERAL
-1- utilizar datatables.js para tabelas interativas em relatórios e listagens ou Chart.js para gráficos
 
 FUNCIONÁRIOS
 1- Implementar sistema de "notas" para funcionários dados pelos clientes
 
 USUÁRIOS
-1- senha padrão (quando cria) = mudar123
 
 CLIENTE
-1- Mostrar modal de sugestão para o cliente com base no histório de compras dele no caixa
-2- Criar módulo para permitir cliente dar nota aos funcionários
+1- Criar módulo para permitir cliente dar nota aos funcionários
 
 ESTOQUE
 1- adicionar campos de obs e fotos em Saída
 
 RELATÓRIOS
 1- adicionar opção de relatório em "cupom não fiscal"
+2- criar relatório de serviços farmacêuticos
 
 CAIXA
 1- 
@@ -26,43 +24,18 @@ PEDIDOS
 Prescrições
 1- fazer junto com dispensão de medicamento controlado
 
-
-
-
-
-# Fluxo de Cadastro de Produtos e Compras
-
-1. Cadastrar Produto
-   - Nome
-   - Descrição
-   - Categoria
-   - Unidade
-   - Estoque mínimo
-
-2. Cadastrar Fornecedor
-   - Nome
-   - CNPJ
-   - Contato
-
-3. Registrar Compra
-   - Selecionar Produto
-   - Selecionar Fornecedor
-   - Informar Quantidade Comprada
-   - Informar Valor de Compra (Preço de Custo)
-   - Atualizar Estoque
-
-4. Definir Preço de Venda
-   - Baseado no Preço de Custo + Margem de Lucro
-   - Atualizar informações do Produto (Preço de Venda)
-
-5. Realizar Venda ao Cliente
-   - Selecionar Produto
-   - Aplicar Preço de Venda
-   - Gerar Pedido / Nota
-
+DSF
+1- Ajustar visual do DSF
+2- Conversando com o meu orientador, ele comentou que se eu deixar o tipo TEXT sem limite pode ser ruim para o banco de dados pois pode deixar ele muito pesado, ele me explicou que mesmo que o JSON não ocupe o espaço inteiro do TEXT (que é aproximadamente 65 mil caracteres, ou seja, 64 KB), o campo em si sempre vai pesar 64kb, está correto? qual limite podemos deixar então que não seja muito baixo? E além disso, no form de cadastro/edição podemos fazer algo que avise caso esteja chegando no limite ou/e que já tenha atingido o limite, não permitindo criar mais campos?
 
 
 
 documentação:
-XML: https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=BMPFMBoln3w=
-Modelo usado: Esquema XML NF-e/NFC-e - Pacote de Liberação nº 010b v. 1.21 (Novo leiaute da NF-e, NT 2025.002 v.1.20, NT 2024.003 e NT 2025.001) (ZIP). Publicado em 20/08/2025
+XML: 
+https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=BMPFMBoln3w=
+
+Modelo usado: 
+Esquema XML NF-e/NFC-e - Pacote de Liberação nº 010b v. 1.21 (Novo leiaute da NF-e, NT 2025.002 v.1.20, NT 2024.003 e NT 2025.001) (ZIP). Publicado em 20/08/2025
+
+Norma que serviço só pode ser feito com medicamento vendido na farmácia:
+Conforme as Boas Práticas Farmacêuticas estabelecidas pela RDC nº 44/2009 da ANVISA e pela Lei 13.021/2014, que posicionam a farmácia como um estabelecimento de saúde, a aplicação de medicamentos injetáveis só pode ser realizada com produtos dispensados pelo próprio estabelecimento. Esta prática é essencial para garantir a rastreabilidade e a integridade do medicamento, protegendo o paciente contra produtos de origem duvidosa, armazenados incorretamente ou falsificados, e resguardando a responsabilidade técnica do farmacêutico e do estabelecimento.

@@ -1,5 +1,5 @@
-INSERT INTO CONFIGURACOES (Nome_RazaoSocial, Nome_Fantasia, Slogan, Documento, Loja, CEP, Endereco, End_Numero, Bairro, Cidade, Estado, Valor_Min_Parcelas, Quant_Max_Parcelas, Margem_Lucro_Padrao) VALUES
-('Farmácia LavenderPharma', 'LavenderPharma', 'Cuidando de Você!', 'XX.XXX.XXX/0001-99', '01', 
+INSERT INTO CONFIGURACOES (Nome_RazaoSocial, Nome_Fantasia, Slogan, Documento, CNES, Telefone, Loja, CEP, Endereco, End_Numero, Bairro, Cidade, Estado, Valor_Min_Parcelas, Quant_Max_Parcelas, Margem_Lucro_Padrao) VALUES
+('Farmácia LavenderPharma', 'LavenderPharma', 'Cuidando de Você!', 'XX.XXX.XXX/0001-99', 'XXXXXXX', '(XX) 9XXXX-XXXX', '01', 
 '01000000', 'Rua das Flores', '123', 'Centro', 'São Paulo', 'SP', 120.00, 3, 100.00);
 
 INSERT INTO CARGOS (Cargo, Descricao) VALUES 
@@ -107,22 +107,6 @@ INSERT INTO FORNECEDORES (Nome_Fantasia, Nome, CNPJ, Tel, Email, CEP, Endereco, 
 ('MedCenter Distribuidora', 'MedCenter Distribuidora de Medicamentos Ltda.', '12345678000190', '(11) 4004-1234', 'contato@medcenterdist.com.br', '01311000', 'Avenida Paulista', '1000', 'Conjunto 501', 'Bela Vista', 'São Paulo', 'SP', 'Ativo'),
 ('FarmaLog Logística', 'FarmaLog Logistica e Transporte Farmacêutico S.A.', '98765432000110', '(21) 3003-5678', 'vendas@farmalog.com.br', '20040030', 'Avenida Rio Branco', '156', 'Torre B, Andar 20', 'Centro', 'Rio de Janeiro', 'RJ', 'Ativo');
 
-INSERT INTO PRODUTOS (ID_Categoria, Nome, ID_Unidade, NCM, EAN_GTIN, Foto) VALUES
-(1, 'Paracetamol 750mg 20cp', 2, '30049099', '7896422500080', 'paracetamol750mg20cp.webp'),
-(9, 'Creme Hidratante Neutrogena 200ml', 3, '33049990', '7891010246124', 'cremehidratanteneutrogena200ml.webp');
-
-INSERT INTO MEDICAMENTOS (ID_Produto, ID_CategoriaMed, ID_Tarja, Tipo, Prin_Ativo) VALUES
-(1, 2, 1, 'Genérico', 'Paracetamol');
-
-INSERT INTO LOTES (Nome_Lote, ID_Produto, Preco_Custo, Preco_Venda, Data_Validade) VALUES
-('L202505A', 1, 2.50, 4.50, '2025-12-31'),
-('L202506B', 2, 0.00, 0.00, '2026-01-15');
-/* 22.90 */
-
-INSERT INTO ESTOQUE (ID_Lote, Quantidade, Data_Entrada, Data_Atualizacao) VALUES
-(1, 100, NOW(), NOW()),
-(2, 0, NOW(), NOW());
-
 INSERT INTO TURNOS (Turno) VALUES
 ('Manhã'),
 ('Tarde'),
@@ -133,4 +117,7 @@ INSERT INTO CAIXAS (Caixa) VALUES
 ('Caixa02');
 
 INSERT INTO FORMAS_PAGAMENTO (Tipo) VALUES
-('Dinheiro'), ('Cartão de Crédito'), ('Cartão de Débito'), ('PIX');
+('Dinheiro'),
+('Cartão de Crédito'), 
+('Cartão de Débito'),
+('PIX');

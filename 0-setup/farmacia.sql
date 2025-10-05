@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS `CONFIGURACOES` (
     `Nome_Fantasia` VARCHAR(255) NOT NULL,
     `Slogan` VARCHAR(255) NOT NULL,
     `Documento` VARCHAR(18) NOT NULL,
+    `CNES` VARCHAR(7) NOT NULL,
+    `Telefone` VARCHAR(20) NOT NULL,
     `Loja` VARCHAR(100) NOT NULL,
     `CEP` CHAR(8) NOT NULL,
     `Endereco` VARCHAR(255) NOT NULL,
@@ -36,6 +38,8 @@ CREATE TABLE IF NOT EXISTS `CLIENTES` (
     `ID_Cliente` INT AUTO_INCREMENT PRIMARY KEY,
     `Nome` VARCHAR(255) NOT NULL,
     `Tipo` ENUM('PJ', 'PF') NOT NULL,
+    `Sexo` ENUM('Masculino', 'Feminino') NULL,
+    `Data_Nascimento` DATE NULL,
     `Documento` VARCHAR(18) NOT NULL UNIQUE,
     `Tel` VARCHAR(20) NOT NULL,
     `Email` VARCHAR(100) NOT NULL UNIQUE,
@@ -111,6 +115,7 @@ CREATE TABLE IF NOT EXISTS `FUNCIONARIOS` (
     `Nome` VARCHAR(255) NOT NULL,
     `Tipo` ENUM('PJ', 'PF') DEFAULT NULL,
     `Documento` VARCHAR(18) DEFAULT NULL UNIQUE,
+    `CRF` VARCHAR(20) DEFAULT NULL UNIQUE,
     `Telefone` VARCHAR(20) DEFAULT NULL,
     `ID_Cargo` INT NOT NULL,
     `Email` VARCHAR(255) NOT NULL UNIQUE,
@@ -440,3 +445,106 @@ CREATE TABLE IF NOT EXISTS `LOGS` (
 ) ENGINE = InnoDB;
 /* drop table LOGS; */
 /* select * from LOGS; */
+
+-- -----------------------------------------------------
+-- Table `SERVICOS_FARMACEUTICOS`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `SERVICOS_FARMACEUTICOS` (
+  `ID_Servico` INT AUTO_INCREMENT PRIMARY KEY,
+  `Nome_Servico` VARCHAR(255) NOT NULL,
+  `Descricao` TEXT NULL,
+  `Valor` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  `Status` ENUM('Ativo', 'Inativo') DEFAULT 'Ativo'
+) ENGINE = InnoDB;
+/* drop table SERVICOS_FARMACEUTICOS; */
+/* select * from SERVICOS_FARMACEUTICOS; */
+
+-- -----------------------------------------------------
+-- Table `REGISTRO_SERVICOS`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `REGISTRO_SERVICOS` (
+  `ID_Registro_Servico` INT AUTO_INCREMENT PRIMARY KEY,
+  `ID_Servico` INT NOT NULL,
+  `ID_Cliente` INT NULL,
+  `Nome_Paciente` VARCHAR(255) NOT NULL,
+  `Doc_Paciente` VARCHAR(15) NOT NULL,
+  `Sexo_Paciente` ENUM('Masculino', 'Feminino') NOT NULL,
+  `Data_Nascimento_Paciente` DATE NOT NULL,
+  `ID_Funcionario` INT NOT NULL,
+  `DataHora` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `Dados_Servico` JSON NULL, 
+  `OBS` TEXT NULL,
+  FOREIGN KEY (`ID_Servico`) REFERENCES `SERVICOS_FARMACEUTICOS`(`ID_Servico`),
+  FOREIGN KEY (`ID_Cliente`) REFERENCES `CLIENTES`(`ID_Cliente`),
+  FOREIGN KEY (`ID_Funcionario`) REFERENCES `FUNCIONARIOS`(`ID_Funcionario`)
+) ENGINE = InnoDB;
+/* drop table REGISTRO_SERVICOS; */
+/* select * from REGISTRO_SERVICOS; */
+
+-- -----------------------------------------------------
+-- Table `SERVICO_CAMPOS`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `SERVICO_CAMPOS` (
+  `ID_Campo` INT AUTO_INCREMENT PRIMARY KEY,
+  `ID_Servico` INT NOT NULL,
+  `Ordem` INT DEFAULT 0,
+  `Label_Campo` VARCHAR(255) NOT NULL, -- "Pressão Sistólica"
+  `Name_Campo` VARCHAR(100) NOT NULL, -- "pressao_sistolica"
+  `Tipo_Campo` ENUM('number', 'text', 'boolean', 'date', 'ean') NOT NULL, -- Tipo do input
+  `Unidade_Medida` VARCHAR(20) NULL, -- "mmHg", "BPM", etc.
+  FOREIGN KEY (`ID_Servico`) REFERENCES `SERVICOS_FARMACEUTICOS`(`ID_Servico`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+/* drop table SERVICO_CAMPOS; */
+/* select * from SERVICO_CAMPOS; */
+
+-- -----------------------------------------------------
+-- Table `SERVICO_CAMPOS_REFERENCIAS`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `SERVICO_CAMPOS_REFERENCIAS` (
+  `ID_Referencia` INT AUTO_INCREMENT PRIMARY KEY,
+  `ID_Campo` INT NOT NULL,
+  `Descricao_Referencia` VARCHAR(255) NOT NULL, -- Ex: "Criança (0-12 anos)"
+  `Valor_Feminino` VARCHAR(100) NULL,
+  `Valor_Masculino` VARCHAR(100) NULL,
+  FOREIGN KEY (`ID_Campo`) REFERENCES `SERVICO_CAMPOS`(`ID_Campo`) ON DELETE CASCADE
+) ENGINE=InnoDB;
+/* drop table SERVICO_CAMPOS_REFERENCIAS; */
+/* select * from SERVICO_CAMPOS_REFERENCIAS; */
+
+-- -----------------------------------------------------
+-- Table `PRE_VENDAS`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PRE_VENDAS` (
+  `ID_PreVenda` INT AUTO_INCREMENT PRIMARY KEY,
+  `Codigo_PreVenda` VARCHAR(20) NOT NULL UNIQUE, -- Código único para o cliente levar ao caixa
+  `ID_Cliente` INT NULL,
+  `ID_Funcionario` INT NOT NULL,
+  `Status` ENUM('Pendente', 'Finalizada', 'Cancelada') NOT NULL DEFAULT 'Pendente',
+  `Data_Criacao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `Data_Finalizacao` DATETIME NULL,
+  `ID_Venda` INT NULL,
+  FOREIGN KEY (`ID_Cliente`) REFERENCES `CLIENTES` (`ID_Cliente`) ON DELETE SET NULL,
+  FOREIGN KEY (`ID_Funcionario`) REFERENCES `FUNCIONARIOS` (`ID_Funcionario`),
+  FOREIGN KEY (`ID_Venda`) REFERENCES `VENDAS` (`ID_Venda`) ON DELETE SET NULL
+) ENGINE = InnoDB;
+/* drop table PRE_VENDAS; */
+/* select * from PRE_VENDAS; */
+
+-- -----------------------------------------------------
+-- Table `PRE_VENDAS_ITENS`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PRE_VENDAS_ITENS` (
+  `ID_Item_PreVenda` INT AUTO_INCREMENT PRIMARY KEY,
+  `ID_PreVenda` INT NOT NULL,
+  `ID_Produto` INT NULL,
+  `ID_Servico` INT NULL,
+  `Quantidade` INT NOT NULL DEFAULT 1,
+  `Valor_Unitario` DECIMAL(10,2) NOT NULL,
+  FOREIGN KEY (`ID_PreVenda`) REFERENCES `PRE_VENDAS` (`ID_PreVenda`) ON DELETE CASCADE,
+  FOREIGN KEY (`ID_Produto`) REFERENCES `PRODUTOS` (`ID_Produto`),
+  FOREIGN KEY (`ID_Servico`) REFERENCES `SERVICOS_FARMACEUTICOS` (`ID_Servico`),
+  -- Garante que cada linha seja ou um produto ou um serviço, mas não ambos
+  CONSTRAINT chk_item_type CHECK (`ID_Produto` IS NOT NULL OR `ID_Servico` IS NOT NULL)
+) ENGINE = InnoDB;
+/* drop table PRE_VENDAS_ITENS; */
+/* select * from PRE_VENDAS_ITENS; */

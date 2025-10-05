@@ -451,30 +451,57 @@ if (isset($_POST['codigo'])) {
         <script> 
             // MUDAR OS VALORES POR CÓDIGO DE BARRAS
             document.getElementById('codigo').addEventListener('change', function () {
-                const codigo = this.value;
+                const codigo = this.value.trim();
+                if (codigo === '') return;
 
-                if (codigo.trim() === '') return;
-
-                fetch('../../Dev/Exec/busca_produto.php?codigo=' + encodeURIComponent(codigo))
+                if (codigo.startsWith('99')) {
+                    
+                    fetch('../../Dev/Exec/processa_carrinho_prevenda.php', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                        body: `codigo_prevenda=${encodeURIComponent(codigo)}`
+                    })
                     .then(response => response.json())
                     .then(data => {
-                        if (data.success) {
-                            document.getElementById('descricao').value = data.nome;
-                            document.getElementById('preco').value = "R$ " + parseFloat(data.preco).toFixed(2).replace('.', ',');
-                            document.getElementById('foto').src = '../../Dev/Imagens/imgProdutos/' + data.foto;
+                        if (data.sucesso) {
+                            mostrarToast(data.mensagem, 'success', 'Sucesso');
+                            location.reload();
                         } 
                         else {
-                            mostrarToast('Produto não existe', 'warning', 'Erro');
-                            console.log(data.msg);
-                            document.getElementById('descricao').value = '';
-                            document.getElementById('preco').value = 'R$ 0,00';
-                            document.getElementById('foto').src = '../../Dev/Imagens/imgSistema/sem-imagem.jpg';
+                            mostrarToast(data.mensagem, 'danger', 'Erro');
+                            this.value = ''; 
                         }
-                    })
-                    .catch(err => {
-                        mostrarToast('Erro ao buscar produto.', 'warning', 'Erro');
-                        console.error(err);
                     });
+
+                } 
+                else {
+                    fetch('../../Dev/Exec/busca_produto.php?codigo=' + encodeURIComponent(codigo))
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) { 
+                                document.getElementById('descricao').value = data.nome;
+                                document.getElementById('preco').value = "R$ " + parseFloat(data.preco).toFixed(2).replace('.', ',');
+                                
+                                let fotoUrl = '../../Dev/Imagens/imgSistema/sem-imagem.jpg';
+                                if(data.foto && data.foto !== 'sem-imagem.jpg') 
+                                    fotoUrl = '../../Dev/Imagens/imgProdutos/' + data.foto;
+                                
+                                document.getElementById('foto').src = fotoUrl;
+
+                            } 
+                            else {
+                                mostrarToast(data.mensagem || 'Produto não encontrado', 'warning', 'Erro');
+                                this.value = '';
+                                document.getElementById('descricao').value = '';
+                                document.getElementById('preco').value = 'R$ 0,00';
+                                document.getElementById('foto').src = '../../Dev/Imagens/imgSistema/sem-imagem.jpg';
+                            }
+                        })
+                        .catch(err => {
+                            mostrarToast('Erro ao buscar produto.', 'warning', 'Erro');
+                            console.error(err);
+                        });
+                }
             });
 
             // MUDAR OS VALORES POR NOME DO PRODUTO
@@ -505,7 +532,6 @@ if (isset($_POST['codigo'])) {
                                 campoDescricaoProduto.value = this.textContent;
                                 sugestoesDiv.innerHTML = '';
 
-                                // Força o evento de 'change' no campo código para carregar dados
                                 document.getElementById('codigo').dispatchEvent(new Event('change'));
                             });
 
@@ -514,7 +540,6 @@ if (isset($_POST['codigo'])) {
                     });
             });
 
-            // Esconde sugestões se clicar fora
             document.addEventListener('click', function(e){
                 if (!campoDescricaoProduto.contains(e.target) && !sugestoesDiv.contains(e.target)) {
                     sugestoesDiv.innerHTML = '';

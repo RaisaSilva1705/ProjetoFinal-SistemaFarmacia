@@ -1,6 +1,6 @@
 <?php
 include "config.php";
-include DEV_PATH . "Exec/conexao.php";
+include "conexao.php";
 
 if (isset($_GET['codigo'])) { // POR CÓDIGO DE BARRAS
     $codigo = $_GET['codigo'];
@@ -34,7 +34,7 @@ if (isset($_GET['codigo'])) { // POR CÓDIGO DE BARRAS
     exit;
 }
 
-if (isset($_GET['nome'])) { // PELO NOME DO PRODUTO
+if (isset($_GET['nome'])) {
     $nome = '%' . $_GET['nome'] . '%';
 
     $stmt = $conn->prepare("SELECT P.EAN_GTIN, P.Nome, P.ID_Produto
