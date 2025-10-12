@@ -15,7 +15,8 @@ include DEV_PATH . "Exec/validar_acesso.php";
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Saída de Produtos</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
     <body>
@@ -24,13 +25,12 @@ include DEV_PATH . "Exec/validar_acesso.php";
 
         <div class="content d-flex flex-column min-vh-100">
             <div class="content flex-grow-1">
-                <!-- Banner -->
                 <div class="container-fluid bg-secondary text-white text-center p-4">
-                    <h3>Registrar Saída de Estoque</h3>
+                    <h3>Registrar Saída de Estoque Manual</h3>
                 </div>
             
                 <div class="container p-5">
-                    <form action="processa_saida.php" method="POST">
+                    <form action="processa_saida.php" method="POST" enctype="multipart/form-data">
                         <div class="mb-3">
                             <label for="busca_produto" class="form-label fw-bold">1. Buscar Produto (Nome ou EAN)</label>
                             <input type="text" id="busca_produto" class="form-control" autocomplete="off" required>
@@ -56,10 +56,21 @@ include DEV_PATH . "Exec/validar_acesso.php";
                                     <option value="">Selecione...</option>
                                     <option value="Perda / Avaria">Perda / Avaria</option>
                                     <option value="Vencimento">Vencimento</option>
+                                    <option value="Furto">Furto</option>
                                     <option value="Ajuste de Inventário">Ajuste de Inventário</option>
                                     <option value="Uso Interno">Uso Interno</option>
                                 </select>
                             </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="obs" class="form-label fw-bold">5. Observações (Opcional)</label>
+                            <textarea name="obs" id="obs" class="form-control" rows="3" placeholder="Ex: Caixa amassada, produto quebrado..."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="foto" class="form-label fw-bold">6. Foto da Ocorrência (Opcional)</label>
+                            <input type="file" name="foto" id="foto" class="form-control" accept="image/png, image/jpeg">
                         </div>
                         
                         <div class="mt-4 text-end">
@@ -69,7 +80,6 @@ include DEV_PATH . "Exec/validar_acesso.php";
                     </form>
                 </div>
             </div>
-            <!-- Footer -->
             <?php include_once DEV_PATH . 'Views/footer.php'?>
         </div>
 

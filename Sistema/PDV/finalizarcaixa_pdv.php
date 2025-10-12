@@ -88,7 +88,7 @@ $dataAtual = date('Y-m-d H:i:s');
 
 
 if (isset($_GET['acao']) && $_GET['acao'] == 'confirmar_fechamento') {
-    if ($dinheiroEmCaixa > 0.00) {
+    if (round($dinheiroEmCaixa, 2) > 0.00) {
         $_SESSION['msg'] = ['texto' => 'Retire o dinheiro em caixa primeiro', 'tipo' => 'warning'];
         header('Location: finalizarcaixa_pdv.php');
         exit();
@@ -225,9 +225,9 @@ $conn->close();
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
             function sangria() {
-                document.getElementById('btnSangria').disabled = true; // Desabilita o botão
+                document.getElementById('btnSangria').disabled = true; 
                 const sangria = document.createElement('div');
-                const valorARetirar = <?= $dinheiroEmCaixa ?>;
+                const valorARetirar = parseFloat(<?= $dinheiroEmCaixa ?>).toFixed(2);
 
                 sangria.innerHTML = `
                     <div class="mb-3 row">

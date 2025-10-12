@@ -4,7 +4,6 @@ include "../../Dev/Exec/config.php";
 include DEV_PATH . 'Exec/conexao.php';
 include DEV_PATH . 'Exec/logs.php';
 include DEV_PATH . "Exec/validar_sessao.php";
-include DEV_PATH . "Exec/validar_acesso.php";
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: estoque.php');
@@ -15,12 +14,27 @@ $id_produto = filter_input(INPUT_POST, 'id_produto', FILTER_VALIDATE_INT);
 $id_lote = filter_input(INPUT_POST, 'id_lote', FILTER_VALIDATE_INT);
 $quantidade = filter_input(INPUT_POST, 'quantidade', FILTER_VALIDATE_INT);
 $motivo = $_POST['motivo'] ?? '';
+$obs = trim($_POST['obs'] ?? '');
 $id_funcionario = $_SESSION['ID_Funcionario'];
+$nome_arquivo_foto = null; 
 
 if (!$id_produto || !$id_lote || !$quantidade || empty($motivo)) {
-    $_SESSION['msg'] = ['texto' => 'Todos os campos são obrigatórios.', 'tipo' => 'warning'];
+    $_SESSION['msg'] = ['texto' => 'Os campos de produto, lote, quantidade e motivo são obrigatórios.', 'tipo' => 'warning'];
     header('Location: saida_estoque.php');
     exit;
+}
+
+if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
+    $diretorio_upload = '../../Dev/Imagens/imgOcorrenciasEstoque/';
+    $extensao = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
+    $nome_arquivo_foto = uniqid() . '_' . time() . '.' . $extensao;
+    $caminho_completo = $diretorio_upload . $nome_arquivo_foto;
+
+    if (!move_uploaded_file($_FILES['foto']['tmp_name'], $caminho_completo)) {
+        $_SESSION['msg'] = ['texto' => 'Erro ao fazer upload da imagem.', 'tipo' => 'danger'];
+        header('Location: saida_estoque.php');
+        exit;
+    }
 }
 
 $conn->begin_transaction();
@@ -31,11 +45,8 @@ try {
     $stmtEstoque->execute();
     $estoque_atual = $stmtEstoque->get_result()->fetch_assoc();
 
-    if (!$estoque_atual) 
-        throw new Exception("Lote não encontrado no estoque.");
-
-    if ($quantidade > $estoque_atual['Quantidade']) 
-        throw new Exception("A quantidade a retirar ({$quantidade}) é maior que o estoque disponível ({$estoque_atual['Quantidade']}).");
+    if (!$estoque_atual) throw new Exception("Lote não encontrado no estoque.");
+    if ($quantidade > $estoque_atual['Quantidade']) throw new Exception("A quantidade a retirar ({$quantidade}) é maior que o estoque disponível ({$estoque_atual['Quantidade']}).");
 
     $id_estoque = $estoque_atual['ID_Estoque'];
 
@@ -43,15 +54,17 @@ try {
     $stmtUpdate->bind_param("ii", $quantidade, $id_estoque);
     $stmtUpdate->execute();
 
-    $stmtMov = $conn->prepare("INSERT INTO MOVIMENTACAO_ESTOQUE (ID_Estoque, ID_Produto, ID_Funcionario, Tipo, Quantidade, OBS) VALUES (?, ?, ?, 'Saída', ?, ?)");
-    $stmtMov->bind_param("iiiis", $id_estoque, $id_produto, $id_funcionario, $quantidade, $motivo);
+    $stmtMov = $conn->prepare(
+        "INSERT INTO MOVIMENTACAO_ESTOQUE (ID_Estoque, ID_Produto, ID_Funcionario, Tipo, Motivo, Quantidade, OBS, Foto_Ocorrencia) 
+         VALUES (?, ?, ?, 'Saída', ?, ?, ?, ?)"
+    );
+    $stmtMov->bind_param("iiisisss", $id_estoque, $id_produto, $id_funcionario, $motivo, $quantidade, $obs, $nome_arquivo_foto);
     $stmtMov->execute();
     
     $conn->commit();
     
     $_SESSION['msg'] = ['texto' => "Baixa de {$quantidade} unidade(s) do estoque registrada com sucesso!", 'tipo' => 'success'];
     registrar_log($conn, $_SESSION['ID_Usuario'], "Registrou saída manual de {$quantidade} un. do produto ID {$id_produto} (Lote ID: {$id_lote}) pelo motivo: {$motivo}");
-
 } 
 catch (Exception $e) {
     $conn->rollback();

@@ -29,7 +29,7 @@ $conn->begin_transaction();
 try {
     $stmtLote = $conn->prepare("INSERT INTO LOTES (ID_Produto, Nome_Lote, Data_Validade, Preco_Custo, Preco_Venda) VALUES (?, ?, ?, ?, ?)");
     $stmtEstoque = $conn->prepare("INSERT INTO ESTOQUE (ID_Lote, Quantidade, Data_Entrada) VALUES (?, ?, ?)");
-    $stmtMovEstoque = $conn->prepare("INSERT INTO MOVIMENTACAO_ESTOQUE (ID_Estoque, ID_Produto, ID_Funcionario, Tipo, Quantidade, OBS) VALUES (?, ?, ?, 'Entrada', ?, ?)");
+    $stmtMovEstoque = $conn->prepare("INSERT INTO MOVIMENTACAO_ESTOQUE (ID_Estoque, ID_Produto, ID_Funcionario, Tipo, Motivo, Quantidade, OBS) VALUES (?, ?, ?, 'Entrada', 'Compra de Fornecedor', ?, ?)");
 
     $itens_importados_count = 0;
     foreach ($produtos as $id_produto => $item) {

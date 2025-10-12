@@ -73,7 +73,6 @@
             <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Produtos/produtos.php">Produtos</a></li>
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Estoque/estoque.php">Estoque</a></li>
-                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Fornecedores/fornecedores.php">Fornecedores</a></li>
                 <hr class="dropdown-divider" style="border-color: #495057;">
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Caixas/caixas.php">Caixas</a></li>
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Cargos/cargos.php">Cargos</a></li>
@@ -88,7 +87,7 @@
             <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Clientes/clientes.php">Clientes</a></li>
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Funcionarios/funcionarios.php">Funcionários</a></li>
-                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Usuarios/usuarios.php">Usuários e Permissões</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Fornecedores/fornecedores.php">Fornecedores</a></li>
             </ul>
         </div>
 
@@ -102,6 +101,10 @@
 
         <div class="nav-item dropdown">
             <a href="<?php echo SISTEMA_URL ?>PreVendas/nova_prevenda.php"><i class="bi bi-basket2-fill"></i>Pré-Venda</a>
+        </div>
+        
+        <div class="nav-item dropdown">
+            <a href="<?php echo SISTEMA_URL ?>Controlados/dispensacao_controlados.php"><i class="bi bi-shield-lock-fill"></i>Controlados</a>
         </div>
 
         <div class="nav-item dropdown">

@@ -11,7 +11,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($conn->connect_error) {
         $_SESSION["msg"] = ['texto' => 'Erro ao conectar ao banco. Por favor, tente novamente', 'tipo' => 'danger'];
         mysqli_close($conn);
-        header('Location' . SISTEMA_URL .'index.php');
+        header('Location:' . SISTEMA_URL .'index.php');
+        exit();
     }
 
     $user = $_POST["user"];
@@ -53,24 +54,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             else {
                 $_SESSION["msg"] = ['texto' => 'Usuário ou senha estão incorretos. Por favor, verifique suas credenciais', 'tipo' => 'danger'];
                 mysqli_close($conn);
-                header('Location' . SISTEMA_URL .'index.php');
-                exit;
+                header('Location:' . SISTEMA_URL .'index.php');
+                exit();
             }
         }
         else {
             registrar_log($conn, $dados['ID_Usuario'], "Usuário inativo '{$dados['Nome']}' tentou logar no sistema.");
             $_SESSION["msg"] = ['texto' => 'Usuário não está ativo', 'tipo' => 'danger'];
             mysqli_close($conn);
-            header('Location' . SISTEMA_URL .'index.php');
-            exit;
+            header('Location:' . SISTEMA_URL .'index.php');
+            exit();
         }
         
     }
     else {
         $_SESSION["msg"] = ['texto' => 'Usuário ou senha estão incorretos. Por favor, verifique suas credenciais', 'tipo' => 'danger'];
         mysqli_close($conn);
-        header('Location' . SISTEMA_URL .'index.php');
-        exit;
+        header('Location:' . SISTEMA_URL .'index.php');
+        exit();
     }
 }
 ?>

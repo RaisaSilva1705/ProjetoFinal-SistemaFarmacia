@@ -54,18 +54,19 @@ try {
         if ($trocoReal > 0) $primeiroPagamento = false;
     }
 
-    $stmtItem = $conn->prepare("INSERT INTO ITENS_VENDA (ID_Venda, ID_Produto, Quantidade, Valor_Total) VALUES (?, ?, ?, ?)");
+    $stmtItem = $conn->prepare("INSERT INTO ITENS_VENDA (ID_Venda, ID_Produto, Quantidade, Valor_Total, Desconto) VALUES (?, ?, ?, ?, ?)");
     $stmtLotes = $conn->prepare("SELECT E.ID_Estoque FROM ESTOQUE E JOIN LOTES L ON E.ID_Lote = L.ID_Lote WHERE L.ID_Produto = ? AND E.Quantidade > 0 ORDER BY L.Data_Validade ASC");
     $stmtUpdateEstoque = $conn->prepare("UPDATE ESTOQUE SET Quantidade = Quantidade - 1 WHERE ID_Estoque = ?");
-    $stmtMovEstoque = $conn->prepare("INSERT INTO MOVIMENTACAO_ESTOQUE (ID_Estoque, ID_Produto, ID_Funcionario, Tipo, Quantidade, ID_Venda, OBS) VALUES (?, ?, ?, 'Saída', 1, ?, ?)");
+    $stmtMovEstoque = $conn->prepare("INSERT INTO MOVIMENTACAO_ESTOQUE (ID_Estoque, ID_Produto, ID_Funcionario, Tipo, Motivo, Quantidade, ID_Venda, OBS) VALUES (?, ?, ?, 'Saída', 'Venda', 1, ?, ?)");
     
     foreach ($_SESSION['carrinho'] as $item) {
         if (isset($item['tipo']) && $item['tipo'] === 'produto') {
             $id_produto = $item['id_produto']; 
             $quantidade = $item['quantidade'];
+            $desconto_item = $item['desconto'] ?? 0.00;
             $valor_total_item = $item['preco'] * $quantidade;
 
-            $stmtItem->bind_param("iiid", $idVenda, $id_produto, $quantidade, $valor_total_item);
+            $stmtItem->bind_param("iiidd", $idVenda, $id_produto, $quantidade, $valor_total_item, $desconto_item);
             $stmtItem->execute();
 
             for ($i = 0; $i < $quantidade; $i++) {

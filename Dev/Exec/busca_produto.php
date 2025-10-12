@@ -5,13 +5,17 @@ include "conexao.php";
 if (isset($_GET['codigo'])) { // POR CÓDIGO DE BARRAS
     $codigo = $_GET['codigo'];
 
-    $stmt = $conn->prepare("SELECT P.Nome, 
+    $stmt = $conn->prepare("SELECT P.ID_Produto,
+                                   P.Nome,
+                                   P.EAN_GTIN, 
                                    MAX(L.Preco_Venda) AS Preco_Venda,
-                                   P.Foto 
+                                   P.Foto,
+                                   M.Controlado
                             FROM PRODUTOS P 
                             LEFT JOIN LOTES L ON P.ID_Produto = L.ID_Produto
-                            WHERE P.EAN_GTIN = ?
-                            GROUP BY P.ID_Produto");
+                            LEFT JOIN MEDICAMENTOS M ON P.ID_Produto = M.ID_Produto
+                            WHERE P.EAN_GTIN = ? AND P.Status = 'Ativo' 
+                            GROUP BY P.ID_Produto, M.Controlado");
     $stmt->bind_param("s", $codigo);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -21,9 +25,12 @@ if (isset($_GET['codigo'])) { // POR CÓDIGO DE BARRAS
 
         echo json_encode([
             'success' => true,
+            'id' => $produto['ID_Produto'],
             'nome' => $produto['Nome'],
+            'codigo_barras' => $produto['EAN_GTIN'],
             'preco' => $produto['Preco_Venda'] ?? 0.00,
-            'foto' => $produto['Foto'] ?? 'sem-imagem.jpg'
+            'foto' => $produto['Foto'] ?? 'sem-imagem.jpg',
+            'controlado' => $produto['Controlado'] ?? 'Não'
         ]);
     } 
     else

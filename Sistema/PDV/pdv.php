@@ -4,8 +4,6 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 include "../../Dev/Exec/config.php";
-
-// Incluir o arquivo de conexão
 include DEV_PATH . 'Exec/conexao.php';
 include DEV_PATH . 'Exec/logs.php';
 include DEV_PATH . "Exec/validar_sessao.php";
@@ -97,11 +95,9 @@ if (isset($_POST['codigo'])) {
         header("Location: " . $_SERVER['PHP_SELF']);
         exit;
     }
-    
     $stmt->close();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-br">
     <head>
@@ -141,7 +137,7 @@ if (isset($_POST['codigo'])) {
                 <div class="row mt-4 mb-4">
                     <!-- COLUNA PRODUTO -->
                     <div class="col-md-7 border p-2">
-                        <form action="#" method="POST">
+                        <form action="pdv.php" method="POST" id="form-add-item">
                             <div class="row">
                                 <!-- COLUNA IMAGEM -->
                                 <div class="col-md-6 p-3">
@@ -206,8 +202,21 @@ if (isset($_POST['codigo'])) {
                                             $totalGeral += $subtotal;
                                             $totalItens += $item['quantidade'];
                                             $linhasOcupadas++;
+                                            $classe_linha = '';
+                                            $texto_quantidade = $item['quantidade'];
+
+                                            if (isset($item['origem']) && $item['origem'] === 'prevenda') {
+                                                $qtd_verificada = $item['quantidade_verificada'] ?? 0;
+                                                if ($qtd_verificada < $item['quantidade']) {
+                                                    $texto_quantidade = "({$qtd_verificada}/{$item['quantidade']})";
+                                                    if ($qtd_verificada == 0) 
+                                                        $classe_linha = 'table-danger';
+                                                    else 
+                                                        $classe_linha = 'table-warning';
+                                                }
+                                            }
                                     ?>
-                                    <tr>
+                                    <tr class="<?= $classe_linha ?>">
                                         <td><?= htmlspecialchars($item['nome']) ?></td>
                                         <td>R$ <?= number_format($preco, 2, ',', '.') ?></td>
                                         <td><?= $item['quantidade'] ?></td>
@@ -245,9 +254,7 @@ if (isset($_POST['codigo'])) {
                                         <td></td>
                                     </tr>
                                 <?php endfor; ?>
-                            <?php endif;
-
-                                ?>
+                            <?php endif; ?>
                             </tbody>
                             <tfoot class="table-secondary">
                                 <tr>
@@ -449,13 +456,93 @@ if (isset($_POST['codigo'])) {
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script> 
+            window.carrinhoSessao = <?= json_encode(array_values($_SESSION['carrinho'])) ?>;
             // MUDAR OS VALORES POR CÓDIGO DE BARRAS
             document.getElementById('codigo').addEventListener('change', function () {
                 const codigo = this.value.trim();
-                if (codigo === '') return;
+                if (codigo === '' || codigo.startsWith('99')) 
+                    return;
+                
+                fetch('../../Dev/Exec/busca_produto.php?codigo=' + encodeURIComponent(codigo))
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) { 
+                            if (data.controlado === 'Sim') {
+                                    const itemPendente = window.carrinhoSessao.some(item => 
+                                    item.codigo === codigo && 
+                                    item.origem === 'prevenda' &&
+                                    item.quantidade_verificada < item.quantidade
+                                );
+
+                                if (!itemPendente) {
+                                    mostrarToast('Este é um medicamento controlado e não pode ser vendido diretamente no caixa.', 'danger', 'Acesso Negado');
+                                    this.value = ''; 
+                                    document.getElementById('descricao').value = '';
+                                    document.getElementById('preco').value = 'R$ 0,00';
+                                    return; 
+                                }
+                            }
+
+                            document.getElementById('descricao').value = data.nome;
+                            document.getElementById('preco').value = "R$ " + parseFloat(data.preco).toFixed(2).replace('.', ',');
+                            
+                            let fotoUrl = '../../Dev/Imagens/imgSistema/sem-imagem.jpg';
+                            if(data.foto && data.foto !== 'sem-imagem.jpg') 
+                                fotoUrl = '../../Dev/Imagens/imgProdutos/' + data.foto;
+                            
+                            document.getElementById('foto').src = fotoUrl;
+
+                        } 
+                        else {
+                            mostrarToast(data.mensagem || 'Produto não encontrado', 'warning', 'Erro');
+                            this.value = '';
+                            document.getElementById('descricao').value = '';
+                            document.getElementById('preco').value = 'R$ 0,00';
+                            document.getElementById('foto').src = '../../Dev/Imagens/imgSistema/sem-imagem.jpg';
+                        }
+                    })
+                    .catch(err => {
+                        mostrarToast('Erro ao buscar produto.', 'warning', 'Erro');
+                        console.error(err);
+                    });
+            });
+
+            document.getElementById('form-add-item').addEventListener('submit', function (event) {
+                event.preventDefault(); 
+    
+                const codigoInput = document.getElementById('codigo');
+                const codigo = codigoInput.value.trim();
+                if(codigo === '') return;
+
+                // --- LÓGICA DE VERIFICAÇÃO PRIMEIRO ---
+                let itemParaVerificarIndex = -1;
+                if (Array.isArray(window.carrinhoSessao)) { 
+                    itemParaVerificarIndex = window.carrinhoSessao.findIndex(item => 
+                        item.codigo === codigo && 
+                        item.origem === 'prevenda' &&
+                        item.quantidade_verificada < item.quantidade
+                    );
+                }
+
+                if (itemParaVerificarIndex > -1) {
+                    fetch('../../Dev/Exec/gerenciar_carrinho.php', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                        body: `acao=verificar&index=${itemParaVerificarIndex}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.sucesso) 
+                            location.reload(); 
+                        else 
+                            mostrarToast(data.erro || 'Não foi possível verificar o item.', 'danger');
+                    });
+
+                } 
 
                 if (codigo.startsWith('99')) {
-                    
+                    event.preventDefault(); 
+
                     fetch('../../Dev/Exec/processa_carrinho_prevenda.php', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -464,44 +551,30 @@ if (isset($_POST['codigo'])) {
                     .then(response => response.json())
                     .then(data => {
                         if (data.sucesso) {
-                            mostrarToast(data.mensagem, 'success', 'Sucesso');
-                            location.reload();
+                            if (data.cliente) {
+                                const idClienteHidden = document.getElementById('id_cliente_hidden');
+                                const buscaClienteInput = document.getElementById('busca_cliente_cpf');
+                                
+                                if (idClienteHidden) idClienteHidden.value = data.cliente.id;
+                                if (buscaClienteInput) {
+                                    buscaClienteInput.value = data.cliente.nome;
+                                    buscaClienteInput.dispatchEvent(new Event('change')); 
+                                }
+                            }
+                            
+                            mostrarToast(data.mensagem || 'Itens carregados com sucesso!', 'success');
+                            setTimeout(() => location.reload(), 1000); 
                         } 
                         else {
-                            mostrarToast(data.mensagem, 'danger', 'Erro');
-                            this.value = ''; 
+                            mostrarToast(data.mensagem || 'Pré-venda não encontrada.', 'danger');
+                            codigoInput.value = ''; 
                         }
+                    })
+                    .catch(err => {
+                        mostrarToast('Erro de comunicação ao carregar pré-venda.', 'danger');
+                        console.error(err);
                     });
-
                 } 
-                else {
-                    fetch('../../Dev/Exec/busca_produto.php?codigo=' + encodeURIComponent(codigo))
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) { 
-                                document.getElementById('descricao').value = data.nome;
-                                document.getElementById('preco').value = "R$ " + parseFloat(data.preco).toFixed(2).replace('.', ',');
-                                
-                                let fotoUrl = '../../Dev/Imagens/imgSistema/sem-imagem.jpg';
-                                if(data.foto && data.foto !== 'sem-imagem.jpg') 
-                                    fotoUrl = '../../Dev/Imagens/imgProdutos/' + data.foto;
-                                
-                                document.getElementById('foto').src = fotoUrl;
-
-                            } 
-                            else {
-                                mostrarToast(data.mensagem || 'Produto não encontrado', 'warning', 'Erro');
-                                this.value = '';
-                                document.getElementById('descricao').value = '';
-                                document.getElementById('preco').value = 'R$ 0,00';
-                                document.getElementById('foto').src = '../../Dev/Imagens/imgSistema/sem-imagem.jpg';
-                            }
-                        })
-                        .catch(err => {
-                            mostrarToast('Erro ao buscar produto.', 'warning', 'Erro');
-                            console.error(err);
-                        });
-                }
             });
 
             // MUDAR OS VALORES POR NOME DO PRODUTO
@@ -642,6 +715,17 @@ if (isset($_POST['codigo'])) {
 
             // Confirmação de pagamento com STRIPE
             document.getElementById('confirmarPagamento').addEventListener('click', async function(event){
+                // ---- BLOCO DE VERIFICAÇÃO DO CARRINHO ----
+                const itemNaoVerificado = window.carrinhoSessao.some(item =>
+                    item.origem === 'prevenda' &&
+                    item.quantidade_verificada < item.quantidade
+                );
+
+                if (itemNaoVerificado) {
+                    event.preventDefault(); 
+                    mostrarToast('Existem itens da pré-venda que ainda não foram verificados! Por favor, escaneie todos os produtos.', 'danger', 'Verificação Pendente');
+                    return; 
+                }
                 event.preventDefault();
 
                 document.querySelectorAll('.forma').forEach(function(input){

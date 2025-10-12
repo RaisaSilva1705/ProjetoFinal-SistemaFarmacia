@@ -26,19 +26,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $valor_min_parcelas = $_POST['valor_min_parcelas'];
     $quant_max_parcelas = $_POST['quant_max_parcelas'];
     $margem_lucro = $_POST['margem_lucro'];
+    $desc_item = $_POST['desc_item'];
     
     // A query de UPDATE sempre vai alterar o registro com ID = 1
     $sql = "UPDATE CONFIGURACOES SET 
                 Nome_RazaoSocial = ?, Nome_Fantasia = ?, Slogan = ?, Documento = ?, Loja = ?, 
                 CEP = ?, Endereco = ?, End_Numero = ?, Bairro = ?, Cidade = ?, Estado = ?, 
-                Valor_Min_Parcelas = ?, Quant_Max_Parcelas = ?, Margem_Lucro_Padrao = ?
+                Valor_Min_Parcelas = ?, Quant_Max_Parcelas = ?, Margem_Lucro_Padrao = ?, Max_Desconto_Item = ?
             WHERE ID_Config = 1";
             
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssssssssssdid", 
+    $stmt->bind_param("sssssssssssdidd", 
         $nome_razao, $nome_fantasia, $slogan, $documento, $loja, $cep, 
         $endereco, $end_numero, $bairro, $cidade, $estado, 
-        $valor_min_parcelas, $quant_max_parcelas, $margem_lucro
+        $valor_min_parcelas, $quant_max_parcelas, $margem_lucro, $desc_item
     );
 
     if ($stmt->execute()) {
@@ -63,7 +64,7 @@ $config = $result->fetch_assoc();
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Configurações</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
     <body>
@@ -122,18 +123,25 @@ $config = $result->fetch_assoc();
                         <hr>
                         <h5 class="mt-3">Regras de Negócio</h5>
                         <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label for="valor_min_parcelas" class="form-label">Valor Mínimo para Parcelamento (R$)</label>
+                            <div class="col-md-3 mb-3">
+                                <label for="valor_min_parcelas" class="form-label">Valor Min p/ Parcelamento (R$)</label>
                                 <input type="text" name="valor_min_parcelas" id="valor_min_parcelas" class="form-control" value="<?= htmlspecialchars($config['Valor_Min_Parcelas']) ?>" required>
                             </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="quant_max_parcelas" class="form-label">Quantidade Máxima de Parcelas</label>
+                            <div class="col-md-3 mb-3">
+                                <label for="quant_max_parcelas" class="form-label">Quantidade Max de Parcelas</label>
                                 <input type="number" name="quant_max_parcelas" id="quant_max_parcelas" class="form-control" value="<?= htmlspecialchars($config['Quant_Max_Parcelas']) ?>" required>
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label for="margem_lucro" class="form-label">Margem de Lucro Padrão (%)</label>
                                 <div class="input-group">
                                     <input type="text" name="margem_lucro" id="margem_lucro" class="form-control" value="<?= htmlspecialchars($config['Margem_Lucro_Padrao']) ?>" required>
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="desc_item" class="form-label">Desconto p/ Item (%)</label>
+                                <div class="input-group">
+                                    <input type="text" name="desc_item" id="desc_item" class="form-control" value="<?= htmlspecialchars($config['Max_Desconto_Item']) ?>" required>
                                     <span class="input-group-text">%</span>
                                 </div>
                             </div>

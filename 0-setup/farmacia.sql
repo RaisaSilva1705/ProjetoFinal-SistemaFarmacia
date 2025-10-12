@@ -25,7 +25,8 @@ CREATE TABLE IF NOT EXISTS `CONFIGURACOES` (
     `Estado` CHAR(2) NOT NULL,
     `Valor_Min_Parcelas` DECIMAL(10,2) NOT NULL,
     `Quant_Max_Parcelas` INT NOT NULL,
-    `Margem_Lucro_Padrao` DECIMAL(10,2) DEFAULT 100.00,
+    `Margem_Lucro_Padrao` DECIMAL(10,2) NOT NULL DEFAULT 100.00,
+    `Max_Desconto_Item` DECIMAL(5,2) NOT NULL DEFAULT 20.00,
     `Data_Alteracao` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
 /* drop table CONFIGURACOES; */
@@ -271,12 +272,34 @@ CREATE TABLE IF NOT EXISTS `MEDICAMENTOS` (
     `ID_Tarja` INT NOT NULL,
     `Tipo` ENUM('Genérico', 'Similar', 'Referência') NOT NULL,
     `Prin_Ativo` VARCHAR(255) DEFAULT NULL,
+    `MS` VARCHAR(20) NOT NULL,
+    `Controlado` ENUM ('Sim', 'Não') DEFAULT 'Não',
     FOREIGN KEY (`ID_Produto`) REFERENCES `PRODUTOS` (`ID_Produto`) ON DELETE CASCADE,
     FOREIGN KEY (`ID_Tarja`) REFERENCES `TARJAS_MEDICAMENTOS` (`ID_Tarja`),
     FOREIGN KEY (`ID_CategoriaMed`) REFERENCES `CATEGORIAS_MEDICAMENTOS` (`ID_CategoriaMed`)
 ) ENGINE = InnoDB;
 /* drop table MEDICAMENTOS; */
 /* select * from MEDICAMENTOS; */
+
+-- -----------------------------------------------------
+-- Table `PRESCRICOES`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PRESCRICOES` (
+  `ID_Prescricao` INT AUTO_INCREMENT PRIMARY KEY,
+  `ID_Cliente` INT NULL,
+  `ID_Funcionario` INT NOT NULL,
+  `Nome_Profissional` VARCHAR(255) NOT NULL,
+  `Conselho` VARCHAR(10) NOT NULL,
+  `Num_Conselho` VARCHAR(20) NOT NULL,
+  `UF_Conselho` CHAR(2) NOT NULL,
+  `Data_Receita` DATE NOT NULL,
+  `Data_Registro` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `Dados_Adicionais` JSON NULL,
+  FOREIGN KEY (`ID_Cliente`) REFERENCES `CLIENTES` (`ID_Cliente`),
+  FOREIGN KEY (`ID_Funcionario`) REFERENCES `FUNCIONARIOS` (`ID_Funcionario`)
+) ENGINE = InnoDB;
+/* drop table PRESCRICOES; */
+/* select * from PRESCRICOES; */
 
 -- -----------------------------------------------------
 -- Table `ESTOQUE`
@@ -389,10 +412,12 @@ CREATE TABLE IF NOT EXISTS `MOVIMENTACAO_ESTOQUE` (
     `ID_Produto` INT NOT NULL,
     `ID_Funcionario` INT NOT NULL,
     `Tipo` ENUM('Entrada', 'Saída') NOT NULL,
+    `Motivo` VARCHAR(100) NOT NULL,
     `Quantidade` INT NOT NULL,
     `ID_Venda` INT DEFAULT NULL,
     `Data_Movimentacao` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `OBS` VARCHAR(255) DEFAULT NULL,
+    `Foto_Ocorrencia` VARCHAR(255) NULL,
     FOREIGN KEY (`ID_Estoque`) REFERENCES `ESTOQUE` (`ID_Estoque`),
     FOREIGN KEY (`ID_Produto`) REFERENCES `PRODUTOS` (`ID_Produto`),
     FOREIGN KEY (`ID_Venda`) REFERENCES `VENDAS` (`ID_Venda`),
@@ -427,6 +452,7 @@ CREATE TABLE IF NOT EXISTS `ITENS_VENDA` (
     `ID_Produto` INT NOT NULL,
     `Quantidade` INT NOT NULL,
     `Valor_Total` DECIMAL(10,2) NOT NULL,
+    `Desconto` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     FOREIGN KEY (`ID_Venda`) REFERENCES `VENDAS` (`ID_Venda`),
     FOREIGN KEY (`ID_Produto`) REFERENCES `PRODUTOS` (`ID_Produto`)
 ) ENGINE = InnoDB;
@@ -516,16 +542,18 @@ CREATE TABLE IF NOT EXISTS `SERVICO_CAMPOS_REFERENCIAS` (
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `PRE_VENDAS` (
   `ID_PreVenda` INT AUTO_INCREMENT PRIMARY KEY,
-  `Codigo_PreVenda` VARCHAR(20) NOT NULL UNIQUE, -- Código único para o cliente levar ao caixa
   `ID_Cliente` INT NULL,
+  `ID_Venda` INT NULL,
   `ID_Funcionario` INT NOT NULL,
+  `ID_Prescricao` INT NULL,
+  `Codigo_PreVenda` VARCHAR(20) NOT NULL UNIQUE, -- Código único para o cliente levar ao caixa
   `Status` ENUM('Pendente', 'Finalizada', 'Cancelada') NOT NULL DEFAULT 'Pendente',
   `Data_Criacao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `Data_Finalizacao` DATETIME NULL,
-  `ID_Venda` INT NULL,
   FOREIGN KEY (`ID_Cliente`) REFERENCES `CLIENTES` (`ID_Cliente`) ON DELETE SET NULL,
   FOREIGN KEY (`ID_Funcionario`) REFERENCES `FUNCIONARIOS` (`ID_Funcionario`),
-  FOREIGN KEY (`ID_Venda`) REFERENCES `VENDAS` (`ID_Venda`) ON DELETE SET NULL
+  FOREIGN KEY (`ID_Venda`) REFERENCES `VENDAS` (`ID_Venda`) ON DELETE SET NULL,
+  FOREIGN KEY (`ID_Prescricao`) REFERENCES `PRESCRICOES` (`ID_Prescricao`) ON DELETE SET NULL
 ) ENGINE = InnoDB;
 /* drop table PRE_VENDAS; */
 /* select * from PRE_VENDAS; */
@@ -540,6 +568,7 @@ CREATE TABLE IF NOT EXISTS `PRE_VENDAS_ITENS` (
   `ID_Servico` INT NULL,
   `Quantidade` INT NOT NULL DEFAULT 1,
   `Valor_Unitario` DECIMAL(10,2) NOT NULL,
+  `Desconto` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   FOREIGN KEY (`ID_PreVenda`) REFERENCES `PRE_VENDAS` (`ID_PreVenda`) ON DELETE CASCADE,
   FOREIGN KEY (`ID_Produto`) REFERENCES `PRODUTOS` (`ID_Produto`),
   FOREIGN KEY (`ID_Servico`) REFERENCES `SERVICOS_FARMACEUTICOS` (`ID_Servico`),
@@ -548,3 +577,64 @@ CREATE TABLE IF NOT EXISTS `PRE_VENDAS_ITENS` (
 ) ENGINE = InnoDB;
 /* drop table PRE_VENDAS_ITENS; */
 /* select * from PRE_VENDAS_ITENS; */
+
+-- -----------------------------------------------------
+-- Table `DESPESAS_CATEGORIAS`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `DESPESAS_CATEGORIAS` (
+  `ID_Categoria_Despesa` INT AUTO_INCREMENT PRIMARY KEY,
+  `Nome_Categoria` VARCHAR(255) NOT NULL UNIQUE
+) ENGINE = InnoDB;
+/* drop table DESPESAS_CATEGORIAS; */
+/* select * from DESPESAS_CATEGORIAS; */
+
+-- -----------------------------------------------------
+-- Table `DESPESAS`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `DESPESAS` (
+  `ID_Despesa` INT AUTO_INCREMENT PRIMARY KEY,
+  `ID_Categoria_Despesa` INT NOT NULL,
+  `Descricao` VARCHAR(255) NOT NULL,
+  `Valor` DECIMAL(10,2) NOT NULL,
+  `Data_Vencimento` DATE NULL,
+  `Data_Pagamento` DATE NULL,
+  `Status` ENUM('Paga', 'Pendente') NOT NULL DEFAULT 'Pendente',
+  `Status_Registro` ENUM('Ativo', 'Cancelado') NOT NULL DEFAULT 'Ativo',
+  `ID_Funcionario` INT NOT NULL,
+  `Data_Registro` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`ID_Categoria_Despesa`) REFERENCES `DESPESAS_CATEGORIAS`(`ID_Categoria_Despesa`),
+  FOREIGN KEY (`ID_Funcionario`) REFERENCES `FUNCIONARIOS`(`ID_Funcionario`)
+) ENGINE = InnoDB;
+/* drop table DESPESAS; */
+/* select * from DESPESAS; */
+
+-- -----------------------------------------------------
+-- Table `PROMOCOES`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PROMOCOES` (
+  `ID_Promocao` INT AUTO_INCREMENT PRIMARY KEY,
+  `Descricao` VARCHAR(255) NOT NULL,
+  `Tipo` ENUM('LEVE_X_PAGUE_Y', 'DESCONTO_PROGRESSIVO', 'COMBO_PRECO_FIXO') NOT NULL,
+  `Data_Inicio` DATE NOT NULL,
+  `Data_Fim` DATE NULL,
+  `Status` ENUM('Ativo', 'Inativo') NOT NULL DEFAULT 'Ativo'
+) ENGINE = InnoDB;
+/* drop table PROMOCOES; */
+/* select * from PROMOCOES; */
+
+-- -----------------------------------------------------
+-- Table `PROMOCOES_ITENS`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PROMOCOES_ITENS` (
+  `ID_Item_Promocao` INT AUTO_INCREMENT PRIMARY KEY,
+  `ID_Promocao` INT NOT NULL,
+  `Tipo_Item` ENUM('Condicao', 'Beneficio') NOT NULL,
+  `ID_Produto` INT NOT NULL,
+  `Quantidade` INT NOT NULL,
+  `Valor_Desconto_Percentual` DECIMAL(5,2) NULL,
+  `Preco_Fixo_Combo` DECIMAL(10,2) NULL,
+  FOREIGN KEY (`ID_Promocao`) REFERENCES `PROMOCOES`(`ID_Promocao`) ON DELETE CASCADE,
+  FOREIGN KEY (`ID_Produto`) REFERENCES `PRODUTOS`(`ID_Produto`)
+) ENGINE = InnoDB;
+/* drop table PROMOCOES_ITENS; */
+/* select * from PROMOCOES_ITENS; */

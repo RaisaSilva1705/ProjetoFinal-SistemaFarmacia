@@ -19,6 +19,9 @@ footer {
     overflow-y: auto;
     flex-direction: column;
 }
+select > option[value=""]:first-child {
+    display: none;
+}
 
 @media print {
     .no-print {

@@ -9,6 +9,18 @@ $acao = $_POST['acao'] ?? '';
 $index = isset($_POST['index']) ? (int)$_POST['index'] : -1;
 $senhaDigitada = $_POST['senha'] ?? '';
 
+if ($acao === 'verificar') {
+    if (isset($_SESSION['carrinho'][$index])) {
+        if ($_SESSION['carrinho'][$index]['quantidade_verificada'] < $_SESSION['carrinho'][$index]['quantidade']) {
+            $_SESSION['carrinho'][$index]['quantidade_verificada']++;
+            echo json_encode(['sucesso' => true]);
+            exit;
+        }
+    }
+    echo json_encode(['sucesso' => false, 'erro' => 'Item já verificado.']);
+    exit;
+}
+
 if ($index < 0 || !isset($_SESSION['carrinho'][$index])) {
     echo json_encode(['sucesso' => false, 'erro' => 'Item não encontrado.']);
     exit;

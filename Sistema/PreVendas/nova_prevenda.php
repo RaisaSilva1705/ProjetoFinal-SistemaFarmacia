@@ -9,8 +9,48 @@ include DEV_PATH . 'Exec/logs.php';
 include DEV_PATH . "Exec/validar_sessao.php";
 include DEV_PATH . "Exec/validar_acesso.php";
 
+$itens_iniciais_json = '[]';
+$id_prevenda_existente = null;
+
+if (isset($_GET['id_prevenda']) && filter_var($_GET['id_prevenda'], FILTER_VALIDATE_INT)) {
+    $id_prevenda_existente = (int)$_GET['id_prevenda'];
+    
+    $sql_itens = "SELECT 
+                    PVI.ID_Produto AS id,
+                    'produto' AS tipo, 
+                    P.Nome AS nome, 
+                    PVI.Valor_Unitario AS valor, 
+                    PVI.Quantidade AS qtd
+                  FROM PRE_VENDAS_ITENS PVI
+                  JOIN PRODUTOS P ON PVI.ID_Produto = P.ID_Produto
+                  WHERE PVI.ID_PreVenda = ?
+                  UNION ALL
+                  SELECT 
+                    PVI.ID_Servico AS id,
+                    'servico' AS tipo, 
+                    SF.Nome_Servico AS nome, 
+                    PVI.Valor_Unitario AS valor, 
+                    PVI.Quantidade AS qtd
+                  FROM PRE_VENDAS_ITENS PVI
+                  JOIN SERVICOS_FARMACEUTICOS SF ON PVI.ID_Servico = SF.ID_Servico
+                  WHERE PVI.ID_PreVenda = ?";
+
+    $stmt = $conn->prepare($sql_itens);
+    $stmt->bind_param("ii", $id_prevenda_existente, $id_prevenda_existente);
+    $stmt->execute();
+    $itens_iniciais = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    
+    foreach ($itens_iniciais as &$item) {
+        $item['id'] = (int)$item['id'];
+        $item['valor'] = (float)$item['valor'];
+        $item['qtd'] = (int)$item['qtd'];
+    }
+    unset($item);
+
+    $itens_iniciais_json = json_encode($itens_iniciais);
+}
+
 $servicos = $conn->query("SELECT ID_Servico, Nome_Servico, Valor FROM SERVICOS_FARMACEUTICOS WHERE Status = 'Ativo' ORDER BY Nome_Servico");
-$produtos = $conn->query("SELECT ID_Produto, Nome, EAN_GTIN FROM PRODUTOS WHERE Status = 'Ativo' ORDER BY Nome");
 ?>
 
 <!DOCTYPE html>
@@ -78,6 +118,7 @@ $produtos = $conn->query("SELECT ID_Produto, Nome, EAN_GTIN FROM PRODUTOS WHERE 
                     <div class="card card-body mb-4">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5>Resultados da Busca:</h5>
+                            <input type="hidden" name="id_prevenda_existente" value="<?= htmlspecialchars($id_prevenda_existente ?? '') ?>">
                             <button type="button" class="btn btn-primary" id="btn-ver-carrinho" data-bs-toggle="modal" data-bs-target="#modalCarrinho">
                                 <i class="bi bi-cart3"></i> Ver Pré-Venda (<span id="cart-item-count">0</span>)
                             </button>
@@ -93,6 +134,7 @@ $produtos = $conn->query("SELECT ID_Produto, Nome, EAN_GTIN FROM PRODUTOS WHERE 
             <?php include_once DEV_PATH . 'Views/footer.php'?>
         </div>
 
+        <!-- Modal carrinho -->
         <div class="modal fade" id="modalCarrinho" tabindex="-1" aria-labelledby="modalCarrinhoLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content">
@@ -107,6 +149,38 @@ $produtos = $conn->query("SELECT ID_Produto, Nome, EAN_GTIN FROM PRODUTOS WHERE 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continuar Adicionando</button>
                         <button type="button" class="btn btn-primary" id="btn-gerar-codigo"><i class="bi bi-receipt"> Gerar Código da Pré-Venda</i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Desconto -->
+        <div class="modal fade" id="modalDesconto" tabindex="-1" aria-labelledby="modalDescontoLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalDescontoLabel">Aplicar Desconto no Item</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Item:</strong> <span id="desconto-item-nome"></span></p>
+                        <input type="hidden" id="desconto-cart-index">
+                        <div class="input-group mb-3">
+                            <select class="form-select" id="desconto-tipo" style="flex-grow: 0; width: 30%;">
+                                <option value="porcento">%</option>
+                                <option value="valor">R$</option>
+                            </select>
+                            <input type="number" class="form-control" id="desconto-valor" placeholder="Valor do Desconto" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label for="desconto-senha">Senha de Autorização</label>
+                            <input type="password" class="form-control" id="desconto-senha" required>
+                        </div>
+                        <div id="desconto-erro" class="text-danger mt-2"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="btn-aplicar-desconto">Aplicar Desconto</button>
                     </div>
                 </div>
             </div>
@@ -128,7 +202,8 @@ $produtos = $conn->query("SELECT ID_Produto, Nome, EAN_GTIN FROM PRODUTOS WHERE 
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                let cart = [];
+                let cart = <?= $itens_iniciais_json ?>;
+                cart.forEach(item => item.desconto = item.desconto || 0);
                 let searchResults = [];
                 const selectServico = document.getElementById('select_servico');
                 const buscaProdutoInput = document.getElementById('busca_produto');
@@ -138,7 +213,12 @@ $produtos = $conn->query("SELECT ID_Produto, Nome, EAN_GTIN FROM PRODUTOS WHERE 
                 const cartItemsContainer = document.getElementById('cart-items-container');
                 const btnGerarCodigo = document.getElementById('btn-gerar-codigo');
                 const modalCarrinho  = new bootstrap.Modal(document.getElementById('modalCarrinho'));
+                const modalDesconto = new bootstrap.Modal(document.getElementById('modalDesconto')); 
+                const btnAplicarDesconto = document.getElementById('btn-aplicar-desconto');
                 const campoBuscaCliente = document.getElementById('busca_cliente_cpf');
+
+                renderCart(); // Para preencher o modal
+                cartItemCount.textContent = cart.length;
 
                 function renderSearchResults(results) {
                     searchResultsContainer.innerHTML = '';
@@ -188,12 +268,27 @@ $produtos = $conn->query("SELECT ID_Produto, Nome, EAN_GTIN FROM PRODUTOS WHERE 
                     }
                     let total = 0;
                     cart.forEach((item, index) => {
-                        total += parseFloat(item.valor);
+                        const precoOriginal = parseFloat(item.valor);
+                        const desconto = parseFloat(item.desconto || 0);
+                        const precoFinal = precoOriginal - desconto;
+                        total += precoFinal * item.qtd;
+
+                        const descontoTexto = desconto > 0 ? `<br><small class="text-danger">Desconto: - R$ ${desconto.toFixed(2).replace('.', ',')}</small>` : '';
+                        
                         const itemHtml = `
                             <div class="item-list-row border-bottom mb-2">
-                                <div class="item-name"><strong>${item.tipo === 'servico' ? 'Serviço' : 'Produto'}:</strong> ${item.nome}</div>
-                                <div>R$ ${parseFloat(item.valor).toFixed(2).replace('.', ',')}</div>
-                                <div><button type="button" class="btn btn-sm btn-danger" onclick="removeFromCart(${index})"><i class="bi bi-trash-fill"></i></button></div>
+                                <div class="item-name">
+                                    <strong>${item.tipo === 'servico' ? 'Serviço' : 'Produto'}:</strong> ${item.nome}
+                                    ${descontoTexto}
+                                </div>
+                                <div>
+                                    ${desconto > 0 ? `<s class="text-muted">R$ ${precoOriginal.toFixed(2).replace('.', ',')}</s><br>` : ''}
+                                    <strong>R$ ${precoFinal.toFixed(2).replace('.', ',')}</strong>
+                                </div>
+                                <div class="d-flex gap-1">
+                                    <button type="button" class="btn btn-sm btn-warning" onclick="abrirModalDesconto(${index})"><i class="bi bi-percent"></i></button>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="removeFromCart(${index})"><i class="bi bi-trash-fill"></i></button>
+                                </div>
                             </div>`;
                         cartItemsContainer.insertAdjacentHTML('beforeend', itemHtml);
                     });
@@ -207,7 +302,8 @@ $produtos = $conn->query("SELECT ID_Produto, Nome, EAN_GTIN FROM PRODUTOS WHERE 
                         tipo: 'produto',
                         nome: item.Nome,
                         valor: item.Preco_Venda,
-                        qtd: 1
+                        qtd: 1,
+                        desconto: 0
                     });
                     cartItemCount.textContent = cart.length;
                     triggerCartButtonAnimation();
@@ -235,7 +331,8 @@ $produtos = $conn->query("SELECT ID_Produto, Nome, EAN_GTIN FROM PRODUTOS WHERE 
                         tipo: 'servico',
                         nome: selected.dataset.nome,
                         valor: selected.dataset.valor,
-                        qtd: 1
+                        qtd: 1,
+                        desconto: 0
                     });
                     this.value = '';
                     cartItemCount.textContent = cart.length;
@@ -264,6 +361,71 @@ $produtos = $conn->query("SELECT ID_Produto, Nome, EAN_GTIN FROM PRODUTOS WHERE 
                         clienteCarrinhoDiv.innerHTML = '';
                 });
 
+                window.abrirModalDesconto = function(cartIndex) {
+                    const item = cart[cartIndex];
+                    document.getElementById('desconto-item-nome').textContent = item.nome;
+                    document.getElementById('desconto-cart-index').value = cartIndex;
+                    document.getElementById('desconto-valor').value = '';
+                    document.getElementById('desconto-senha').value = '';
+                    document.getElementById('desconto-erro').textContent = '';
+                    modalDesconto.show();
+                };
+
+                btnAplicarDesconto.addEventListener('click', function() {
+                    const index = document.getElementById('desconto-cart-index').value;
+                    const item = cart[index];
+                    const tipo = document.getElementById('desconto-tipo').value;
+                    const valorDesconto = parseFloat(document.getElementById('desconto-valor').value);
+                    const senha = document.getElementById('desconto-senha').value;
+                    const erroDiv = document.getElementById('desconto-erro');
+                    erroDiv.textContent = '';
+
+                    if (isNaN(valorDesconto) || valorDesconto <= 0) {
+                        erroDiv.textContent = 'Valor de desconto inválido.';
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('senha', senha);
+
+                    fetch('../../Dev/Exec/validar_senha.php', { method: 'POST', body: formData })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.sucesso) {
+                            const precoItem = parseFloat(item.valor);
+                            let descontoCalculado = 0;
+
+                            if (tipo === 'porcento') {
+                                if (valorDesconto > data.limite_max) {
+                                    erroDiv.textContent = `Erro: Desconto máximo permitido é de ${data.limite_max}%.`;
+                                    return;
+                                }
+                                descontoCalculado = (precoItem * valorDesconto) / 100;
+                            } 
+                            else { 
+                                const percentualEquivalente = (valorDesconto / precoItem) * 100;
+                                if (percentualEquivalente > data.limite_max) {
+                                    erroDiv.textContent = `Erro: Desconto máximo permitido é de ${data.limite_max}%.`;
+                                    return;
+                                }
+                                descontoCalculado = valorDesconto;
+                            }
+
+                            if (descontoCalculado > precoItem) {
+                                erroDiv.textContent = 'Desconto não pode ser maior que o preço do item.';
+                                return;
+                            }
+
+                            cart[index].desconto = descontoCalculado;
+                            renderCart();
+                            modalDesconto.hide();
+                            mostrarToast('Desconto aplicado com sucesso!', 'success');
+                        } 
+                        else 
+                            erroDiv.textContent = data.mensagem;
+                    });
+                });
+
                 btnGerarCodigo.addEventListener('click', function() {
                     if (cart.length === 0) {
                         mostrarToast('O carrinho está vazio.', 'warning');
@@ -272,15 +434,15 @@ $produtos = $conn->query("SELECT ID_Produto, Nome, EAN_GTIN FROM PRODUTOS WHERE 
                     const formData = new FormData();
                     formData.append('id_cliente', document.getElementById('id_cliente').value);
                     formData.append('itens', JSON.stringify(cart));
+                    formData.append('id_prevenda_existente', document.querySelector('input[name="id_prevenda_existente"]').value);
 
                     fetch('processa_prevenda.php', { method: 'POST', body: formData })
                         .then(response => response.json())
                         .then(data => {
                             if (data.sucesso) {
                                 modalCarrinho.hide();
-                                alert(`Código gerado: ${data.codigo}.`);
-                                //window.open(`cupom_prevenda.php?codigo=${data.codigo}`, '_blank');
-                                window.location.reload();
+                                window.open(`cupom_prevenda.php?codigo=${data.codigo}`, '_blank');
+                                setTimeout(() => window.location.href = 'nova_prevenda.php', 500);
                             }
                             else 
                                 mostrarToast('Erro: ' + (data.mensagem || 'Ocorreu um problema.'), 'danger');
@@ -304,6 +466,16 @@ $produtos = $conn->query("SELECT ID_Produto, Nome, EAN_GTIN FROM PRODUTOS WHERE 
                             }
                         });
                 });
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const vindoDeDispensacao = urlParams.has('id_prevenda');
+
+                if (vindoDeDispensacao && cart.length > 0) {
+                    setTimeout(() => {
+                        mostrarToast(`Itens da dispensação carregados na pré-venda!`, 'info');
+                        triggerCartButtonAnimation(); 
+                    }, 1000);
+                }
             });
 
             <?php
