@@ -106,9 +106,13 @@
         <div class="nav-item dropdown">
             <a href="<?php echo SISTEMA_URL ?>Controlados/dispensacao_controlados.php"><i class="bi bi-shield-lock-fill"></i>Controlados</a>
         </div>
+        
+        <div class="nav-item dropdown">
+            <a href="<?php echo SISTEMA_URL ?>Financeiro/despesas.php"><i class="bi bi-cash-coin"></i>Financeiro</a>
+        </div>
 
         <div class="nav-item dropdown">
-            <a href="<?php echo SISTEMA_URL ?>Configuracoes/configuracoes.php"><i class="bi bi-gear-fill"></i>Configurações</a>
+            <a href="<?php echo SISTEMA_URL ?>Promocoes/promocoes.php"><i class="bi bi-tags-fill"></i>Promoções</a>
         </div>
     </div>
 

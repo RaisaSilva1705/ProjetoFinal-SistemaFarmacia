@@ -8,6 +8,7 @@ include DEV_PATH . 'Exec/conexao.php';
 include DEV_PATH . 'Exec/logs.php';
 include DEV_PATH . "Exec/validar_sessao.php";
 include DEV_PATH . "Exec/validar_acesso.php";
+include DEV_PATH . "Exec/busca_promocoes.php";
 
 // Confere se não há ID_Caixa aberto
 if (!isset($_SESSION['ID_Caixa'])){
@@ -35,9 +36,12 @@ if (!isset($_SESSION['carrinho'])) $_SESSION['carrinho'] = [];
 
 // Adiciona item no carrinho
 if (isset($_POST['codigo'])) {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+
     $codigo = $_POST['codigo'];
 
-    $stmt = $conn->prepare("SELECT P.Nome, 
+    $stmt = $conn->prepare("SELECT P.ID_Produto, P.Nome, 
                                    MAX(L.Preco_Venda) AS Preco_Venda,
                                    P.Foto 
                             FROM PRODUTOS P 
@@ -72,6 +76,7 @@ if (isset($_POST['codigo'])) {
 
         if (!$produtoEncontrado) {
             $_SESSION['carrinho'][] = [
+                'id_produto' => $produto['ID_Produto'],
                 'codigo' => $codigo,
                 'nome' => $produto['Nome'],
                 'preco' => $produto['Preco_Venda'],
@@ -86,6 +91,9 @@ if (isset($_POST['codigo'])) {
             'preco' => $produto['Preco_Venda'],
             'foto' => $produto['Foto']
         ];
+
+        // Busca as promoções
+        aplicarPromocoesAoCarrinho($conn);
 
         header("Location: " . $_SERVER['PHP_SELF']);
         exit;
@@ -198,8 +206,10 @@ if (isset($_POST['codigo'])) {
                                     if (!empty($_SESSION['carrinho'])):
                                         foreach ($_SESSION['carrinho'] as $index => $item):
                                             $preco = ($item['preco'] == null) ?  0.00 : $item['preco'];
-                                            $subtotal = $preco * $item['quantidade'];
-                                            $totalGeral += $subtotal;
+                                            $desconto_total_item = $item['desconto'] ?? 0.00;
+                                            $subtotal_original = $preco * $item['quantidade'];
+                                            $subtotal_final = $subtotal_original - $desconto_total_item;
+                                            $totalGeral += $subtotal_final;
                                             $totalItens += $item['quantidade'];
                                             $linhasOcupadas++;
                                             $classe_linha = '';
@@ -217,10 +227,27 @@ if (isset($_POST['codigo'])) {
                                             }
                                     ?>
                                     <tr class="<?= $classe_linha ?>">
-                                        <td><?= htmlspecialchars($item['nome']) ?></td>
+                                        <td>
+                                            <?= htmlspecialchars($item['nome']) ?>
+                                            <?php if (isset($item['desconto_promocao_desc'])): ?>
+                                                <br><small class="text-success fw-bold" style="font-size: 0.8em;"><i class="bi bi-tag-fill"></i> <?= $item['desconto_promocao_desc'] ?></small>
+                                            <?php endif; ?>
+                                        </td>
                                         <td>R$ <?= number_format($preco, 2, ',', '.') ?></td>
                                         <td><?= $item['quantidade'] ?></td>
-                                        <td>R$ <?= number_format($subtotal, 2, ',', '.') ?></td>
+                                        <td>
+                                            <?php if ($desconto_total_item > 0): ?>
+                                                <del class="text-danger" >
+                                                    R$ <?= number_format($subtotal_original, 2, ',', '.') ?>
+                                                </del>
+                                                <br>
+                                                <span class="fw-bold">
+                                                    R$ <?= number_format($subtotal_final, 2, ',', '.') ?>
+                                                </span>
+                                            <?php else: ?>
+                                                R$ <?= number_format($subtotal_final, 2, ',', '.') ?>
+                                            <?php endif; ?>
+                                        </td>
                                         <td class="d-flex align-items-center justify-content-center gap-1">
                                             <button class="btn btn-sm btn-secondary" onclick="gerenciarItem(<?= $index ?>, 'diminuir')"><i class="bi bi-dash-lg"></i></button>
                                             <button class="btn btn-sm btn-danger" onclick="gerenciarItem(<?= $index ?>, 'remover')"><i class="bi bi-trash-fill"></i></button>
@@ -228,7 +255,6 @@ if (isset($_POST['codigo'])) {
                                     </tr>
                                     <?php
                                         endforeach;
-
                                         // Preenche o restante com linhas vazias
                                         for ($i = 0; $i < $linhasDesejadas - $linhasOcupadas; $i++): ?>
                                             <tr>
@@ -268,8 +294,8 @@ if (isset($_POST['codigo'])) {
 
                 <!-- RODAPÉ -->
                 <div class="row">
-                    <div class="col-md-1">
-                        <label>Total Bruto:</label>
+                    <div class="col-md-2">
+                        <label><strong>Total Bruto:</strong></label>
                         <input type="text" id="total_bruto" class="form-control" value="R$ <?= number_format($totalGeral, 2, ',', '.') ?>" readonly>
                     </div>
                     <div class="col-md-1">
@@ -278,13 +304,13 @@ if (isset($_POST['codigo'])) {
                     </div>
 
                     <div class="col-md-4 d-flex align-items-center gap-2 mt-4">
-                        <button type="button" class="btn btn-success" onclick="selecionarForma(1)">(1) Dinheiro</button>
-                        <button type="button" class="btn btn-success" onclick="selecionarForma(2)">(2) Crédito</button>
-                        <button type="button" class="btn btn-success" onclick="selecionarForma(3)">(3) Débito</button>
-                        <button type="button" class="btn btn-success" onclick="selecionarForma(4)">(4) Pix</button>
+                        <button type="button" class="btn btn-success" onclick="selecionarForma(1)">1- Dinheiro</button>
+                        <button type="button" class="btn btn-success" onclick="selecionarForma(2)">2- Crédito</button>
+                        <button type="button" class="btn btn-success" onclick="selecionarForma(3)">3- Débito</button>
+                        <button type="button" class="btn btn-success" onclick="selecionarForma(4)">4- Pix</button>
                     </div>
 
-                    <div class="col-md-6 d-flex align-items-center justify-content-end gap-2 mt-4">
+                    <div class="col-md-5 d-flex align-items-center justify-content-end gap-2 mt-4">
                         <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalConsultaPreco" id="btnConsultarPreco">
                             Consultar Preço
                         </button>
@@ -297,7 +323,7 @@ if (isset($_POST['codigo'])) {
                             <button class="btn btn-secondary" type="submit">Fechar Caixa</button>
                         </form>
                         <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#popupFuncionalidades" id="btnFuncionalidades">
-                            Funcionalidades
+                            Funcionalidades Extras
                         </button>
                     </div>
                 </div>
@@ -425,6 +451,10 @@ if (isset($_POST['codigo'])) {
                     </div>
                     <div class="modal-body">
                         <p>Por favor, insira a senha do gerente para continuar.</p>
+                        <div class="form-group mb-3" id="divQuantidadeRemover" style="display: none;">
+                            <label for="quantidadeRemover">Quantidade a remover:</label>
+                            <select class="form-select" id="quantidadeRemover"></select>
+                        </div>
                         <div class="form-group">
                             <label for="senhaGerente">Senha:</label>
                             <input type="password" class="form-control" id="senhaGerente">
@@ -508,13 +538,14 @@ if (isset($_POST['codigo'])) {
             });
 
             document.getElementById('form-add-item').addEventListener('submit', function (event) {
-                event.preventDefault(); 
-    
                 const codigoInput = document.getElementById('codigo');
                 const codigo = codigoInput.value.trim();
-                if(codigo === '') return;
+                if(codigo === '') {
+                    event.preventDefault(); 
+                    return;
+                }
 
-                // --- LÓGICA DE VERIFICAÇÃO PRIMEIRO ---
+                // --- LÓGICA DE VERIFICAÇÃO DE ITEM DE PRÉ-VENDA ---
                 let itemParaVerificarIndex = -1;
                 if (Array.isArray(window.carrinhoSessao)) { 
                     itemParaVerificarIndex = window.carrinhoSessao.findIndex(item => 
@@ -525,6 +556,7 @@ if (isset($_POST['codigo'])) {
                 }
 
                 if (itemParaVerificarIndex > -1) {
+                    event.preventDefault(); 
                     fetch('../../Dev/Exec/gerenciar_carrinho.php', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -537,12 +569,12 @@ if (isset($_POST['codigo'])) {
                         else 
                             mostrarToast(data.erro || 'Não foi possível verificar o item.', 'danger');
                     });
+                    return; 
+                }
 
-                } 
-
+                // --- LÓGICA DE CARREGAR PRÉ-VENDA ---
                 if (codigo.startsWith('99')) {
                     event.preventDefault(); 
-
                     fetch('../../Dev/Exec/processa_carrinho_prevenda.php', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -561,7 +593,6 @@ if (isset($_POST['codigo'])) {
                                     buscaClienteInput.dispatchEvent(new Event('change')); 
                                 }
                             }
-                            
                             mostrarToast(data.mensagem || 'Itens carregados com sucesso!', 'success');
                             setTimeout(() => location.reload(), 1000); 
                         } 
@@ -574,7 +605,8 @@ if (isset($_POST['codigo'])) {
                         mostrarToast('Erro de comunicação ao carregar pré-venda.', 'danger');
                         console.error(err);
                     });
-                } 
+                    return; 
+                }
             });
 
             // MUDAR OS VALORES POR NOME DO PRODUTO
@@ -715,40 +747,137 @@ if (isset($_POST['codigo'])) {
 
             // Confirmação de pagamento com STRIPE
             document.getElementById('confirmarPagamento').addEventListener('click', async function(event){
-                // ---- BLOCO DE VERIFICAÇÃO DO CARRINHO ----
+                event.preventDefault();
+
+                const btn = this; 
+                const originalButtonHTML = btn.innerHTML; 
+
                 const itemNaoVerificado = window.carrinhoSessao.some(item =>
                     item.origem === 'prevenda' &&
                     item.quantidade_verificada < item.quantidade
                 );
-
                 if (itemNaoVerificado) {
-                    event.preventDefault(); 
-                    mostrarToast('Existem itens da pré-venda que ainda não foram verificados! Por favor, escaneie todos os produtos.', 'danger', 'Verificação Pendente');
+                    mostrarToast('Existem itens da pré-venda que ainda não foram verificados!', 'danger', 'Verificação Pendente');
                     return; 
                 }
-                event.preventDefault();
 
-                document.querySelectorAll('.forma').forEach(function(input){
-                    const style = window.getComputedStyle(input.closest('.campo-forma'));
-                    if (style.display === 'none') return; // Ignora campos ocultos
-                    
-                    const id = parseInt(input.dataset.id);
-                    const valor = parseFloat(input.value.replace(',', '.'));
-                    if (!isNaN(valor) && valor > 0) {
-                        totalPago += valor;
+                // --- LÓGICA DE DESATIVAÇÃO E FEEDBACK VISUAL ---
+                btn.disabled = true;
+                btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processando...`;
 
-                        if (!mapaFormas[id]){
-                            const inputParcelas = document.getElementById('parcelas');
+                try {
+                    let totalPago = 0;
+                    let formas_pagamento = [];
+                    let mapaFormas = {};
 
-                            mapaFormas[id] = {
-                                id_forma_pag: id,
-                                valor: 0,
-                                quant_vezes: (inputParcelas && valor >= <?= $infoParcelas['Valor_Min_Parcelas'] ?>) ? inputParcelas.value : 1
-                            };
+                    document.querySelectorAll('.forma').forEach(function(input){
+                        const style = window.getComputedStyle(input.closest('.campo-forma'));
+                        if (style.display === 'none') return; 
+                        
+                        const id = parseInt(input.dataset.id);
+                        const valor = parseFloat(input.value.replace(',', '.'));
+                        if (!isNaN(valor) && valor > 0) {
+                            totalPago += valor;
+
+                            if (!mapaFormas[id]){
+                                const inputParcelas = document.getElementById('parcelas');
+
+                                mapaFormas[id] = {
+                                    id_forma_pag: id,
+                                    valor: 0,
+                                    quant_vezes: (inputParcelas && valor >= <?= $infoParcelas['Valor_Min_Parcelas'] ?>) ? inputParcelas.value : 1
+                                };
+                            }
+                            mapaFormas[id].valor += valor;
                         }
-                        mapaFormas[id].valor += valor;
+                    });
+                    
+                    formas_pagamento = Object.values(mapaFormas);
+
+                    if (totalPago < <?= $totalGeral ?>) {
+                        mostrarToast("Pagamento Concluído. Ainda faltam R$ " + (<?= $totalGeral ?> - totalPago).toFixed(2).replace('.', ','), 'success', 'Sucesso');
+                        btn.disabled = false;
+                        btn.innerHTML = originalButtonHTML;
+                        calcularTroco();
+                        return;
                     }
-                });
+
+                    let erroPagamento = false;
+                    for (let forma of formas_pagamento) {
+                        if (forma.id_forma_pag !== 1) {  // apenas Crédito (2), Débito (3) ou PIX (4)
+                            let response;
+
+                            if (forma.id_forma_pag === 4){ // PIX
+
+                                // -------- STRIPE -> precisa de verificação com CNPJ --------
+                                /*response = await fetch('../../Dev/Exec/stripe_pagamento.php', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        valor: forma.valor,
+                                        tipo: 'pix'
+                                    })
+                                });*/
+
+                                // Simulação: gera um QR Code fake com o valor da venda
+                                const qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=Pagamento_PIX_VALOR_' + encodeURIComponent(forma.valor);
+
+                                // Abre o Modal do PIX
+                                const pixModal = new bootstrap.Modal(document.getElementById('modalPix'));
+                                const pixImg = document.getElementById('pixImg');
+                                pixImg.src = qrCodeUrl;
+
+                                pixModal.show();
+
+                                await new Promise((resolve) => {
+                                    document.getElementById('btnConfirmarPix').onclick = function(){
+                                        pixModal.hide();
+                                        resolve();
+                                    }
+                                })
+
+                            }
+                            else { // Cartão
+                                response = await fetch('../../Dev/Exec/stripe_pagamento.php', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        valor: forma.valor,
+                                        tipo: 'cartao'
+                                    })
+                                });
+                            
+                                const result = await response.json();
+                                // console.log(result);
+
+                                if (!result.sucesso) {
+                                    document.getElementById('card-errors').textContent = 'Erro no pagamento: ' + result.mensagem;
+                                    erroPagamento = true;
+                                    break; 
+                                }
+                            }
+                        }
+                    }
+
+                    if (!erroPagamento) {
+                        // A função enviarJson agora é responsável por recarregar a página,
+                        // então não precisamos reativar o botão em caso de sucesso.
+                        await enviarJson(formas_pagamento);
+                    } 
+                    else {
+                        // Reativa o botão se o pagamento falhar
+                        btn.disabled = false;
+                        btn.innerHTML = originalButtonHTML;
+                    }
+
+                } 
+                catch (error) {
+                    console.error("Erro inesperado no processo de pagamento:", error);
+                    mostrarToast('Ocorreu um erro inesperado. Tente novamente.', 'danger');
+                    // Garante que o botão seja reativado em qualquer erro não previsto
+                    btn.disabled = false;
+                    btn.innerHTML = originalButtonHTML;
+                }
 
                 formas_pagamento = Object.values(mapaFormas);
                 console.log(formas_pagamento);
@@ -1163,9 +1292,29 @@ if (isset($_POST['codigo'])) {
             function gerenciarItem(index, acao) {
                 document.getElementById('itemIndex').value = index;
                 document.getElementById('acaoGerente').value = acao;
-
                 document.getElementById('senhaGerente').value = '';
                 document.getElementById('erroSenha').textContent = '';
+
+                const divQuantidade = document.getElementById('divQuantidadeRemover');
+                const selectQuantidade = document.getElementById('quantidadeRemover');
+                selectQuantidade.innerHTML = '';
+
+                if (acao === 'diminuir') {
+                    const item = window.carrinhoSessao[index];
+                    const quantidadeAtual = item.quantidade;
+
+                    // Popula o select com as opções de 1 até (quantidade - 1)
+                    for (let i = 1; i < quantidadeAtual; i++) {
+                        const option = document.createElement('option');
+                        option.value = i;
+                        option.textContent = i;
+                        selectQuantidade.appendChild(option);
+                    }
+
+                    divQuantidade.style.display = 'block'; 
+                } 
+                else 
+                    divQuantidade.style.display = 'none'; 
 
                 modalGerente.show();
             }
@@ -1174,16 +1323,21 @@ if (isset($_POST['codigo'])) {
                 const senha = document.getElementById('senhaGerente').value;
                 const index = document.getElementById('itemIndex').value;
                 const acao = document.getElementById('acaoGerente').value;
+                const quantidade = document.getElementById('quantidadeRemover').value;
 
                 if (senha === '') {
                     document.getElementById('erroSenha').textContent = 'Por favor, insira a senha.';
                     return;
                 }
 
+                let body = `acao=${acao}&index=${index}&senha=${encodeURIComponent(senha)}`;
+                if (acao === 'diminuir') 
+                    body += `&quantidade_a_remover=${quantidade}`;
+
                 fetch('../../Dev/Exec/gerenciar_carrinho.php', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: `acao=${acao}&index=${index}&senha=${encodeURIComponent(senha)}`
+                    body: body
                 })
                 .then(response => response.json())
                 .then(data => {

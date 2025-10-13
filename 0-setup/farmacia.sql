@@ -638,3 +638,14 @@ CREATE TABLE IF NOT EXISTS `PROMOCOES_ITENS` (
 ) ENGINE = InnoDB;
 /* drop table PROMOCOES_ITENS; */
 /* select * from PROMOCOES_ITENS; */
+
+SHOW VARIABLES LIKE 'event_scheduler';
+CREATE EVENT desativa_promocoes_expiradas
+ON SCHEDULE EVERY 1 DAY
+STARTS CURRENT_TIMESTAMP + INTERVAL 1 DAY_HOUR
+DO
+  UPDATE `PROMOCOES`
+  SET `Status` = 'Inativo'
+  WHERE `Status` = 'Ativo'
+    AND `Data_Fim` IS NOT NULL
+    AND `Data_Fim` < CURDATE();

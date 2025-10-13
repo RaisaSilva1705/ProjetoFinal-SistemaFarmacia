@@ -60,32 +60,30 @@ try {
     $stmtMovEstoque = $conn->prepare("INSERT INTO MOVIMENTACAO_ESTOQUE (ID_Estoque, ID_Produto, ID_Funcionario, Tipo, Motivo, Quantidade, ID_Venda, OBS) VALUES (?, ?, ?, 'Saída', 'Venda', 1, ?, ?)");
     
     foreach ($_SESSION['carrinho'] as $item) {
-        if (isset($item['tipo']) && $item['tipo'] === 'produto') {
-            $id_produto = $item['id_produto']; 
-            $quantidade = $item['quantidade'];
-            $desconto_item = $item['desconto'] ?? 0.00;
-            $valor_total_item = $item['preco'] * $quantidade;
+        $id_produto = $item['id_produto']; 
+        $quantidade = $item['quantidade'];
+        $desconto_item = $item['desconto'] ?? 0.00;
+        $valor_total_item = $item['preco'] * $quantidade;
 
-            $stmtItem->bind_param("iiidd", $idVenda, $id_produto, $quantidade, $valor_total_item, $desconto_item);
-            $stmtItem->execute();
+        $stmtItem->bind_param("iiidd", $idVenda, $id_produto, $quantidade, $valor_total_item, $desconto_item);
+        $stmtItem->execute();
 
-            for ($i = 0; $i < $quantidade; $i++) {
-                $stmtLotes->bind_param("i", $id_produto);
-                $stmtLotes->execute();
-                $lotes_disponiveis = $stmtLotes->get_result()->fetch_all(MYSQLI_ASSOC);
-                
-                if (empty($lotes_disponiveis)) 
-                    throw new Exception("Estoque insuficiente para o produto: " . $item['nome']);
-                
-                $id_estoque_a_retirar = $lotes_disponiveis[0]['ID_Estoque'];
-                
-                $stmtUpdateEstoque->bind_param("i", $id_estoque_a_retirar);
-                $stmtUpdateEstoque->execute();
+        for ($i = 0; $i < $quantidade; $i++) {
+            $stmtLotes->bind_param("i", $id_produto);
+            $stmtLotes->execute();
+            $lotes_disponiveis = $stmtLotes->get_result()->fetch_all(MYSQLI_ASSOC);
+            
+            if (empty($lotes_disponiveis)) 
+                throw new Exception("Estoque insuficiente para o produto: " . $item['nome']);
+            
+            $id_estoque_a_retirar = $lotes_disponiveis[0]['ID_Estoque'];
+            
+            $stmtUpdateEstoque->bind_param("i", $id_estoque_a_retirar);
+            $stmtUpdateEstoque->execute();
 
-                $obs_mov = 'Venda PDV #' . $idVenda;
-                $stmtMovEstoque->bind_param("iiiis", $id_estoque_a_retirar, $id_produto, $id_funcionario, $idVenda, $obs_mov);
-                $stmtMovEstoque->execute();
-            }
+            $obs_mov = 'Venda PDV #' . $idVenda;
+            $stmtMovEstoque->bind_param("iiiis", $id_estoque_a_retirar, $id_produto, $id_funcionario, $idVenda, $obs_mov);
+            $stmtMovEstoque->execute();
         }
     }
 

@@ -2,6 +2,7 @@
 session_start();
 include 'config.php';
 include 'conexao.php';
+include 'busca_promocoes.php';
 
 header('Content-Type: application/json');
 
@@ -47,13 +48,17 @@ if ($senhaValida) {
         $_SESSION['carrinho'] = array_values($_SESSION['carrinho']);
     }
     elseif ($acao === 'diminuir') {
-        if ($_SESSION['carrinho'][$index]['quantidade'] > 1)
-            $_SESSION['carrinho'][$index]['quantidade']--;
-        else {
+        $quantidade_a_remover = isset($_POST['quantidade_a_remover']) ? (int)$_POST['quantidade_a_remover'] : 1;
+        $quantidade_atual = $_SESSION['carrinho'][$index]['quantidade'];
+
+        if ($quantidade_a_remover > 0 && $quantidade_a_remover < $quantidade_atual) 
+            $_SESSION['carrinho'][$index]['quantidade'] -= $quantidade_a_remover;
+        elseif ($quantidade_a_remover >= $quantidade_atual) {
             unset($_SESSION['carrinho'][$index]);
             $_SESSION['carrinho'] = array_values($_SESSION['carrinho']);
         }
     }
+    aplicarPromocoesAoCarrinho($conn);
     echo json_encode(['sucesso' => true]);
 }
 else
