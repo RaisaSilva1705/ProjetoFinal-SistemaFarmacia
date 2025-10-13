@@ -199,6 +199,7 @@ if (isset($_POST['codigo'])) {
                             <tbody style="min-height: 240px;">
                                 <?php
                                     $totalGeral = 0;
+                                    $totalBrutoGeral = 0;
                                     $totalItens = 0;
                                     $linhasDesejadas = 11; // Número total de linhas que você quer
                                     $linhasOcupadas = 0;
@@ -210,6 +211,7 @@ if (isset($_POST['codigo'])) {
                                             $subtotal_original = $preco * $item['quantidade'];
                                             $subtotal_final = $subtotal_original - $desconto_total_item;
                                             $totalGeral += $subtotal_final;
+                                            $totalBrutoGeral += $subtotal_original;
                                             $totalItens += $item['quantidade'];
                                             $linhasOcupadas++;
                                             $classe_linha = '';
@@ -281,6 +283,7 @@ if (isset($_POST['codigo'])) {
                                     </tr>
                                 <?php endfor; ?>
                             <?php endif; ?>
+                            <?php $totalDescontoGeral = $totalBrutoGeral - $totalGeral; ?>
                             </tbody>
                             <tfoot class="table-secondary">
                                 <tr>
@@ -322,7 +325,7 @@ if (isset($_POST['codigo'])) {
                             <input type="hidden" name="finalizar_caixa" value="1">
                             <button class="btn btn-secondary" type="submit">Fechar Caixa</button>
                         </form>
-                        <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#popupFuncionalidades" id="btnFuncionalidades">
+                        <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#popupFuncionalidades" id="btnFuncionalidades">
                             Funcionalidades Extras
                         </button>
                     </div>
@@ -972,7 +975,7 @@ if (isset($_POST['codigo'])) {
                     total_itens: <?= $totalItens ?>,
                     id_cliente: document.getElementById('id_cliente_hidden').value || null,
                     id_funcionario: <?= $_SESSION['ID_Funcionario'] ?> || null,
-                    desconto: 0.00,
+                    desconto: <?= $totalDescontoGeral ?? 0.00 ?>,
                     formas_pagamento: formas_pagamento
                 };
 

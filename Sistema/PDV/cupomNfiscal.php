@@ -71,13 +71,14 @@ $sqlTabelaItens = "
     -- Seleciona os PRODUTOS da venda
     (SELECT 
         'produto' AS TipoItem,
-        P.Nome AS Nome,
-        P.EAN_GTIN AS Codigo,
+        COALESCE(P.Nome, '[PRODUTO REMOVIDO]') AS Nome,
+        COALESCE(P.EAN_GTIN, 'N/A') AS Codigo,
         IV.Quantidade AS Quantidade,
-        (IV.Valor_Total / IV.Quantidade) AS Valor_Unitario,
-        IV.Valor_Total AS Valor_Total
+        (IV.Valor_Total / IV.Quantidade) AS Valor_Unitario_Final, -- << MUDANÇA AQUI
+        IV.Valor_Total AS Valor_Total_Final, -- << MUDANÇA AQUI
+        IV.Desconto AS Desconto_Item -- << MUDANÇA AQUI
     FROM ITENS_VENDA IV
-    JOIN PRODUTOS P ON IV.ID_Produto = P.ID_Produto
+    LEFT JOIN PRODUTOS P ON IV.ID_Produto = P.ID_Produto
     WHERE IV.ID_Venda = ?)
 
     UNION ALL
@@ -85,14 +86,15 @@ $sqlTabelaItens = "
     -- Seleciona os SERVIÇOS da venda (via Pré-Venda)
     (SELECT 
         'servico' AS TipoItem,
-        SF.Nome_Servico AS Nome,
-        CONCAT('SERV', SF.ID_Servico) AS Codigo,
+        COALESCE(SF.Nome_Servico, '[SERVIÇO REMOVIDO]') AS Nome,
+        CONCAT('SERV', PVI.ID_Servico) AS Codigo,
         PVI.Quantidade AS Quantidade,
-        PVI.Valor_Unitario AS Valor_Unitario,
-        (PVI.Valor_Unitario * PVI.Quantidade) AS Valor_Total
+        PVI.Valor_Unitario AS Valor_Unitario_Final, -- << MUDANÇA AQUI
+        (PVI.Valor_Unitario * PVI.Quantidade) AS Valor_Total_Final, -- << MUDANÇA AQUI
+        PVI.Desconto AS Desconto_Item -- << MUDANÇA AQUI
     FROM PRE_VENDAS PV
     JOIN PRE_VENDAS_ITENS PVI ON PV.ID_PreVenda = PVI.ID_PreVenda
-    JOIN SERVICOS_FARMACEUTICOS SF ON PVI.ID_Servico = SF.ID_Servico
+    LEFT JOIN SERVICOS_FARMACEUTICOS SF ON PVI.ID_Servico = SF.ID_Servico
     WHERE PV.ID_Venda = ? AND PVI.ID_Servico IS NOT NULL)
 ";
 
@@ -138,17 +140,30 @@ $dataHora = date('d/m/Y H:i:s', strtotime($dadosVenda['DataHora_Venda']));
                 # | COD | DESC | QTD | UN | VL UN R$ | VL ITEM R$
             </div>
             <hr>
-            <?php 
+            <?php
                 $cont = 1;
+                $total_descontos_itens = 0; // Vamos somar os descontos para mostrar no final
                 foreach($tabItens as $item):
-                    $preco_un = number_format($item['Valor_Unitario'], 2, ',', '.');
-                    $vl_total = number_format($item['Valor_Total'], 2, ',', '.');
-                    $nomeItem = strlen($item['Nome']) > 20 ? substr($item['Nome'], 0, 20) . '...' : $item['Nome'];
+                    $desconto_item = $item['Desconto_Item'] ?? 0;
+                    $total_descontos_itens += $desconto_item;
+
+                    // Calcula o preço original para mostrar o "de/por"
+                    $valor_total_original = $item['Valor_Total_Final'] + $desconto_item;
+                    $preco_un_original = $valor_total_original / $item['Quantidade'];
+
+                    $preco_un_final_formatado = number_format($item['Valor_Unitario_Final'], 2, ',', '.');
+                    $vl_total_final_formatado = number_format($item['Valor_Total_Final'], 2, ',', '.');
+                    $nomeItem = strlen($item['Nome']) > 22 ? substr($item['Nome'], 0, 22) . '...' : $item['Nome'];
                     $unidade = $item['TipoItem'] === 'produto' ? 'UN' : 'SERV';
             ?>
             <div class="small">
                 <?= $cont ?> | <?= $item['Codigo'] ?> | <?= $nomeItem ?><br>
-                <div style="text-align: right;"><?= $item['Quantidade'] ?> | <?= $unidade ?> | <?= $preco_un ?> | <?= $vl_total ?></div>
+                <div style="text-align: right;"><?= $item['Quantidade'] ?> | <?= $unidade ?> | <?= $preco_un_final_formatado ?> | <?= $vl_total_final_formatado ?></div>
+                <?php if ($desconto_item > 0): ?>
+                    <div style="text-align: right; font-size: 11px;">
+                        Desconto: R$ <?= number_format($desconto_item, 2, ',', '.') ?>
+                    </div>
+                <?php endif; ?>
             </div>
             <?php $cont++; endforeach; ?>
         </div>
@@ -166,12 +181,20 @@ $dataHora = date('d/m/Y H:i:s', strtotime($dadosVenda['DataHora_Venda']));
                 ?>
             </div>
             <div>
-                <div style="display: flex; justify-content: space-between;">
-                    
+                <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                        <span>Subtotal:</span>
+                        <span>R$ <?= number_format($dadosVenda['Valor_Total'] + $dadosVenda['Desconto'], 2, ',', '.') ?></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                        <span>Descontos:</span>
+                        <span>- R$ <?= number_format($dadosVenda['Desconto'], 2, ',', '.') ?></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
                         <span><strong>TOTAL: </strong></span>
                         <span><strong>R$ <?= number_format($dadosVenda['Valor_Total'], 2, ',', '.') ?></strong></span>
-                    
-                </div> 
+                    </div>
+                </div>
             </div>
         </div>
         <hr>

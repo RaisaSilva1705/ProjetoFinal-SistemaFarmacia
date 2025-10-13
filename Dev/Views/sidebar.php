@@ -62,58 +62,61 @@
             <a class="dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-shop-window"></i>Frente de Loja</a>
             <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>PDV/pdv.php">Nova Venda (PDV)</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>PreVendas/prevendas.php">Pré-Vendas</a></li>
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Caixas/caixas.php">Situação do Caixa</a></li>
-                <hr class="dropdown-divider" style="border-color: #495057;">
-                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Relatorios/relatorio_pdv.php">Relatório de Vendas</a></li>
+            </ul>
+        </div>
+        
+        <div class="nav-item dropdown">
+            <a class="dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-box-seam-fill"></i>Estoque</a>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Produtos/produtos.php">Cadastro de Produtos</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Estoque/estoque.php">Posição de Estoque</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Fornecedores/fornecedores.php">Fornecedores</a></li>
+            </ul>
+        </div>
+
+        <a class="nav-item" href="<?php echo SISTEMA_URL ?>Servicos/servicos.php"><i class="bi bi-clipboard2-pulse-fill"></i>Serviços</a>
+        
+        <a class="nav-item" href="<?php echo SISTEMA_URL ?>Controlados/dispensacao_controlados.php"><i class="bi bi-shield-lock-fill"></i>Controlados</a>
+
+        <div class="nav-item dropdown">
+            <a class="dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-cash-coin"></i>Financeiro</a>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Financeiro/despesas.php">Gestão de Despesas</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Relatorios/relatorio_financeiro.php">Relatório Financeiro</a></li>
             </ul>
         </div>
 
         <div class="nav-item dropdown">
-            <a class="dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-box-seam-fill"></i>Gestão</a>
+            <a class="dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-tags-fill"></i>Marketing</a>
             <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Produtos/produtos.php">Produtos</a></li>
-                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Estoque/estoque.php">Estoque</a></li>
-                <hr class="dropdown-divider" style="border-color: #495057;">
-                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Caixas/caixas.php">Caixas</a></li>
-                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Cargos/cargos.php">Cargos</a></li>
-                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Unidades/unidades.php">Unidades</a></li>
-                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Pagamentos/formas_pagamentos.php">Formas de Pagamento</a></li>
-                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Servicos/servicos.php">Serviços Farmacêuticos</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Promocoes/promocoes.php">Promoções</a></li>
             </ul>
         </div>
+
+        <a class="nav-item" href="<?php echo SISTEMA_URL ?>Relatorios/relatorios.php"><i class="bi bi-bar-chart-line-fill"></i>Relatórios</a>
 
         <div class="nav-item dropdown">
             <a class="dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-people-fill"></i>Pessoas</a>
             <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Clientes/clientes.php">Clientes</a></li>
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Funcionarios/funcionarios.php">Funcionários</a></li>
-                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Fornecedores/fornecedores.php">Fornecedores</a></li>
             </ul>
         </div>
 
         <div class="nav-item dropdown">
-            <a href="<?php echo SISTEMA_URL ?>Relatorios/relatorios.php"><i class="bi bi-bar-chart-line-fill"></i>Relatórios</a>
+            <a class="dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-gear-fill"></i>Configurações</a>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Caixas/caixas.php">Caixas</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Cargos/cargos.php">Cargos e Permissões</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Unidades/unidades.php">Unidades de Medida</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Pagamentos/formas_pagamentos.php">Formas de Pagamento</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Servicos/servicos.php">Cadastro de Serviços</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Financeiro/categorias_despesa.php">Categorias de Despesa</a></li>
+            </ul>
         </div>
 
-        <div class="nav-item dropdown">
-            <a href="<?php echo SISTEMA_URL ?>Servicos/servicos.php"><i class="bi bi-clipboard-pulse"></i>Serviços</a>
-        </div>
-
-        <div class="nav-item dropdown">
-            <a href="<?php echo SISTEMA_URL ?>PreVendas/nova_prevenda.php"><i class="bi bi-basket2-fill"></i>Pré-Venda</a>
-        </div>
-        
-        <div class="nav-item dropdown">
-            <a href="<?php echo SISTEMA_URL ?>Controlados/dispensacao_controlados.php"><i class="bi bi-shield-lock-fill"></i>Controlados</a>
-        </div>
-        
-        <div class="nav-item dropdown">
-            <a href="<?php echo SISTEMA_URL ?>Financeiro/despesas.php"><i class="bi bi-cash-coin"></i>Financeiro</a>
-        </div>
-
-        <div class="nav-item dropdown">
-            <a href="<?php echo SISTEMA_URL ?>Promocoes/promocoes.php"><i class="bi bi-tags-fill"></i>Promoções</a>
-        </div>
     </div>
 
     <div class="sidebar-footer">

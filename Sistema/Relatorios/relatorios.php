@@ -12,137 +12,152 @@ include DEV_PATH . "Exec/validar_acesso.php";
 ?>
 
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
     <head>
         <meta charset="UTF-8">
-        <title>Relatórios</title>
+        <title>Central de Relatórios</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
     <body class="bg-light">
-        <!-- Navbar -->
-        <?php include_once DEV_PATH . 'Views/sidebar.php'?>
+        <?php include_once DEV_PATH . 'Views/sidebar.php'; ?>
 
         <div class="content d-flex flex-column min-vh-100">
             <div class="content flex-grow-1">
-                <!-- Banner -->
                 <div class="container-fluid bg-secondary text-white text-center p-4 no-print">
                     <h3>Central de Relatórios</h3>
                 </div>
+                
                 <div class="container p-5">
-                    <h2 class="mb-4">Análises do Sistema</h2>
-                    <div class="row">
 
+                    <h3 class="mb-4">Análises Estratégicas e Financeiras</h3>
+                    <div class="row">
                         <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="card h-100">
+                            <div class="card h-100 shadow-sm">
                                 <div class="card-body text-center d-flex flex-column">
-                                    <i class="bi bi-cash-coin fs-1 text-success"></i>
-                                    <h5 class="card-title mt-3">Relatório de Vendas</h5>
-                                    <p class="card-text text-muted">Analise o faturamento detalhado por período, cliente, funcionário e caixa.</p>
+                                    <i class="bi bi-pie-chart-fill fs-1 text-success"></i>
+                                    <h5 class="card-title mt-3">Relatório Financeiro (DRE)</h5>
+                                    <p class="card-text text-muted">Acompanhe a saúde financeira da farmácia: Receita, Custos, Despesas e Lucro Líquido.</p>
+                                    <a href="relatorio_financeiro.php" class="btn btn-success mt-auto">Acessar Relatório</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body text-center d-flex flex-column">
+                                    <i class="bi bi-receipt-cutoff fs-1 text-primary"></i>
+                                    <h5 class="card-title mt-3">Relatório de Vendas (PDV)</h5>
+                                    <p class="card-text text-muted">Visualize o registro detalhado de todas as vendas realizadas, com filtros avançados.</p>
                                     <a href="relatorio_pdv.php" class="btn btn-primary mt-auto">Acessar Relatório</a>
                                 </div>
                             </div>
                         </div>
-
                         <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="card h-100">
+                            <div class="card h-100 shadow-sm">
                                 <div class="card-body text-center d-flex flex-column">
-                                    <i class="bi bi-box-seam fs-1 text-warning"></i>
-                                    <h5 class="card-title mt-3">Relatório de Posição de Estoque</h5>
-                                    <p class="card-text text-muted">Visualize o valor total do seu inventário (custo e venda) e identifique produtos abaixo do mínimo.</p>
-                                    <a href="relatorio_estoque.php" class="btn btn-primary mt-auto">Acessar Relatório</a>
+                                    <i class="bi bi-box-seam-fill fs-1 text-warning"></i>
+                                    <h5 class="card-title mt-3">Posição de Estoque</h5>
+                                    <p class="card-text text-muted">Analise o valor do seu inventário e identifique produtos que precisam de reposição.</p>
+                                    <a href="relatorio_estoque.php" class="btn btn-warning mt-auto">Acessar Relatório</a>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
+                    <h3 class="mb-4 mt-5">Análises de Desempenho</h3>
+                    <div class="row">
                         <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="card h-100">
+                            <div class="card h-100 shadow-sm">
                                 <div class="card-body text-center d-flex flex-column">
-                                    <i class="bi bi-tags-fill fs-1 text-info"></i>
-                                    <h5 class="card-title mt-3">Relatório de Desempenho de Produtos</h5>
-                                    <p class="card-text text-muted">Descubra os produtos mais vendidos, mais rentáveis e com maior giro de estoque.</p>
-                                    <a href="relatorio_produtos.php" class="btn btn-primary mt-auto">Acessar Relatório</a>
+                                    <i class="bi bi-bar-chart-line-fill fs-1 text-info"></i>
+                                    <h5 class="card-title mt-3">Desempenho de Produtos</h5>
+                                    <p class="card-text text-muted">Descubra os produtos mais vendidos, mais rentáveis e o lucro bruto por item.</p>
+                                    <a href="relatorio_produtos.php" class="btn btn-info mt-auto">Acessar Relatório</a>
                                 </div>
                             </div>
                         </div>
-
                         <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="card h-100">
+                            <div class="card h-100 shadow-sm">
                                 <div class="card-body text-center d-flex flex-column">
-                                    <i class="bi bi-archive-fill fs-1 text-dark"></i>
-                                    <h5 class="card-title mt-3">Relatório de Caixas</h5>
-                                    <p class="card-text text-muted">Consulte o histórico de fechamentos, com saldos iniciais, finais e valores vendidos por sessão.</p>
-                                    <a href="relatorio_caixas.php" class="btn btn-primary mt-auto">Acessar Relatório</a>
+                                    <i class="bi bi-people-fill fs-1" style="color: #6f42c1;"></i>
+                                    <h5 class="card-title mt-3">Desempenho de Clientes</h5>
+                                    <p class="card-text text-muted">Identifique seus clientes mais valiosos e analise o ranking de compras.</p>
+                                    <a href="relatorio_clientes.php" class="btn btn-primary mt-auto" style="background-color: #6f42c1; border-color: #6f42c1;">Acessar Relatório</a>
                                 </div>
                             </div>
                         </div>
-
                         <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="card h-100">
+                            <div class="card h-100 shadow-sm">
                                 <div class="card-body text-center d-flex flex-column">
-                                    <i class="bi bi-person-lines-fill fs-1" style="color: purple;"></i>
-                                    <h5 class="card-title mt-3">Relatório de Clientes</h5>
-                                    <p class="card-text text-muted">Identifique seus clientes mais valiosos com base no histórico de compras e valor total gasto.</p>
-                                    <a href="relatorio_clientes.php" class="btn btn-primary mt-auto">Acessar Relatório</a>
+                                    <i class="bi bi-person-badge-fill fs-1 text-secondary"></i>
+                                    <h5 class="card-title mt-3">Desempenho de Funcionários</h5>
+                                    <p class="card-text text-muted">Acompanhe o desempenho de vendas da sua equipe e o ticket médio por vendedor.</p>
+                                    <a href="relatorio_funcionarios.php" class="btn btn-secondary mt-auto">Acessar Relatório</a>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
+                    <h3 class="mb-4 mt-5">Auditoria e Conformidade</h3>
+                    <div class="row">
                         <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="card h-100">
+                            <div class="card h-100 shadow-sm">
                                 <div class="card-body text-center d-flex flex-column">
-                                    <i class="bi bi-person-badge fs-1 text-primary"></i>
-                                    <h5 class="card-title mt-3">Relatório de Funcionários</h5>
-                                    <p class="card-text text-muted">Acompanhe o desempenho de vendas da sua equipe e identifique os vendedores destaque.</p>
-                                    <a href="relatorio_funcionarios.php" class="btn btn-primary mt-auto">Acessar Relatório</a>
+                                    <i class="bi bi-file-earmark-medical-fill fs-1 text-danger"></i>
+                                    <h5 class="card-title mt-3">Dispensação de Controlados</h5>
+                                    <p class="card-text text-muted">Rastreie todas as vendas de medicamentos controlados para fins de auditoria e SNGPC.</p>
+                                    <a href="relatorio_controlados.php" class="btn btn-danger mt-auto">Acessar Relatório</a>
                                 </div>
                             </div>
                         </div>
-
                         <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="card h-100">
+                            <div class="card h-100 shadow-sm">
                                 <div class="card-body text-center d-flex flex-column">
-                                    <i class="bi bi-truck fs-1" style="color: brown;"></i>
-                                    <h5 class="card-title mt-3">Relatório de Fornecedores</h5>
-                                    <p class="card-text text-muted">Analise quais fornecedores trazem os produtos que mais geram faturamento para a sua loja.</p>
-                                    <a href="relatorio_fornecedores.php" class="btn btn-primary mt-auto">Acessar Relatório</a>
+                                    <i class="bi bi-shield-lock-fill fs-1 text-secondary"></i>
+                                    <h5 class="card-title mt-3">Atividades do Sistema (Logs)</h5>
+                                    <p class="card-text text-muted">Audite todas as ações realizadas pelos usuários no sistema, com filtros de data e funcionário.</p>
+                                    <a href="relatorio_logs.php" class="btn btn-secondary mt-auto">Acessar Relatório</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body text-center d-flex flex-column">
+                                    <i class="bi bi-archive-fill fs-1" style="color: #6c757d;"></i>
+                                    <h5 class="card-title mt-3">Histórico de Caixas</h5>
+                                    <p class="card-text text-muted">Consulte o histórico de todos os caixas fechados, com valores e operadores.</p>
+                                    <a href="relatorio_caixas.php" class="btn btn-secondary mt-auto">Acessar Relatório</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body text-center d-flex flex-column">
+                                    <i class="bi bi-clipboard2-pulse-fill fs-1" style="color: #0dcaf0;"></i>
+                                    <h5 class="card-title mt-3">Serviços Farmacêuticos</h5>
+                                    <p class="card-text text-muted">Analise o faturamento e o desempenho dos serviços clínicos prestados.</p>
+                                    <a href="relatorio_servicos.php" class="btn btn-info mt-auto">Acessar Relatório</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body text-center d-flex flex-column">
+                                    <i class="bi bi-truck fs-1" style="color: #343a40;"></i>
+                                    <h5 class="card-title mt-3">Análise de Fornecedores</h5>
+                                    <p class="card-text text-muted">Veja quais fornecedores representam a maior parte do seu faturamento.</p>
+                                    <a href="relatorio_fornecedores.php" class="btn btn-dark mt-auto">Acessar Relatório</a>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Footer -->
-            <?php include_once DEV_PATH . 'Views/footer.php'?>
-        </div>
-
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
-            </div>
+            
+            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
         
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="<?= DEV_URL ?>JS/toast.js"></script>
-        <script>
-            <?php
-            if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {
-                $texto = addslashes($_SESSION['msg']['texto']);
-                $tipo = $_SESSION['msg']['tipo'];
-                
-                echo "mostrarToast('{$texto}', '{$tipo}');";
-
-                unset($_SESSION['msg']);
-            }
-            ?>
-        </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

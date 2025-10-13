@@ -14,110 +14,92 @@ $data_fim = $_GET['data_fim'] ?? date('Y-m-d');
 $busca_nome = $_GET['busca_nome'] ?? '';
 
 $sql = "SELECT
-            F.ID_Fornecedor, F.Nome_Fantasia,
+            F.Nome_Fantasia,
             COUNT(DISTINCT P.ID_Produto) AS Total_Produtos_Vendidos,
             SUM(IV.Quantidade) AS Total_Unidades_Vendidas,
             SUM(IV.Valor_Total) AS Faturamento_Gerado
-        FROM FORNECEDORES F
-        JOIN PRODUTOS P ON F.ID_Fornecedor = P.ID_Fornecedor
-        JOIN ITENS_VENDA IV ON P.ID_Produto = IV.ID_Produto
-        JOIN VENDAS V ON IV.ID_Venda = V.ID_Venda";
+        FROM ITENS_VENDA IV
+        JOIN VENDAS V ON IV.ID_Venda = V.ID_Venda
+        JOIN PRODUTOS P ON IV.ID_Produto = P.ID_Produto
+        JOIN FORNECEDORES F ON P.ID_Fornecedor = F.ID_Fornecedor
+        WHERE DATE(V.DataHora_Venda) BETWEEN ? AND ?";
 
-$conditions = [];
-$params = [];
-$types = '';
-
-$conditions[] = "DATE(V.DataHora_Venda) BETWEEN ? AND ?";
-$types .= 'ss';
-$params[] = $data_inicio;
-$params[] = $data_fim;
+$params = [$data_inicio, $data_fim];
+$types = 'ss';
 
 if (!empty($busca_nome)) {
-    $conditions[] = "F.Nome_Fantasia LIKE ?";
+    $sql .= " AND F.Nome_Fantasia LIKE ?";
     $types .= 's';
     $params[] = "%" . $busca_nome . "%";
 }
-
-$sql .= " WHERE " . implode(' AND ', $conditions);
-$sql .= " GROUP BY F.ID_Fornecedor, F.Nome_Fantasia HAVING Faturamento_Gerado > 0 ORDER BY Faturamento_Gerado DESC";
+$sql .= " GROUP BY F.ID_Fornecedor, F.Nome_Fantasia ORDER BY Faturamento_Gerado DESC";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param($types, ...$params);
 $stmt->execute();
-$result = $stmt->get_result();
-$fornecedores_ranking = $result->fetch_all(MYSQLI_ASSOC);
+$fornecedores_ranking = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
-// ----- CARDS DE RESUMO -----
-$fornecedor_destaque = $fornecedores_ranking[0] ?? ['Nome_Fantasia' => 'N/A', 'Faturamento_Gerado' => 0];
-$total_fornecedores_unicos = count($fornecedores_ranking); 
+$fornecedor_destaque = ['Nome_Fantasia' => 'N/A', 'Faturamento_Gerado' => 0];
+$faturamento_total_fornecedores = 0;
+$total_produtos_unicos_vendidos = 0;
+$total_unidades_vendidas = 0;
+
+if (count($fornecedores_ranking) > 0) {
+    $fornecedor_destaque = $fornecedores_ranking[0]; 
+    
+    foreach ($fornecedores_ranking as $fornecedor) {
+        $faturamento_total_fornecedores += $fornecedor['Faturamento_Gerado'];
+        $total_produtos_unicos_vendidos += $fornecedor['Total_Produtos_Vendidos'];
+        $total_unidades_vendidas += $fornecedor['Total_Unidades_Vendidas'];
+    }
+}
 ?>
 
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
     <head>
         <meta charset="UTF-8">
-        <title>Relatório de Fornecedores</title>
+        <title>Relatório de Análise de Fornecedores</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
     <body class="bg-light">
-        <!-- Navbar -->
-        <?php include_once DEV_PATH . 'Views/sidebar.php'?>
+        <?php include_once DEV_PATH . 'Views/sidebar.php'; ?>
 
         <div class="content d-flex flex-column min-vh-100">
             <div class="content flex-grow-1">
-                <!-- Banner -->
                 <div class="container-fluid bg-secondary text-white text-center p-4 no-print">
-                    <h3>Relatório de Análise de Fornecedores</h3>
+                    <h3>Relatórios Estratégicos</h3>
                 </div>
+                
                 <div class="container p-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+                        <h2 class="m-0">Análise de Fornecedores</h2>
+                        <button onclick="window.print()" class="btn btn-outline-secondary btn-sm no-print"><i class="bi bi-printer"></i> Imprimir</button>
+                    </div>
+
                     <div class="card card-body mb-4 no-print">
                         <form method="GET" action="relatorio_fornecedores.php">
-                            <div class="row align-items-end">
-                                <div class="col-md-3">
-                                    <label for="data_inicio">Data Início:</label>
-                                    <input type="date" id="data_inicio" name="data_inicio" class="form-control" value="<?= htmlspecialchars($data_inicio) ?>" required>
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="data_fim">Data Fim:</label>
-                                    <input type="date" id="data_fim" name="data_fim" class="form-control" value="<?= htmlspecialchars($data_fim) ?>" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="busca_nome">Buscar Fornecedor Específico:</label>
-                                    <input type="text" id="busca_nome" name="busca_nome" class="form-control" placeholder="Digite o nome fantasia..." value="<?= htmlspecialchars($busca_nome) ?>">
-                                </div>
-                                <div class="col-md-2">
-                                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
-                                </div>
+                            <div class="row g-3 align-items-end">
+                                <div class="col-md-3"><label for="data_inicio">Período de:</label><input type="date" name="data_inicio" class="form-control" value="<?= htmlspecialchars($data_inicio) ?>"></div>
+                                <div class="col-md-3"><label for="data_fim">Até:</label><input type="date" name="data_fim" class="form-control" value="<?= htmlspecialchars($data_fim) ?>"></div>
+                                <div class="col-md-4"><label for="busca_nome">Buscar Fornecedor:</label><input type="text" name="busca_nome" class="form-control" placeholder="Digite o nome fantasia..." value="<?= htmlspecialchars($busca_nome) ?>"></div>
+                                <div class="col-md-2"><button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel-fill"></i> Filtrar</button></div>
                             </div>
                         </form>
                     </div>
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="card text-center bg-light">
-                                <div class="card-body">
-                                    <h5 class="card-title">Fornecedor Destaque do Período (por Faturamento Gerado)</h5>
-                                    <p class="card-text fs-4"><?= htmlspecialchars($fornecedor_destaque['Nome_Fantasia']) ?></p>
-                                    <span class="badge bg-success fs-6">Total Gerado: R$ <?= number_format($fornecedor_destaque['Faturamento_Gerado'], 2, ',', '.') ?></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card text-center h-100">
-                                <div class="card-body">
-                                    <h5 class="card-title">Fornecedores com Vendas no Período</h5>
-                                    <br>
-                                    <p class="card-text fs-4"><?= $total_fornecedores_unicos ?></p>
-                                </div>
-                            </div>
-                        </div>
+
+                    <div class="row g-4 mb-5">
+                        <div class="col-lg-3 col-md-6"><div class="card text-center h-100 shadow-sm"><div class="card-header">Faturamento Total (Fornec.)</div><div class="card-body"><p class="card-text fs-2 fw-bold text-success">R$ <?= number_format($faturamento_total_fornecedores, 2, ',', '.') ?></p></div></div></div>
+                        <div class="col-lg-3 col-md-6"><div class="card text-center h-100 shadow-sm"><div class="card-header">Fornecedor Destaque</div><div class="card-body"><p class="card-text fs-5"><?= htmlspecialchars($fornecedor_destaque['Nome_Fantasia']) ?><br><span class="badge bg-primary">R$ <?= number_format($fornecedor_destaque['Faturamento_Gerado'], 2, ',', '.') ?></span></p></div></div></div>
+                        <div class="col-lg-3 col-md-6"><div class="card text-center h-100 shadow-sm"><div class="card-header">Produtos Únicos Vendidos</div><div class="card-body"><p class="card-text fs-2 fw-bold text-info"><?= $total_produtos_unicos_vendidos ?></p></div></div></div>
+                        <div class="col-lg-3 col-md-6"><div class="card text-center h-100 shadow-sm"><div class="card-header">Unidades Totais Vendidas</div><div class="card-body"><p class="card-text fs-2 fw-bold text-secondary"><?= $total_unidades_vendidas ?></p></div></div></div>
                     </div>
 
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            Ranking de Fornecedores por Faturamento Gerado
-                            <button onclick="window.print()" class="btn btn-outline-secondary btn-sm no-print">Imprimir Relatório</button>
+                            <h4>Ranking de Fornecedores por Faturamento Gerado</h4>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-striped table-hover mb-0">
@@ -125,26 +107,25 @@ $total_fornecedores_unicos = count($fornecedores_ranking);
                                     <tr>
                                         <th>#</th>
                                         <th>Fornecedor</th>
-                                        <th class="text-center">Produtos Únicos Vendidos</th>
-                                        <th class="text-center">Unidades Totais Vendidas</th>
+                                        <th class="text-center">Produtos Únicos</th>
+                                        <th class="text-center">Unidades Vendidas</th>
                                         <th class="text-end">Faturamento Gerado</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php if (count($fornecedores_ranking) > 0): 
                                         $rank = 1;
-                                    ?>
-                                        <?php foreach ($fornecedores_ranking as $fornecedor): ?>
+                                        foreach ($fornecedores_ranking as $fornecedor): ?>
                                             <tr>
                                                 <td><?= $rank++ ?></td>
                                                 <td><?= htmlspecialchars($fornecedor['Nome_Fantasia']) ?></td>
                                                 <td class="text-center"><?= $fornecedor['Total_Produtos_Vendidos'] ?></td>
                                                 <td class="text-center"><?= $fornecedor['Total_Unidades_Vendidas'] ?></td>
-                                                <td class="text-end fw-bold">R$ <?= number_format($fornecedor['Faturamento_Gerado'], 2, ',', '.') ?></td>
+                                                <td class="text-end fw-bold text-success">R$ <?= number_format($fornecedor['Faturamento_Gerado'], 2, ',', '.') ?></td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php else: ?>
-                                        <tr><td colspan="5" class="text-center">Nenhum fornecedor teve produtos vendidos no período selecionado.</td></tr>
+                                        <tr><td colspan="5" class="text-center p-4">Nenhum fornecedor teve produtos vendidos no período selecionado.</td></tr>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
@@ -152,36 +133,10 @@ $total_fornecedores_unicos = count($fornecedores_ranking);
                     </div>
                 </div>
             </div>
-
-            <!-- Footer -->
-            <?php include_once DEV_PATH . 'Views/footer.php'?>
-        </div>
-
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
-            </div>
+            
+            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
         
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="<?= DEV_URL ?>JS/toast.js"></script>
-        <script>
-            <?php
-            if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {
-                $texto = addslashes($_SESSION['msg']['texto']);
-                $tipo = $_SESSION['msg']['tipo'];
-                
-                echo "mostrarToast('{$texto}', '{$tipo}');";
-
-                unset($_SESSION['msg']);
-            }
-            ?>
-        </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

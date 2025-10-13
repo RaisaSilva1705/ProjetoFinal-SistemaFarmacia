@@ -96,7 +96,6 @@ $historico = $stmt->get_result();
                         <h2 class="m-0">Histórico de Serviços Prestados</h2>
                         <div>
                             <a href="novo_servico.php" class="btn btn-primary">Registrar Atendimento</a>
-                            <a href="../PreVendas/nova_prevenda.php" class="btn btn-outline-primary">Gerar Pré-Venda</a>
                             <a href="../Relatorios/relatorio_servicos.php" class="btn btn-outline-secondary">Ver Relatório</a>
                         </div>
                     </div>
