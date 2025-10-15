@@ -4,7 +4,6 @@ include "../../Dev/Exec/config.php";
 include DEV_PATH . 'Exec/conexao.php';
 include DEV_PATH . 'Exec/logs.php';
 include DEV_PATH . "Exec/validar_sessao.php";
-include DEV_PATH . "Exec/validar_acesso.php";
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     $_SESSION['msg'] = ['texto' => 'Acesso inválido.', 'tipo' => 'danger'];

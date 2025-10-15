@@ -6,6 +6,7 @@ ini_set('display_errors', 1);
 include "../../../Dev/Exec/config.php";
 include DEV_PATH . 'Exec/conexao.php';
 include DEV_PATH . "Exec/validar_sessao.php";
+define('MODULO_SOLICITADO', 'CONFIGURACOES_GERENCIAR'); 
 include DEV_PATH . "Exec/validar_acesso.php";
 
 $busca_texto = $_GET['busca_texto'] ?? '';

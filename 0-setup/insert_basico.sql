@@ -7,57 +7,23 @@ INSERT INTO CARGOS (Cargo, Descricao) VALUES
 ('Gerente', 'Acesso irrestrito ao sistema.'),
 ('Farmacêutico', 'Acesso especial ao sistema.');
 
-INSERT INTO MODULOS (Modulo) VALUES 
--- Sem grupo
-('Home'),
-('Caixa PDV'),
-('Minhas Comissões'),
-('Configurações'),
--- Pessoas
-('Clientes'),
-('Usuários'),
-('Funcionários'),
-('Fornecedores'),
--- Cadastros
-('Cargos'),
-('Caixas'),
-('Forma Pgto'),
--- Produtos
-('Categorias'),
-('Produtos'),
-('Entradas'),
-('Saídas'),
-('Estoque'),
-('Trocas'),
--- Financeiro
-('Contas à Receber'),
-('Despesas'),
-('Compras'),
-('Vendas'),
-('Fluxo de Caixa'),
-('Comissões'),
-('Contas Vencidas'),
--- Relatórios
-('Relatório de Vendas'),
-('Relatório de Clientes'),
-('Relatório de Recebimentos'),
-('Relatório de Despesas'),
-('Relatório de Lucro'),
-('Relatório de Produtos'),
-('Relatório de Estoque'),
-('Relatório de Entrada/Saída'),
-('Relatório de Caixas'),
-('Relatório de Comissões'),
-('Relatório de Trocas'),
-('Relatório de Vendas Produtos'),
--- Vendas
-('Orçamentos'),
-('Contas Pendentes'),
-('Todas as Vendas'),
-('Atualizar Vendas');
+INSERT INTO `MODULOS` (`Nome_Modulo`, `Chave_Acesso`) VALUES
+('Acesso ao PDV', 'PDV_ACESSAR'),
+('Acesso ao Financeiro', 'FINANCEIRO_VER'),
+('Acesso às Promoções', 'PROMOCOES_GERENCIAR'),
+('Acesso aos Relatórios', 'RELATORIOS_VER'),
+('Cadastro de Produtos', 'PRODUTOS_GERENCIAR'),
+('Gestão de Estoque', 'ESTOQUE_GERENCIAR'),
+('Cadastro de Clientes', 'CLIENTES_GERENCIAR'),
+('Cadastro de Funcionários', 'FUNCIONARIOS_GERENCIAR'),
+('Cadastro de Fornecedores', 'FORNECEDORES_GERENCIAR'),
+('Gestão de Controlados', 'CONTROLADOS_GERENCIAR'),
+('Gestão de Serviços', 'SERVICOS_GERENCIAR'),
+('Acesso às Configurações', 'CONFIGURACOES_GERENCIAR')
+ON DUPLICATE KEY UPDATE Chave_Acesso=Chave_Acesso;
 
-INSERT INTO CARGOS_MODULOS (ID_Cargo, ID_Modulo, Acesso_Permitido)
-SELECT 1, ID_Modulo, TRUE FROM MODULOS;
+INSERT INTO CARGOS_MODULOS (ID_Cargo, ID_Modulo)
+SELECT 1, ID_Modulo FROM MODULOS;
 
 INSERT INTO FUNCIONARIOS (ID_Funcionario, Nome, Email, ID_Cargo)
 VALUES (1, 'Administrador Geral', 'admin@admin.com', 1);

@@ -5,8 +5,9 @@ ini_set('display_errors', 1);
 
 include "../../dev/Exec/config.php"; 
 include DEV_PATH . 'Exec/conexao.php';
-include DEV_PATH . 'Exec/logs.php';
+include DEV_PATH . "Exec/logs.php";
 include DEV_PATH . "Exec/validar_sessao.php";
+define('MODULO_SOLICITADO', 'FINANCEIRO_VER');
 include DEV_PATH . "Exec/validar_acesso.php"; 
 
 $stmt = $conn->prepare("SELECT ID_Categoria_Despesa, Nome_Categoria FROM DESPESAS_CATEGORIAS ORDER BY Nome_Categoria ASC");

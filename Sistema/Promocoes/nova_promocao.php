@@ -5,7 +5,9 @@ ini_set('display_errors', 1);
 
 include "../../dev/Exec/config.php";
 include DEV_PATH . 'Exec/conexao.php';
+include DEV_PATH . "Exec/logs.php";
 include DEV_PATH . "Exec/validar_sessao.php";
+define('MODULO_SOLICITADO', 'PROMOCOES_GERENCIAR');
 include DEV_PATH . "Exec/validar_acesso.php";
 
 $produto_pre_selecionado = null;
@@ -152,7 +154,7 @@ if (isset($_GET['id_produto']) && isset($_GET['nome_produto'])) {
                                         </div>
                                     </div>
                                     <div class="col-md-2 campo-dinamico campo-preco-fixo" style="display: none;">
-                                        <label class="form-label">Preço Fixo do Combo (R$)</label>
+                                        <label class="form-label">Preço Fixo</label>
                                         <div class="input-group">
                                             <input type="number" name="itens[${itemCounter}][preco_fixo]" class="form-control" step="0.01" min="0">
                                             <span class="input-group-text" id="basic-addon2"> R$ </span>

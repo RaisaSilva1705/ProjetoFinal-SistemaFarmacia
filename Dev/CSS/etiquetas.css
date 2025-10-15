@@ -1,0 +1,57 @@
+@media print {
+    body, html { margin: 0; padding: 0; }
+    .no-print { display: none !important; }
+    .pagina-etiquetas { border: none !important; box-shadow: none !important; }
+}
+body { background-color: #f0f0f0; }
+
+.pagina-etiquetas { background: white; width: 21cm; min-height: 29.7cm; margin: 20px auto; padding: 1cm; box-shadow: 0 0 10px rgba(0,0,0,0.1); display: flex; flex-wrap: wrap; align-content: flex-start; gap: 5px; }
+
+.etiqueta { border: 1px solid #ccc; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; padding: 5px; }
+
+/* --- MODELOS/CORES --- */
+.modelo-normal_branca { background-color: #ffffff; }
+.modelo-promocao_amarela { background-color: #fffbcf; border: 2px dashed #ffc107; }
+.modelo-oferta_vermelha { background-color: #ffdddd; border: 2px solid #dc3545; }
+
+/* --- TAMANHOS --- */
+.tamanho-pequena { width: 6cm; height: 4cm; }
+.tamanho-media { width: 10cm; height: 5cm; }
+.tamanho-grande { width: 10cm; height: 7cm; }
+
+/* --- Títulos --- */
+.etiqueta-titulo-promo, .etiqueta-titulo-oferta { font-weight: bold; text-align: center; padding: 2px 0; margin: -5px -5px 5px -5px; font-family: Arial, sans-serif; }
+.etiqueta-titulo-promo { color: #664d03; background-color: #ffc107; font-size: 14px; }
+.etiqueta-titulo-oferta { color: #ffffff; background-color: #dc3545; font-size: 14px; }
+
+/* --- Corpo e Alinhamentos --- */
+.etiqueta-corpo { flex-grow: 1; display: flex; flex-direction: column; }
+.etiqueta-nome { font-weight: bold; font-family: Arial, sans-serif; text-align: left; margin-top: 5px; }
+.etiqueta-preco {
+    font-family: Arial, sans-serif;
+    margin-top: auto; 
+    display: flex; 
+    justify-content: flex-end;
+    align-items: baseline; 
+    flex-direction: row;
+    gap: 10px; 
+}
+
+/* Fontes por tamanho */
+.tamanho-pequena .etiqueta-nome { font-size: 11px; }
+.tamanho-media .etiqueta-nome { font-size: 16px; }
+.tamanho-grande .etiqueta-nome { font-size: 20px; }
+
+/* --- Blocos de Preço --- */
+.preco-bloco-de, .preco-bloco-por, .preco-bloco-texto { line-height: 1; }
+.etiqueta-de, .etiqueta-por { font-size: 0.6em; display: block; font-weight: normal; }
+.preco-antigo { font-size: 0.8em; color: #dc3545; text-decoration: line-through; }
+.preco-novo, .preco-normal { font-size: 2em; font-weight: bold; }
+.tamanho-pequena .preco-novo, .tamanho-pequena .preco-normal { font-size: 1.4em; }
+
+.preco-texto-promo { display: block; font-size: 1.2em; font-weight: bold; text-align: center; }
+.preco-base-informativo { display: block; font-size: 0.7em; font-weight: normal; color: #6c757d; text-align: center; }
+
+/* --- Código de Barras --- */
+.etiqueta-barcode { text-align: center; margin-top: 5px; }
+.barcode { max-width: 100%; height: auto;}

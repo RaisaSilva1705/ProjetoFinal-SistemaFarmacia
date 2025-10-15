@@ -7,6 +7,7 @@ include "../../../Dev/Exec/config.php";
 include DEV_PATH . 'Exec/conexao.php';
 include DEV_PATH . 'Exec/logs.php';
 include DEV_PATH . "Exec/validar_sessao.php";
+define('MODULO_SOLICITADO', 'SERVICOS_GERENCIAR'); 
 include DEV_PATH . "Exec/validar_acesso.php";
 
 $id_servico = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);

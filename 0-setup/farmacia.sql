@@ -89,8 +89,9 @@ CREATE TABLE IF NOT EXISTS `CARGOS` (
 -- Table `MODULOS`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `MODULOS` (
-    `ID_Modulo` INT AUTO_INCREMENT PRIMARY KEY,
-    `Modulo` VARCHAR(255) NOT NULL UNIQUE
+  `ID_Modulo` INT AUTO_INCREMENT PRIMARY KEY,
+  `Nome_Modulo` VARCHAR(255) NOT NULL,
+  `Chave_Acesso` VARCHAR(100) NOT NULL UNIQUE
 ) ENGINE = InnoDB;
 /* drop table MODULOS; */
 /* select * from MODULOS; */
@@ -99,12 +100,12 @@ CREATE TABLE IF NOT EXISTS `MODULOS` (
 -- Table `CARGOS_MODULOS`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `CARGOS_MODULOS` (
-    `ID_Cargo_Modulo` INT AUTO_INCREMENT PRIMARY KEY,
-    `ID_Cargo` INT NOT NULL,
-    `ID_Modulo` INT NOT NULL,
-    `Acesso_Permitido` BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (`ID_Cargo`) REFERENCES `CARGOS` (`ID_Cargo`),
-    FOREIGN KEY (`ID_Modulo`) REFERENCES `MODULOS` (`ID_Modulo`)
+  `ID_Cargo_Modulo` INT AUTO_INCREMENT PRIMARY KEY,
+  `ID_Cargo` INT NOT NULL,
+  `ID_Modulo` INT NOT NULL,
+  FOREIGN KEY (`ID_Cargo`) REFERENCES `CARGOS`(`ID_Cargo`) ON DELETE CASCADE,
+  FOREIGN KEY (`ID_Modulo`) REFERENCES `MODULOS`(`ID_Modulo`) ON DELETE CASCADE,
+  UNIQUE (`ID_Cargo`, `ID_Modulo`) -- Garante que uma permissão não seja duplicada
 ) ENGINE = InnoDB;
 /* drop table CARGOS_MODULOS; */
 /* select * from CARGOS_MODULOS; */
@@ -144,7 +145,7 @@ CREATE TABLE IF NOT EXISTS `USUARIOS` (
     `Status` ENUM('Ativo', 'Inativo') DEFAULT 'Ativo',
     `Data_Cadastro` DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (`ID_Funcionario`) REFERENCES `FUNCIONARIOS` (`ID_Funcionario`)
-);
+) ENGINE = InnoDB;
 /* drop table USUARIOS; */
 /* select * from USUARIOS; */
 

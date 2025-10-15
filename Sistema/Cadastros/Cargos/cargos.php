@@ -6,6 +6,7 @@ ini_set('display_errors', 1);
 include "../../../Dev/Exec/config.php";
 include DEV_PATH . 'Exec/conexao.php';
 include DEV_PATH . "Exec/validar_sessao.php";
+define('MODULO_SOLICITADO', 'CONFIGURACOES_GERENCIAR');
 include DEV_PATH . "Exec/validar_acesso.php";
 
 $busca_texto = $_GET['busca_texto'] ?? '';
@@ -55,36 +56,23 @@ $result = $stmt->get_result();
 
         <div class="content d-flex flex-column min-vh-100">
             <div class="content flex-grow-1">
-                <!-- Banner -->
                 <div class="container-fluid bg-secondary text-white text-center p-4">
-                    <h3>Gestão de CARGOS</h3>
+                    <h3>Configurações do Sistema</h3>
                 </div>
                 <div class="container p-5">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2 class="m-0">Lista de Cargos</h2>
+                        <h2 class="m-0">Gestão de Cargos</h2>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCargo">
-                            Adicionar Novo Cargo
+                            <i class="bi bi-plus-circle"></i> Novo Cargo
                         </button>
                     </div>
 
                     <div class="card card-body mb-4">
                         <form method="GET" action="cargos.php">
-                            <div class="row align-items-end">
-                                <div class="col-md-6">
-                                    <label for="busca_texto" class="form-label">Buscar por Nome</label>
-                                    <input type="text" name="busca_texto" id="busca_texto" class="form-control" value="<?= htmlspecialchars($busca_texto) ?>">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="status" class="form-label">Status</label>
-                                    <select name="status" id="status" class="form-select">
-                                        <option value="">Todos</option>
-                                        <option value="Ativo" <?= $status == 'Ativo' ? 'selected' : '' ?>>Ativo</option>
-                                        <option value="Inativo" <?= $status == 'Inativo' ? 'selected' : '' ?>>Inativo</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
-                                </div>
+                            <div class="row g-3 align-items-end">
+                                <div class="col-md-6"><label for="busca_texto" class="form-label">Buscar por Nome</label><input type="text" name="busca_texto" id="busca_texto" class="form-control" value="<?= htmlspecialchars($busca_texto) ?>"></div>
+                                <div class="col-md-4"><label for="status" class="form-label">Status</label><select name="status" id="status" class="form-select"><option value="">Todos</option><option value="Ativo" <?= $status == 'Ativo' ? 'selected' : '' ?>>Ativo</option><option value="Inativo" <?= $status == 'Inativo' ? 'selected' : '' ?>>Inativo</option></select></div>
+                                <div class="col-md-2"><button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel-fill"></i> Filtrar</button></div>
                             </div>
                         </form>
                     </div>
@@ -95,7 +83,7 @@ $result = $stmt->get_result();
                                 <tr>
                                     <th>Cargo</th>
                                     <th>Descrição</th>
-                                    <th>Status</th>
+                                    <th class="text-center">Status</th>
                                     <th class="text-center">Ações</th>
                                 </tr>
                             </thead>
@@ -105,27 +93,30 @@ $result = $stmt->get_result();
                                         <tr>
                                             <td><?= htmlspecialchars($row['Cargo']) ?></td>
                                             <td><?= htmlspecialchars($row['Descricao']) ?></td>
-                                            <td <?php $badge_class = $row['Status'] == 'Ativo' ? 'table-success' : 'table-danger'; echo "class='{$badge_class}'"?>>
-                                                <?= htmlspecialchars($row['Status']) ?>
+                                            <td class="text-center">
+                                                <span class="badge <?= $row['Status'] == 'Ativo' ? 'bg-success' : 'bg-danger' ?>"><?= $row['Status'] ?></span>
                                             </td>
                                             <td class="text-center">
-                                                <button type="button" class="btn btn-warning btn-sm btn-edit"
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#modalCargo"
-                                                        data-id="<?= $row['ID_Cargo'] ?>"
-                                                        data-cargo="<?= htmlspecialchars($row['Cargo']) ?>"
-                                                        data-descricao="<?= htmlspecialchars($row['Descricao']) ?>"
-                                                        data-status="<?= htmlspecialchars($row['Status']) ?>">
-                                                    Editar
-                                                </button>
-                                                <button type="button" class="btn btn-sm <?= $row['Status'] == 'Ativo' ? 'btn-danger' : 'btn-success' ?> btn-status"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#modalConfirmStatus"
-                                                        data-id="<?= $row['ID_Cargo'] ?>"
-                                                        data-cargo="<?= htmlspecialchars($row['Cargo']) ?>"
-                                                        data-status-atual="<?= $row['Status'] ?>">
-                                                    <?= $row['Status'] == 'Ativo' ? 'Inativar' : 'Ativar' ?>
-                                                </button>
+                                                <div class="d-flex justify-content-center gap-2">
+                                                    <a href="permissoes_cargo.php?cargo_id=<?= $row['ID_Cargo'] ?>" class="btn btn-secondary btn-sm" title="Gerenciar Permissões">
+                                                        <i class="bi bi-shield-check"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-warning btn-sm" title="Editar Cargo"
+                                                            data-bs-toggle="modal" data-bs-target="#modalCargo"
+                                                            data-id="<?= $row['ID_Cargo'] ?>"
+                                                            data-cargo="<?= htmlspecialchars($row['Cargo']) ?>"
+                                                            data-descricao="<?= htmlspecialchars($row['Descricao']) ?>">
+                                                        <i class="bi bi-pencil-fill"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm <?= $row['Status'] == 'Ativo' ? 'btn-danger' : 'btn-success' ?>" 
+                                                            title="<?= $row['Status'] == 'Ativo' ? 'Inativar' : 'Ativar' ?>"
+                                                            data-bs-toggle="modal" data-bs-target="#modalConfirmStatus"
+                                                            data-id="<?= $row['ID_Cargo'] ?>"
+                                                            data-cargo="<?= htmlspecialchars($row['Cargo']) ?>"
+                                                            data-status-atual="<?= $row['Status'] ?>">
+                                                        <i class="bi <?= $row['Status'] == 'Ativo' ? 'bi-pause-circle-fill' : 'bi-play-circle-fill' ?>"></i>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endwhile; ?>
@@ -196,19 +187,9 @@ $result = $stmt->get_result();
             </div>
         </div>
 
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
-            </div>
-        </div>
+        <?php include_once DEV_PATH . 'Views/toast.php'; ?>
         
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
             const modalCargo = document.getElementById('modalCargo');

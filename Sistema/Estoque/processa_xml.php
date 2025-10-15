@@ -2,8 +2,6 @@
 session_start();
 include "../../Dev/Exec/config.php";
 include DEV_PATH . 'Exec/conexao.php';
-include DEV_PATH . "Exec/validar_sessao.php";
-include DEV_PATH . "Exec/validar_acesso.php";
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_FILES['arquivo_xml']) || $_FILES['arquivo_xml']['error'] != 0) {
     $_SESSION['msg'] = ['texto' => 'Nenhum arquivo XML válido foi enviado.', 'tipo' => 'danger'];

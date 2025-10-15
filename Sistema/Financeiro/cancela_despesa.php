@@ -3,7 +3,6 @@ session_start();
 include "../../dev/Exec/config.php"; 
 include DEV_PATH . 'Exec/conexao.php';
 include DEV_PATH . 'Exec/logs.php';
-include DEV_PATH . "Exec/validar_sessao.php";
 
 $id_despesa = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 $id_usuario = $_SESSION['ID_Usuario'];

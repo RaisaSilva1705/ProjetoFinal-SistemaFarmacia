@@ -5,8 +5,9 @@ ini_set('display_errors', 1);
 
 include "../../dev/Exec/config.php";
 include DEV_PATH . 'Exec/conexao.php';
-include DEV_PATH . 'Exec/logs.php';
+include DEV_PATH . "Exec/logs.php";
 include DEV_PATH . "Exec/validar_sessao.php";
+define('MODULO_SOLICITADO', 'RELATORIOS_VER');
 include DEV_PATH . "Exec/validar_acesso.php";
 
 $data_inicio = $_GET['data_inicio'] ?? date('Y-m-01');

@@ -5,8 +5,7 @@ header('Content-Type: application/json');
 
 include "../../Dev/Exec/config.php";
 include DEV_PATH . 'Exec/conexao.php';
-include DEV_PATH . 'Exec/logs.php';
-include DEV_PATH . "Exec/validar_sessao.php";
+include DEV_PATH . "Exec/logs.php";
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['sucesso' => false, 'mensagem' => 'Método não permitido.']);
