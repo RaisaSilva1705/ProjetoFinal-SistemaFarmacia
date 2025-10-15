@@ -28,7 +28,7 @@ INSERT INTO ESTOQUE (ID_Lote, Quantidade, Data_Entrada) VALUES (@id_lote_dipiron
 INSERT INTO PRODUTOS (ID_Categoria, Nome, Marca, ID_Fornecedor, Descricao, ID_Unidade, NCM, EAN_GTIN, Status) VALUES (1, 'Neosaldina 4 drágeas', 'Takeda', 1, 'Analgésico para dores de cabeça', 2, '30049039', '7896094911365', 'Ativo');
 SET @id_produto_neosaldina = LAST_INSERT_ID();
 INSERT INTO MEDICAMENTOS (ID_Produto, ID_CategoriaMed, ID_Tarja, Tipo, Prin_Ativo, MS, Controlado) VALUES (@id_produto_neosaldina, 1, 1, 'Similar', 'Dipirona + Mucato de Isometepteno + Cafeína', '1063902310021', 'Não');
-INSERT INTO LOTES (ID_Produto, Nome_Lote, Preco_Custo, Preco_Venda, Data_Validade) VALUES (@id_produto_neosaldina, 'LOTE-NEO-001', 1.80, 4.29, '2026-10-31');
+INSERT INTO LOTES (ID_Produto, Nome_Lote, Preco_Custo, Preco_Venda, Data_Validade) VALUES (@id_produto_neosaldina, 'LOTE-NEO-001', 1.80, 4.29, '2025-10-31');
 SET @id_lote_neosaldina = LAST_INSERT_ID();
 INSERT INTO ESTOQUE (ID_Lote, Quantidade, Data_Entrada) VALUES (@id_lote_neosaldina, 250, CURDATE());
 

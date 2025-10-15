@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS `CLIENTES` (
     `Senha` VARCHAR(255) NOT NULL,
     `Status` ENUM('Ativo', 'Inativo') DEFAULT 'Ativo',
     `OBS` TEXT DEFAULT NULL,
+    `Saldo_Credito` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     `Data_Cadastro` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `Data_Alteracao` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
@@ -436,6 +437,7 @@ CREATE TABLE IF NOT EXISTS `VENDA_PAGAMENTOS` (
     `Valor` DECIMAL(10,2) NOT NULL,
     `Troco` DECIMAL(10,2) DEFAULT 0.00,
     `Quant_Vezes` INT NOT NULL DEFAULT 1,
+    `Gateway_Transaction_ID` VARCHAR(255) NULL,
     `Data_Pagamento` DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (`ID_Venda`) REFERENCES `VENDAS` (`ID_Venda`),
     FOREIGN KEY (`ID_Forma_Pag`) REFERENCES `FORMAS_PAGAMENTO` (`ID_Forma_Pag`)
@@ -639,7 +641,73 @@ CREATE TABLE IF NOT EXISTS `PROMOCOES_ITENS` (
 /* drop table PROMOCOES_ITENS; */
 /* select * from PROMOCOES_ITENS; */
 
-SHOW VARIABLES LIKE 'event_scheduler';
+-- -----------------------------------------------------
+-- Table `DEVOLUCOES_FORNECEDORES`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `DEVOLUCOES_FORNECEDORES` (
+  `ID_Devolucao_Fornecedor` INT AUTO_INCREMENT PRIMARY KEY,
+  `ID_Fornecedor` INT NOT NULL,
+  `ID_Funcionario` INT NOT NULL,
+  `Data_Devolucao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `Motivo_Geral` TEXT NULL,
+  `Valor_Total_Custo` DECIMAL(10,2) NOT NULL,
+  FOREIGN KEY (`ID_Fornecedor`) REFERENCES `FORNECEDORES`(`ID_Fornecedor`),
+  FOREIGN KEY (`ID_Funcionario`) REFERENCES `FUNCIONARIOS`(`ID_Funcionario`)
+) ENGINE = InnoDB;
+/* drop table DEVOLUCOES_FORNECEDORES; */
+/* select * from DEVOLUCOES_FORNECEDORES; */
+
+-- -----------------------------------------------------
+-- Table `DEVOLUCOES_FORNECEDORES_ITENS`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `DEVOLUCOES_FORNECEDORES_ITENS` (
+  `ID_Item_Dev_Fornecedor` INT AUTO_INCREMENT PRIMARY KEY,
+  `ID_Devolucao_Fornecedor` INT NOT NULL,
+  `ID_Produto` INT NOT NULL,
+  `ID_Lote` INT NOT NULL,
+  `Quantidade` INT NOT NULL,
+  `Valor_Custo_Unitario` DECIMAL(10,2) NOT NULL,
+  FOREIGN KEY (`ID_Devolucao_Fornecedor`) REFERENCES `DEVOLUCOES_FORNECEDORES`(`ID_Devolucao_Fornecedor`) ON DELETE CASCADE,
+  FOREIGN KEY (`ID_Produto`) REFERENCES `PRODUTOS`(`ID_Produto`),
+  FOREIGN KEY (`ID_Lote`) REFERENCES `LOTES`(`ID_Lote`)
+) ENGINE = InnoDB;
+/* drop table DEVOLUCOES_FORNECEDORES_ITENS; */
+/* select * from DEVOLUCOES_FORNECEDORES_ITENS; */
+
+-- -----------------------------------------------------
+-- Table `DEVOLUCOES_CLIENTES`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `DEVOLUCOES_CLIENTES` (
+  `ID_Devolucao_Cliente` INT AUTO_INCREMENT PRIMARY KEY,
+  `ID_Cliente` INT NULL,
+  `ID_Venda_Original` INT NOT NULL,
+  `ID_Funcionario` INT NOT NULL,
+  `Data_Devolucao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `Tipo_Resolucao` ENUM('Reembolso', 'Credito_Loja') NOT NULL,
+  `Valor_Total_Devolvido` DECIMAL(10,2) NOT NULL,
+  FOREIGN KEY (`ID_Cliente`) REFERENCES `CLIENTES`(`ID_Cliente`),
+  FOREIGN KEY (`ID_Venda_Original`) REFERENCES `VENDAS`(`ID_Venda`),
+  FOREIGN KEY (`ID_Funcionario`) REFERENCES `FUNCIONARIOS`(`ID_Funcionario`)
+) ENGINE = InnoDB;
+/* drop table DEVOLUCOES_CLIENTES; */
+/* select * from DEVOLUCOES_CLIENTES; */
+
+-- -----------------------------------------------------
+-- Table `DEVOLUCOES_CLIENTES_ITENS`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `DEVOLUCOES_CLIENTES_ITENS` (
+  `ID_Item_Dev_Cliente` INT AUTO_INCREMENT PRIMARY KEY,
+  `ID_Devolucao_Cliente` INT NOT NULL,
+  `ID_Produto` INT NOT NULL,
+  `Quantidade` INT NOT NULL,
+  `Valor_Unitario_Devolvido` DECIMAL(10,2) NOT NULL,
+  `Motivo` VARCHAR(255) NULL,
+  FOREIGN KEY (`ID_Devolucao_Cliente`) REFERENCES `DEVOLUCOES_CLIENTES`(`ID_Devolucao_Cliente`) ON DELETE CASCADE,
+  FOREIGN KEY (`ID_Produto`) REFERENCES `PRODUTOS`(`ID_Produto`)
+) ENGINE = InnoDB;
+/* drop table DEVOLUCOES_CLIENTES_ITENS; */
+/* select * from DEVOLUCOES_CLIENTES_ITENS; */
+
 CREATE EVENT desativa_promocoes_expiradas
 ON SCHEDULE EVERY 1 DAY
 STARTS CURRENT_TIMESTAMP + INTERVAL 1 DAY_HOUR

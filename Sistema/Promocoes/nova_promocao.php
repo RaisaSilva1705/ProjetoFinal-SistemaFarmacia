@@ -7,6 +7,14 @@ include "../../dev/Exec/config.php";
 include DEV_PATH . 'Exec/conexao.php';
 include DEV_PATH . "Exec/validar_sessao.php";
 include DEV_PATH . "Exec/validar_acesso.php";
+
+$produto_pre_selecionado = null;
+if (isset($_GET['id_produto']) && isset($_GET['nome_produto'])) {
+    $produto_pre_selecionado = [
+        'id' => filter_var($_GET['id_produto'], FILTER_VALIDATE_INT),
+        'nome' => $_GET['nome_produto']
+    ];
+}
 ?>
 
 <!DOCTYPE html>
@@ -242,6 +250,28 @@ include DEV_PATH . "Exec/validar_acesso.php";
                                 });
                             });
                     });
+                }
+
+                const produtoPreSelecionado = <?= json_encode($produto_pre_selecionado) ?>;
+                if (produtoPreSelecionado) {
+                    tipoPromocaoSelect.value = 'DESCONTO_PROGRESSIVO';
+                    
+                    btnAdicionarItem.disabled = false;
+                    btnAdicionarItem.click();
+
+                    const primeiroItem = document.querySelector('.item-regra-promo');
+                    if (primeiroItem) {
+                        primeiroItem.querySelector('.busca-produto-promo').value = produtoPreSelecionado.nome;
+                        primeiroItem.querySelector('input[name*="[id_produto]"]').value = produtoPreSelecionado.id;
+
+                        const tipoItemSelect = primeiroItem.querySelector('select[name*="[tipo_item]"]');
+                        tipoItemSelect.value = 'Condicao';
+                        primeiroItem.querySelector('input[name*="[quantidade]"]').value = 1;
+
+                        tipoItemSelect.dispatchEvent(new Event('change'));
+                    }
+                    
+                    document.getElementById('itens-container').scrollIntoView({ behavior: 'smooth' });
                 }
             });
 

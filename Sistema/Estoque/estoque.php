@@ -5,6 +5,7 @@ ini_set('display_errors', 1);
 
 include "../../Dev/Exec/config.php";
 include DEV_PATH . 'Exec/conexao.php';
+include DEV_PATH . 'Exec/logs.php';
 include DEV_PATH . "Exec/validar_sessao.php";
 include DEV_PATH . "Exec/validar_acesso.php";
 
@@ -143,33 +144,46 @@ $result = $stmt->get_result();
                             </thead>
                             <tbody>
                                 <?php
-                                if ($result->num_rows > 0) {
-                                    while ($row = $result->fetch_assoc()) { // quebra de página após 20 resultados
-                                        if($row["Quantidade_Total"] <= $row["Quant_Minima"]){
-                                            $class = ($row["Quantidade_Total"] == $row["Quant_Minima"]) ? "table-warning" : '';
-                                            $classe_estoque = ($row["Quantidade_Total"] <= $row["Quant_Minima"]) ? "table-danger" : '' ;
-                                        }
-                                        else {
-                                            $class = "table-success";
-                                            $classe_estoque = '';
-                                        }
-        
-                                        echo "<tr class='{$classe_estoque}'>";
-                                            echo '<td>' . $row["Nome"] . '</td>';
-                                            echo '<td>' . $row["EAN_GTIN"] . '</td>';
-                                            echo '<td>' . $row["Categoria"] . '</td>';
-                                            echo '<td class="' . $class . '">' . $row["Quantidade_Total"] . '</td>';
-                                            echo '<td>' . $row["Quant_Minima"] . '</td>';
-                                            echo '<td>
-                                                    <a href="lotes_estoque.php?codigo=' . $row['ID_Produto'] . '" class="btn btn-warning btn-sm">Conferir Lotes</a>
-                                                    <a href="saida_estoque.php?codigo=' . $row['ID_Produto'] . '" class="btn btn-danger btn-sm">Saída</a>
-                                                </td>';
-                                        echo '</tr>';
-                                    }
-                                } 
-                                else 
-                                    echo '<tr><td colspan="10" class="text-center">Nenhum produto cadastrado.</td></tr>';
+                                if ($result->num_rows > 0):
+                                    while ($row = $result->fetch_assoc()):
+                                        $qtd_total = $row["Quantidade_Total"] ?? 0;
+                                        $qtd_minima = $row["Quant_Minima"];
+                                        $classe_alerta = '';
+
+                                        if ($qtd_total == 0) 
+                                            $classe_alerta = 'table-danger text-muted';
+                                        elseif ($qtd_total < $qtd_minima) 
+                                            $classe_alerta = 'table-danger';
+                                        elseif ($qtd_total == $qtd_minima) 
+                                            $classe_alerta = 'table-warning';
                                 ?>
+                                    <tr class="<?= $classe_alerta ?>">
+                                        <td><?= htmlspecialchars($row["Nome"]) ?></td>
+                                        <td><?= htmlspecialchars($row["EAN_GTIN"]) ?></td>
+                                        <td><?= htmlspecialchars($row["Categoria"]) ?></td>
+                                        <td class="fw-bold"><?= intval($qtd_total) ?></td>
+                                        <td><?= intval($qtd_minima) ?></td>
+                                        <td class="text-center">
+                                            <a href="lotes_estoque.php?id=<?= $row['ID_Produto'] ?>" class="btn btn-info btn-sm" title="Conferir Lotes">
+                                                <i class="bi bi-list-ol"></i>
+                                            </a>
+                                            <?php if ($qtd_total > 0): ?>
+                                                <a href="saida_estoque.php?id_produto=<?= $row['ID_Produto'] ?>" class="btn btn-danger btn-sm" title="Registrar Saída Manual">
+                                                    <i class="bi bi-box-arrow-up"></i>
+                                                </a>
+                                            <?php else: ?>
+                                                <button type="button" class="btn btn-danger btn-sm" title="Registrar Saída Manual" disabled>
+                                                    <i class="bi bi-box-arrow-up"></i>
+                                                </button>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php
+                                    endwhile;
+                                else:
+                                ?>
+                                    <tr><td colspan="6" class="text-center p-4">Nenhum produto encontrado.</td></tr>
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>

@@ -433,6 +433,7 @@ if (isset($_POST['codigo'])) {
                             <div class="text-center">
                                 <button class="btn btn-danger m-2" onclick="selecionarFuncionalidade('saida')">Sangria (Saída de Dinheiro)</button>
                                 <button class="btn btn-success m-2" onclick="selecionarFuncionalidade('entrada')">Entrada de Dinheiro</button>
+                                <a href="../Devolucoes/devolucao_cliente.php" class="btn btn-warning m-2">Devolução de Produto</a>
                             </div>
                         </div>
                         <div class="modal-footer" id="funcionalidadesFooter" style="display: none;">

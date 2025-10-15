@@ -125,7 +125,7 @@
                 <i class="bi bi-person-circle"></i><?php echo htmlspecialchars($_SESSION['Nome']); ?>
             </a>
             <ul class="dropdown-menu dropdown-menu-dark">
-                <li><a class="dropdown-item" href="#">Minha Conta</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Configuracoes/configuracoes.php">Minha Loja</a></li>
                 <li><hr class="dropdown-divider" style="border-color: #495057;"></li>
                 <li><a class="dropdown-item" href="<?php echo DEV_URL ?>Exec/logout.php"><i class="bi bi-box-arrow-right"></i>Sair</a></li>
             </ul>

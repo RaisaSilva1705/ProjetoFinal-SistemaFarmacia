@@ -119,6 +119,7 @@ $ticket_medio = ($numero_vendas > 0) ? $total_faturado / $numero_vendas : 0;
                                         <th>Formas Pag.</th>
                                         <th class="text-end">Desconto</th>
                                         <th class="text-end">Valor Total</th>
+                                        <th class="text-end">Cupom Fiscal</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -133,6 +134,9 @@ $ticket_medio = ($numero_vendas > 0) ? $total_faturado / $numero_vendas : 0;
                                                 <td><?= htmlspecialchars($venda['Formas_Pagamento']) ?></td>
                                                 <td class="text-end text-danger">R$ <?= number_format($venda['Desconto'], 2, ',', '.') ?></td>
                                                 <td class="text-end fw-bold text-success">R$ <?= number_format($venda['Valor_Total'], 2, ',', '.') ?></td>
+                                                <td class="text-center">
+                                                    <a href="../PDV/cupomNfiscal.php?ID_Venda=<?= $venda['ID_Venda'] ?>" class="btn btn-success" title="Acessar Cupom Fiscal" target="_blank"><i class="bi bi-receipt"></i></a>
+                                                </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php else: ?>
