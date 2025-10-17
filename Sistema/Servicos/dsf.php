@@ -19,7 +19,7 @@ $sql = "SELECT
             RS.*, 
             S.Nome_Servico,
             C.Nome as Nome_Cliente, 
-            C.Documento as Doc_Cliente, 
+            CD.Numero as Doc_Cliente, 
             C.Email as Email_Cliente, 
             C.Tel as Tel_Cliente, 
             C.Data_Nascimento as DN_Cliente, 
@@ -30,6 +30,7 @@ $sql = "SELECT
         JOIN SERVICOS_FARMACEUTICOS S ON RS.ID_Servico = S.ID_Servico
         JOIN FUNCIONARIOS F ON RS.ID_Funcionario = F.ID_Funcionario
         LEFT JOIN CLIENTES C ON RS.ID_Cliente = C.ID_Cliente
+        LEFT JOIN CLIENTES_DOCUMENTOS CD ON CD.ID_Cliente = C.ID_Cliente
         WHERE RS.ID_Registro_Servico = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id_registro);
@@ -52,7 +53,7 @@ if (!empty($registro['ID_Cliente'])) {
 
 $dados_servico = json_decode($registro['Dados_Servico'], true);
 
-$stmt_campos = $conn->prepare("SELECT Name_Campo, Label_Campo, Unidade_Medida, Tipo_Campo FROM SERVICO_CAMPOS WHERE ID_Servico = ? ORDER BY Ordem");
+$stmt_campos = $conn->prepare("SELECT ID_Campo, Name_Campo, Label_Campo, Unidade_Medida, Tipo_Campo FROM SERVICO_CAMPOS WHERE ID_Servico = ? ORDER BY Ordem");
 $stmt_campos->bind_param("i", $registro['ID_Servico']);
 $stmt_campos->execute();
 $campos_ordenados = $stmt_campos->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -141,18 +142,56 @@ unset($dados_servico['doc_responsavel']);
                         <?php 
                             $name = $campo['Name_Campo'];
                             if(isset($dados_servico[$name]) && !empty($dados_servico[$name])):
+                                $referencias = [];
+                                $stmt_refs = $conn->prepare("SELECT Descricao_Referencia, Valor_Feminino, Valor_Masculino FROM SERVICO_CAMPOS_REFERENCIAS WHERE ID_Campo = ?");
+                                
+                                if ($stmt_refs) {
+                                    $id_campo_atual = $campo['ID_Campo'];
+                                    $stmt_refs->bind_param("i", $id_campo_atual);
+                                    $stmt_refs->execute();
+                                    $referencias = $stmt_refs->get_result()->fetch_all(MYSQLI_ASSOC);
+                                    $stmt_refs->close(); 
+                                }
+
                                 $label = $campo['Label_Campo'];
                                 $valor = $dados_servico[$name]; 
                                 if ($campo['Tipo_Campo'] === 'date' && !empty($valor))
                                     $valor = (new DateTime($valor))->format('d/m/Y');
                                 $unidade = $campo['Unidade_Medida'];
                         ?>
-                            <div class="info-pair">
-                                <div>
-                                    <span><strong><?= htmlspecialchars($label) ?>:</strong></span>
-                                    <span><?= htmlspecialchars($valor) ?> <?= htmlspecialchars($unidade) ?></span>
+                            <?php if (!empty($referencias)): // Se encontrou referências, mostra a tabela completa ?>
+                                <div class="resultado-com-referencia">
+                                    <div class="resultado-paciente">
+                                        <span><strong><?= htmlspecialchars($label) ?>:</strong></span>
+                                        <span class="valor-destaque"><?= htmlspecialchars($valor) ?> <?= htmlspecialchars($unidade) ?></span>
+                                    </div>
+                                    <table class="tabela-referencias">
+                                        <thead>
+                                            <tr>
+                                                <th>Referências</th>
+                                                <th>Homem</th>
+                                                <th>Mulher</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach($referencias as $ref): ?>
+                                            <tr>
+                                                <td><?= htmlspecialchars($ref['Descricao_Referencia']) ?></td>
+                                                <td><?= htmlspecialchars($ref['Valor_Masculino']) ?></td>
+                                                <td><?= htmlspecialchars($ref['Valor_Feminino']) ?></td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
                                 </div>
-                            </div>
+                            <?php else: // Senão, mostra o resultado simples de antes ?>
+                                <div class="info-pair">
+                                    <div>
+                                        <span><strong><?= htmlspecialchars($label) ?>:</strong></span>
+                                        <span><?= htmlspecialchars($valor) ?> <?= htmlspecialchars($unidade) ?></span>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                         <?php endif; ?>
                     <?php endforeach; ?>
                 </section>
@@ -194,7 +233,7 @@ unset($dados_servico['doc_responsavel']);
 
                 <div class="termo-ciencia">
                     <div class="section-title" style="border:none; margin: 0 0 1rem 0;">TERMO DE CIÊNCIA</div>
-                    <p>Eu, <?php if ($nome_responsavel): ?> <?= "<strong>" . strtoupper(htmlspecialchars($nome_responsavel)) . "</strong>" ?>, inscrito(a) no CPF sob o n° <strong><?= htmlspecialchars($doc_responsavel) ?></strong>, responsável legal por <?php endif; ?> <?= "<strong>" . strtoupper(htmlspecialchars($nome_paciente)) . "</strong>" ?> , inscrito(a) no CPF sob o n° <strong><?= htmlspecialchars($doc_paciente) ?></strong>, declaro estar ciente de que o serviço farmacêutico prestado pela <?= htmlspecialchars($empresa['Nome_Fantasia']) ?> é um procedimento de atenção à saúde que não constitui um diagnóstico médico e não substitui uma consulta com um profissional de saúde qualificado. As informações e os resultados obtidos servem como um auxílio no monitoramento da saúde e na promoção do uso racional de medicamentos. Tenho ciência de que os dados coletados serão tratados com sigilo e confidencialidade, conforme a Lei Geral de Proteção de Dados (LGPD), e serão utilizados para fins de assistência farmacêutica. Concordo com o conteúdo do termo e com a realização do procedimento.</p>
+                    <p>Eu, <?php if ($nome_responsavel): ?> <?= "<strong>" . strtoupper(htmlspecialchars($nome_responsavel)) . "</strong>" ?>, inscrito(a) no CPF sob o n° <strong><?= htmlspecialchars($doc_responsavel) ?></strong>, responsável legal por <?php endif; ?> <?= "<strong>" . strtoupper(htmlspecialchars($nome_paciente)) . "</strong>" ?>, inscrito(a) no CPF sob o n° <strong><?= htmlspecialchars($doc_paciente) ?></strong>, declaro estar ciente de que o serviço farmacêutico prestado pela <?= htmlspecialchars($empresa['Nome_Fantasia']) ?> é um procedimento de atenção à saúde que não constitui um diagnóstico médico e não substitui uma consulta com um profissional de saúde qualificado. As informações e os resultados obtidos servem como um auxílio no monitoramento da saúde e na promoção do uso racional de medicamentos. Tenho ciência de que os dados coletados serão tratados com sigilo e confidencialidade, conforme a Lei Geral de Proteção de Dados (LGPD), e serão utilizados para fins de assistência farmacêutica. Concordo com o conteúdo do termo e com a realização do procedimento.</p>
                 </div>
 
                 <div class="signature-area" style="margin-top: 2rem; justify-content: center;">

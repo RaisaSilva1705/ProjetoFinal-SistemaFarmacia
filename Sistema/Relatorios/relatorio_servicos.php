@@ -12,8 +12,8 @@ include DEV_PATH . "Exec/validar_acesso.php";
 
 $data_inicio = $_GET['data_inicio'] ?? date('Y-m-01');
 $data_fim = $_GET['data_fim'] ?? date('Y-m-t');
-$filtro_servico_id = filter_input(INPUT_GET, 'servico_id', FILTER_VALIDATE_INT);
-$filtro_funcionario_id = filter_input(INPUT_GET, 'funcionario_id', FILTER_VALIDATE_INT);
+$filtro_servico_id = (isset($_GET['servico_id']) && $_GET['servico_id'] !== 'Todos') ? $_GET['servico_id'] : '';
+$filtro_funcionario_id = (isset($_GET['funcionario_id']) && $_GET['funcionario_id'] !== 'Todos') ? $_GET['funcionario_id'] : '';
 
 $servicos = $conn->query("SELECT ID_Servico, Nome_Servico FROM SERVICOS_FARMACEUTICOS WHERE Status = 'Ativo' ORDER BY Nome_Servico")->fetch_all(MYSQLI_ASSOC);
 $funcionarios = $conn->query("SELECT ID_Funcionario, Nome FROM FUNCIONARIOS WHERE Status = 'Ativo' ORDER BY Nome")->fetch_all(MYSQLI_ASSOC);
@@ -103,7 +103,7 @@ if ($total_atendimentos > 0) {
                                 <div class="col-md-2">
                                     <label for="servico_id">Serviço:</label>
                                     <select name="servico_id" class="form-select">
-                                        <option value="">Todos</option>
+                                        <option value="Todos">Todos</option>
                                         <?php foreach ($servicos as $servico): ?>
                                             <option value="<?= $servico['ID_Servico'] ?>" <?= ($filtro_servico_id == $servico['ID_Servico']) ? 'selected' : '' ?>><?= htmlspecialchars($servico['Nome_Servico']) ?></option>
                                         <?php endforeach; ?>
@@ -112,7 +112,7 @@ if ($total_atendimentos > 0) {
                                 <div class="col-md-2">
                                     <label for="funcionario_id">Funcionário:</label>
                                     <select name="funcionario_id" class="form-select">
-                                        <option value="">Todos</option>
+                                        <option value="Todos">Todos</option>
                                         <?php foreach ($funcionarios as $func): ?>
                                             <option value="<?= $func['ID_Funcionario'] ?>" <?= ($filtro_funcionario_id == $func['ID_Funcionario']) ? 'selected' : '' ?>><?= htmlspecialchars($func['Nome']) ?></option>
                                         <?php endforeach; ?>

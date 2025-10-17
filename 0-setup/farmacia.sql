@@ -347,7 +347,9 @@ CREATE TABLE IF NOT EXISTS `CAIXAS` (
     `ID_Caixa` INT AUTO_INCREMENT PRIMARY KEY,
     `Caixa` VARCHAR(255) NOT NULL,
     `Status` ENUM('Aberto', 'Fechado') NOT NULL DEFAULT 'Fechado',
-    `StatusCadastrado` ENUM('Ativo', 'Inativo') NOT NULL DEFAULT 'Ativo'
+    `StatusCadastrado` ENUM('Ativo', 'Inativo') NOT NULL DEFAULT 'Ativo',
+    `Tela_Cliente_Modo` ENUM('Inativo', 'Aguardando', 'Venda', 'Avaliacao') NOT NULL DEFAULT 'Inativo',
+    `Tela_Cliente_Status` JSON DEFAULT NULL
 ) ENGINE = InnoDB;
 /* drop table CAIXAS; */
 /* select * from CAIXAS; */
@@ -653,7 +655,7 @@ CREATE TABLE IF NOT EXISTS `PROMOCOES_ITENS` (
   FOREIGN KEY (`ID_Produto`) REFERENCES `PRODUTOS`(`ID_Produto`)
 ) ENGINE = InnoDB;
 /* drop table PROMOCOES_ITENS; */
-/* select * from PROMOCOES_ITENS; */
+ select * from PROMOCOES_ITENS; 
 
 -- -----------------------------------------------------
 -- Table `DEVOLUCOES_FORNECEDORES`

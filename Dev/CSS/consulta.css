@@ -1,0 +1,61 @@
+html, body {
+    height: 100%;
+    overflow: hidden;
+    background-color: #f0f2f5;
+}
+.container-terminal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-family: Arial, sans-serif;
+}
+.card-consulta {
+    width: 90%;
+    max-width: 800px;
+    padding: 2rem;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    /* --- INÍCIO DA MUDANÇA --- */
+    /* Usamos grid para empilhar as duas telas uma sobre a outra */
+    display: grid;
+    place-items: center;
+}
+
+#tela-inicial, #tela-resultado {
+    /* Faz com que ambas as telas ocupem a mesma célula do grid */
+    grid-area: 1 / 1;
+    
+    /* Define a transição de opacidade com duração de 0.5s */
+    transition: opacity 0.5s ease-in-out;
+    
+    /* Garante que o conteúdo não quebre o layout durante a transição */
+    width: 100%; 
+}
+
+/* A tela que não estiver ativa fica completamente transparente e não pode ser clicada */
+.screen:not(.active) {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* A tela ativa fica visível */
+.screen.active {
+    opacity: 1;
+}
+/* --- FIM DA MUDANÇA --- */
+
+#tela-inicial { text-align: center; }
+#tela-inicial h1 { font-size: 3rem; font-weight: bold; color: #0d6efd; }
+#tela-inicial p { font-size: 1.5rem; color: #6c757d; }
+
+#tela-resultado img { max-height: 300px; object-fit: contain; }
+#resultado-preco { font-size: 4rem; font-weight: bold; color: #198754; }
+.box-promocao {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    border-radius: .375rem;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+.box-promocao h5 { color: #664d03; }

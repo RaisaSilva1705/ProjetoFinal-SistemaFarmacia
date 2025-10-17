@@ -10,21 +10,54 @@ include DEV_PATH . "Exec/validar_sessao.php";
 define('MODULO_SOLICITADO', 'PROMOCOES_GERENCIAR');
 include DEV_PATH . "Exec/validar_acesso.php";
 
-$stmt = $conn->prepare("SELECT ID_Promocao, Descricao, Tipo, Data_Inicio, Data_Fim, Status FROM PROMOCOES ORDER BY ID_Promocao DESC");
+$where_clauses = [];
+$params = [];
+$types = '';
+
+if (!empty($_GET['descricao'])) {
+    $where_clauses[] = "p.Descricao LIKE ?";
+    $params[] = '%' . $_GET['descricao'] . '%';
+    $types .= 's';
+}
+
+if (!empty($_GET['tipo']) && $_GET['tipo'] !== 'Todos') {
+    $where_clauses[] = "p.Tipo = ?";
+    $params[] = $_GET['tipo'];
+    $types .= 's';
+}
+
+if (!empty($_GET['status']) && $_GET['status'] !== 'Todos') {
+    $where_clauses[] = "p.Status = ?";
+    $params[] = $_GET['status'];
+    $types .= 's';
+}
+
+$where_sql = count($where_clauses) > 0 ? 'WHERE ' . implode(' AND ', $where_clauses) : '';
+
+$sql = "SELECT 
+            p.ID_Promocao, p.Descricao, p.Tipo, p.Data_Inicio, p.Data_Fim, p.Status,
+            GROUP_CONCAT(prod.Nome SEPARATOR ', ') AS Produtos
+        FROM PROMOCOES p
+        LEFT JOIN PROMOCOES_ITENS pi ON p.ID_Promocao = pi.ID_Promocao
+        LEFT JOIN PRODUTOS prod ON pi.ID_Produto = prod.ID_Produto
+        {$where_sql}
+        GROUP BY p.ID_Promocao
+        ORDER BY p.ID_Promocao DESC";
+
+$stmt = $conn->prepare($sql);
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
 $stmt->execute();
 $promocoes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
 function traduzirTipoPromocao($tipo) {
     switch ($tipo) {
-        case 'LEVE_X_PAGUE_Y':
-            return 'Leve X, Pague Y';
-        case 'DESCONTO_PROGRESSIVO':
-            return 'Desconto Progressivo';
-        case 'COMBO_PRECO_FIXO':
-            return 'Combo com Preço Fixo';
-        default:
-            return 'Não identificado';
+        case 'LEVE_X_PAGUE_Y': return 'Leve X, Pague Y';
+        case 'DESCONTO_PROGRESSIVO': return 'Desconto Progressivo';
+        case 'COMBO_PRECO_FIXO': return 'Combo com Preço Fixo';
+        default: return 'Não identificado';
     }
 }
 ?>
@@ -50,12 +83,40 @@ function traduzirTipoPromocao($tipo) {
                 <div class="container p-5">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2 class="m-0">
-                            <i class="bi bi-tag-fill text-primary"></i>
                             Gestão de Promoções
                         </h2>
                         <a href="nova_promocao.php" class="btn btn-primary">
                             <i class="bi bi-plus-circle"></i> Nova Promoção
                         </a>
+                    </div>
+
+                    <div class="card card-body mb-4">
+                        <form action="promocoes.php" method="GET" class="row g-3 align-items-end">
+                            <div class="col-md-5">
+                                <label for="descricao" class="form-label">Buscar por Descrição</label>
+                                <input type="text" class="form-control" name="descricao" id="descricao" value="<?= htmlspecialchars($_GET['descricao'] ?? '') ?>">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="tipo" class="form-label">Tipo</label>
+                                <select name="tipo" id="tipo" class="form-select">
+                                    <option value="Todos">Todos</option>
+                                    <option value="LEVE_X_PAGUE_Y" <?= ($_GET['tipo'] ?? '') == 'LEVE_X_PAGUE_Y' ? 'selected' : '' ?>>Leve X, Pague Y</option>
+                                    <option value="DESCONTO_PROGRESSIVO" <?= ($_GET['tipo'] ?? '') == 'DESCONTO_PROGRESSIVO' ? 'selected' : '' ?>>Desconto Progressivo</option>
+                                    <option value="COMBO_PRECO_FIXO" <?= ($_GET['tipo'] ?? '') == 'COMBO_PRECO_FIXO' ? 'selected' : '' ?>>Combo com Preço Fixo</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="status" class="form-label">Status</label>
+                                <select name="status" id="status" class="form-select">
+                                    <option value="Todos">Todos</option>
+                                    <option value="Ativo" <?= ($_GET['status'] ?? '') == 'Ativo' ? 'selected' : '' ?>>Ativas</option>
+                                    <option value="Inativo" <?= ($_GET['status'] ?? '') == 'Inativo' ? 'selected' : '' ?>>Inativas</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel-fill"></i> Filtrar</button>
+                            </div>
+                        </form>
                     </div>
 
                     <div class="card">
@@ -116,19 +177,8 @@ function traduzirTipoPromocao($tipo) {
             <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
 
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
-            </div>
-        </div>
-
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <?php include_once DEV_PATH . 'Views/toast.php'; ?>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?php echo DEV_URL ?>JS/toast.js"></script>
         <script>
             <?php

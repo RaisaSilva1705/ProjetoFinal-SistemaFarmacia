@@ -62,8 +62,10 @@
             <a class="dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-shop-window"></i>Frente de Loja</a>
             <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>PDV/pdv.php">Nova Venda (PDV)</a></li>
-                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>PreVendas/prevendas.php">Pré-Vendas</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>PreVendas/prevendas.php">Nova Pré-Venda</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>PreVendas/listagem_prevendas.php">Conferir Pré-Vendas</a></li>
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Caixas/caixas.php">Situação do Caixa</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Consulta/terminal_consulta.php">Terminal de Consulta</a></li>
             </ul>
         </div>
         

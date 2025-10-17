@@ -12,9 +12,9 @@ include DEV_PATH . "Exec/validar_acesso.php";
 
 $data_inicio = $_GET['data_inicio'] ?? date('Y-m-01');
 $data_fim = $_GET['data_fim'] ?? date('Y-m-d');
-$filtro_id_caixa = $_GET['id_caixa'] ?? '';
-$filtro_id_funcionario = $_GET['id_funcionario'] ?? '';
-$filtro_id_cliente = $_GET['id_cliente'] ?? '';
+$filtro_id_caixa = (isset($_GET['id_caixa']) && $_GET['id_caixa'] !== 'Todos') ? $_GET['id_caixa'] : '';
+$filtro_id_funcionario = (isset($_GET['id_funcionario']) && $_GET['id_funcionario'] !== 'Todos') ? $_GET['id_funcionario'] : '';
+$filtro_id_cliente = (isset($_GET['id_cliente']) && $_GET['id_cliente'] !== 'Todos') ? $_GET['id_cliente'] : '';
 
 $caixas_lista = $conn->query("SELECT ID_Caixa, Caixa FROM CAIXAS WHERE StatusCadastrado = 'Ativo' ORDER BY Caixa")->fetch_all(MYSQLI_ASSOC);
 $funcionarios_lista = $conn->query("SELECT ID_Funcionario, Nome FROM FUNCIONARIOS WHERE Status = 'Ativo' ORDER BY Nome")->fetch_all(MYSQLI_ASSOC);
@@ -90,8 +90,8 @@ $ticket_medio = ($numero_vendas > 0) ? $total_faturado / $numero_vendas : 0;
                             <div class="row g-3 align-items-end">
                                 <div class="col-md-3"><label>De:</label><input type="date" name="data_inicio" class="form-control" value="<?= htmlspecialchars($data_inicio) ?>"></div>
                                 <div class="col-md-3"><label>Até:</label><input type="date" name="data_fim" class="form-control" value="<?= htmlspecialchars($data_fim) ?>"></div>
-                                <div class="col-md-2"><label>Caixa:</label><select name="id_caixa" class="form-select"><option value="">Todos</option><?php foreach ($caixas_lista as $caixa) echo "<option value='{$caixa['ID_Caixa']}' ".($filtro_id_caixa == $caixa['ID_Caixa'] ? 'selected' : '').">{$caixa['Caixa']}</option>"; ?></select></div>
-                                <div class="col-md-2"><label>Funcionário:</label><select name="id_funcionario" class="form-select"><option value="">Todos</option><?php foreach ($funcionarios_lista as $func) echo "<option value='{$func['ID_Funcionario']}' ".($filtro_id_funcionario == $func['ID_Funcionario'] ? 'selected' : '').">{$func['Nome']}</option>"; ?></select></div>
+                                <div class="col-md-2"><label>Caixa:</label><select name="id_caixa" class="form-select"><option value="Todos">Todos</option><?php foreach ($caixas_lista as $caixa) echo "<option value='{$caixa['ID_Caixa']}' ".($filtro_id_caixa == $caixa['ID_Caixa'] ? 'selected' : '').">{$caixa['Caixa']}</option>"; ?></select></div>
+                                <div class="col-md-2"><label>Funcionário:</label><select name="id_funcionario" class="form-select"><option value="Todos">Todos</option><?php foreach ($funcionarios_lista as $func) echo "<option value='{$func['ID_Funcionario']}' ".($filtro_id_funcionario == $func['ID_Funcionario'] ? 'selected' : '').">{$func['Nome']}</option>"; ?></select></div>
                                 <div class="col-md-2"><button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel-fill"></i> Filtrar</button></div>
                             </div>
                         </form>

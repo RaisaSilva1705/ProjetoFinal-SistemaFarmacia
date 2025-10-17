@@ -239,10 +239,18 @@ include DEV_PATH . "Exec/validar_acesso.php";
                                         <div class="form-text" id="feedback_${campo.Name_Campo}"></div>
                                     `;
                                 }
+                                else if (campo.Tipo_Campo === 'number') {
+                                    inputHtml = `
+                                        <div class="input-group">
+                                            <input type="${campo.Tipo_Campo}" id="${campo.Name_Campo}" name="dados_servico[${campo.Name_Campo}]" class="form-control" step="0.01" required>
+                                            ${campo.Unidade_Medida ? `<span class="input-group-text">${campo.Unidade_Medida}</span>` : ''}
+                                        </div>
+                                    `;
+                                }
                                 else {
                                     inputHtml = `
                                         <div class="input-group">
-                                            <input type="${campo.Tipo_Campo}" id="${campo.Name_Campo}" name="dados_servico[${campo.Name_Campo}]" class="form-control" required>
+                                            <input type="${campo.Tipo_Campo}" id="${campo.Name_Campo}" name="dados_servico[${campo.Name_Campo}]" class="form-control" step="0.01" required>
                                             ${campo.Unidade_Medida ? `<span class="input-group-text">${campo.Unidade_Medida}</span>` : ''}
                                         </div>
                                     `;

@@ -12,7 +12,7 @@ include DEV_PATH . "Exec/validar_acesso.php";
 
 $data_inicio = $_GET['data_inicio'] ?? date('Y-m-d', strtotime('-7 days'));
 $data_fim = $_GET['data_fim'] ?? date('Y-m-d');
-$filtro_id_caixa = $_GET['id_caixa'] ?? '';
+$filtro_id_caixa = (isset($_GET['id_caixa']) && $_GET['id_caixa'] !== 'Todos') ? $_GET['id_caixa'] : '';
 
 $sql = "SELECT
             CA.Valor_Vendido,
@@ -96,7 +96,7 @@ $caixas_lista = $conn->query("SELECT ID_Caixa, Caixa FROM CAIXAS WHERE StatusCad
                                 <div class="col-md-2">
                                     <label for="id_caixa">Caixa:</label>
                                     <select name="id_caixa" class="form-select">
-                                        <option value="">Todos</option>
+                                        <option value="Todos">Todos</option>
                                         <?php foreach ($caixas_lista as $caixa_opt): ?>
                                             <option value="<?= $caixa_opt['ID_Caixa'] ?>" <?= ($filtro_id_caixa == $caixa_opt['ID_Caixa']) ? 'selected' : '' ?>><?= htmlspecialchars($caixa_opt['Caixa']) ?></option>
                                         <?php endforeach; ?>

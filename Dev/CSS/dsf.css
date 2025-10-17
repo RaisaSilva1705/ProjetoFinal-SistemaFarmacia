@@ -1,44 +1,63 @@
 body {
     background-color: #f0f2f5;
+    font-family: Arial, Helvetica, sans-serif; /* Fonte mais moderna */
 }
 
 .dsf-document {
+    /* A imagem de fundo agora é uma marca d'água sutil */
     background-image: url('../../Dev/Imagens/imgSistema/mascaraDSF.jpg');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    max-width: 21cm; /* Largura de uma folha A4 */
-    min-height: 29.7cm; /* Altura de uma folha A4 */
+    background-size: auto;
+    background-repeat: repeat-y;
+    background-position: auto;
+    position: relative;
+    max-width: 21cm;
+    min-height: 29.7cm;
     margin: 2rem auto;
     padding: 2cm;
     background-color: white;
     box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    font-family: 'Times New Roman', Times, serif;
-    font-size: 12pt;
+    font-size: 11pt; /* Tamanho base mais legível */
     line-height: 1.5;
-    color: #000;
+    color: #333; /* Cor de texto mais suave que o preto puro */
+}
+/* Camada para controlar a opacidade da marca d'água */
+.dsf-document::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('../../Dev/Imagens/imgSistema/mascaraDSF.jpg');
+    background-size: auto;
+    background-repeat: repeat-y;
+    background-position: auto;
+    opacity: 0.08; /* Deixa a imagem bem sutil */
+    z-index: 1;
+}
+/* Garante que o conteúdo fique acima da marca d'água */
+.dsf-document > * {
+    position: relative;
+    z-index: 2;
 }
 
 .dsf-header {
     display: flex;
     justify-content: space-between;
-    border-bottom: 2px solid #000;
+    align-items: flex-start; /* Alinha os itens ao topo */
+    border-bottom: 2px solid #0056b3; /* Cor azul profissional */
     padding-bottom: 1rem;
     margin-bottom: 1rem;
 }
 .dsf-header .left-col, .dsf-header .right-col {
     width: 48%;
-    font-size: 10pt;
+    font-size: 9pt;
 }
-.dsf-header .left-col {
-    font-weight: bold;
-}
-.dsf-header .right-col {
-    text-align: right;
-}
+.dsf-header .left-col { font-weight: bold; font-size: 11pt; }
+.dsf-header .right-col { text-align: right; }
 
 .dsf-section {
-    border-bottom: 2px solid #000;
+    border-bottom: 1px solid #ccc; /* Linha de separação mais suave */
     padding-bottom: 1rem;
     margin-bottom: 1rem;
 }
@@ -46,62 +65,78 @@ body {
     font-weight: bold;
     text-align: center;
     margin-bottom: 1rem;
-    font-size: 14pt;
+    font-size: 12pt;
+    color: #0056b3;
 }
-
 .info-pair {
     display: flex;
     justify-content: space-between;
+    margin-bottom: 0.5rem;
 }
-.info-pair span:first-child {
-    font-weight: bold;
-}
-
 .section-title {
     text-align: center;
     font-weight: bold;
     text-transform: uppercase;
     margin: 1.5rem 0;
-    border-top: 2px solid #000;
-    border-bottom: 2px solid #000;
+    background-color: #f0f2f5;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
     padding: 0.5rem 0;
+    font-size: 12pt;
 }
 
-.signature-area {
-    margin-top: 4rem;
+/* --- ESTILOS PARA A NOVA TABELA DE REFERÊNCIAS --- */
+.resultado-com-referencia {
+    margin-bottom: 1.5rem; /* Espaçamento entre os resultados */
+}
+.resultado-paciente {
     display: flex;
-    justify-content: space-around;
-    text-align: center;
-    font-size: 11pt;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
 }
-.signature-line {
-    border-top: 1px solid #000;
-    padding-top: 0.5rem;
-    width: 300px;
+.resultado-paciente .valor-destaque {
+    font-weight: bold;
+    font-size: 1.1em;
+    background-color: #e9ecef;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
 }
-
-.termo-ciencia {
-    margin-top: 2rem;
+.tabela-referencias {
+    width: 100%;
+    border-collapse: collapse;
     font-size: 10pt;
-    text-align: justify;
+    margin-left: 1rem; /* Indentação para a tabela */
+    width: calc(100% - 1rem);
 }
-
-.dsf-footer {
-    margin-top: 2rem;
+.tabela-referencias th, .tabela-referencias td {
+    border: 1px solid #ddd;
+    padding: 0.4rem;
+    text-align: left;
+}
+.tabela-referencias th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+.tabela-referencias td:nth-child(2), .tabela-referencias td:nth-child(3) {
     text-align: center;
-    font-size: 9pt;
-    border-top: 2px solid #000;
-    padding-top: 0.5rem;
 }
+/* --- FIM DOS ESTILOS DA TABELA --- */
+
+.signature-area { margin-top: 3rem; display: flex; justify-content: space-around; text-align: center; font-size: 10pt; }
+.signature-line { border-top: 1px solid #333; padding-top: 0.5rem; width: 300px; }
+
+.termo-ciencia { margin-top: 2rem; font-size: 9pt; text-align: justify; }
+
+.dsf-footer { margin-top: 2rem; text-align: center; font-size: 8pt; border-top: 1px solid #ccc; padding-top: 0.5rem; }
 
 @media print {
-    body { background-color: white; }
+    body { background-color: white; font-family: Arial, Helvetica, sans-serif; }
     .no-print { display: none !important; }
     .dsf-document {
-        margin: 0;
-        padding: 0;
-        box-shadow: none; 
-        border: none;
+        margin: 0; padding: 0; box-shadow: none; border: none;
+        max-width: 100%; min-height: auto;
     }
+    .dsf-document::before { display: none; } /* Remove marca d'água na impressão para economizar tinta */
     @page { margin: 2cm; }
 }

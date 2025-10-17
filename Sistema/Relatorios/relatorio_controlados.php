@@ -12,8 +12,8 @@ include DEV_PATH . "Exec/validar_acesso.php";
 
 $data_inicio = $_GET['data_inicio'] ?? date('Y-m-01');
 $data_fim = $_GET['data_fim'] ?? date('Y-m-t');
-$filtro_medicamento_id = filter_input(INPUT_GET, 'medicamento_id', FILTER_VALIDATE_INT);
-$filtro_prescritor = $_GET['prescritor'] ?? '';
+$filtro_medicamento_id = (isset($_GET['medicamento_id']) && $_GET['medicamento_id'] !== 'Todos') ? $_GET['medicamento_id'] : '';
+$filtro_prescritor = (isset($_GET['prescritor']) && $_GET['prescritor'] !== 'Todos') ? $_GET['prescritor'] : '';
 
 $controlados_lista = $conn->query("SELECT DISTINCT P.ID_Produto, P.Nome FROM ITENS_VENDA IV JOIN PRODUTOS P ON IV.ID_Produto = P.ID_Produto JOIN MEDICAMENTOS M ON P.ID_Produto = M.ID_Produto WHERE M.Controlado = 'Sim' ORDER BY P.Nome")->fetch_all(MYSQLI_ASSOC);
 $prescritores_lista = $conn->query("SELECT DISTINCT Nome_Profissional FROM PRESCRICOES ORDER BY Nome_Profissional")->fetch_all(MYSQLI_ASSOC);
@@ -111,7 +111,7 @@ if (count($registros) > 0) {
                                 <div class="col-md-2">
                                     <label for="medicamento_id">Medicamento:</label>
                                     <select name="medicamento_id" class="form-select">
-                                        <option value="">Todos</option>
+                                        <option value="Todos">Todos</option>
                                         <?php foreach ($controlados_lista as $med): ?>
                                             <option value="<?= $med['ID_Produto'] ?>" <?= ($filtro_medicamento_id == $med['ID_Produto']) ? 'selected' : '' ?>><?= htmlspecialchars($med['Nome']) ?></option>
                                         <?php endforeach; ?>
@@ -120,7 +120,7 @@ if (count($registros) > 0) {
                                 <div class="col-md-2">
                                     <label for="prescritor">Prescritor:</label>
                                     <select name="prescritor" class="form-select">
-                                        <option value="">Todos</option>
+                                        <option value="Todos">Todos</option>
                                         <?php foreach ($prescritores_lista as $presc): ?>
                                             <option value="<?= htmlspecialchars($presc['Nome_Profissional']) ?>" <?= ($filtro_prescritor == $presc['Nome_Profissional']) ? 'selected' : '' ?>><?= htmlspecialchars($presc['Nome_Profissional']) ?></option>
                                         <?php endforeach; ?>

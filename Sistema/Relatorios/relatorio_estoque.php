@@ -10,8 +10,8 @@ include DEV_PATH . "Exec/validar_sessao.php";
 define('MODULO_SOLICITADO', 'RELATORIOS_VER');
 include DEV_PATH . "Exec/validar_acesso.php";
 
-$filtro_id_categoria = $_GET['id_categoria'] ?? '';
-$status_estoque = $_GET['status_estoque'] ?? '';
+$filtro_id_categoria = (isset($_GET['id_categoria']) && $_GET['id_categoria'] !== 'Todos') ? $_GET['id_categoria'] : '';
+$status_estoque = (isset($_GET['status_estoque']) && $_GET['status_estoque'] !== 'Todos') ? $_GET['status_estoque'] : '';
 
 $sql = "SELECT
             P.Nome,
@@ -92,7 +92,7 @@ $categorias_lista = $conn->query("SELECT ID_Categoria, Categoria FROM CATEGORIAS
                                 <div class="col-md-5">
                                     <label for="id_categoria">Filtrar por Categoria:</label>
                                     <select name="id_categoria" class="form-select">
-                                        <option value="">Todas</option>
+                                        <option value="Todos">Todas</option>
                                         <?php foreach ($categorias_lista as $cat): ?>
                                             <option value="<?= $cat['ID_Categoria'] ?>" <?= ($filtro_id_categoria == $cat['ID_Categoria']) ? 'selected' : '' ?>><?= htmlspecialchars($cat['Categoria']) ?></option>
                                         <?php endforeach; ?>
@@ -101,7 +101,7 @@ $categorias_lista = $conn->query("SELECT ID_Categoria, Categoria FROM CATEGORIAS
                                 <div class="col-md-5">
                                     <label for="status_estoque">Filtrar por Status:</label>
                                     <select name="status_estoque" class="form-select">
-                                        <option value="">Todos</option>
+                                        <option value="Todos">Todos</option>
                                         <option value="Abaixo" <?= $status_estoque == 'Abaixo' ? 'selected' : '' ?>>Abaixo do Mínimo</option>
                                         <option value="Normal" <?= $status_estoque == 'Normal' ? 'selected' : '' ?>>Estoque Normal</option>
                                     </select>

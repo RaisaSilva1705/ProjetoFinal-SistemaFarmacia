@@ -13,7 +13,7 @@ include DEV_PATH . "Exec/validar_acesso.php";
 // 1. LÓGICA DE FILTROS E PAGINAÇÃO
 $data_inicio = $_GET['data_inicio'] ?? date('Y-m-d');
 $data_fim = $_GET['data_fim'] ?? date('Y-m-d');
-$filtro_usuario_id = filter_input(INPUT_GET, 'usuario_id', FILTER_VALIDATE_INT);
+$filtro_usuario_id = (isset($_GET['usuario_id']) && $_GET['usuario_id'] !== 'Todos') ? $_GET['usuario_id'] : '';
 $busca_acao = $_GET['busca_acao'] ?? '';
 $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT) ?: 1;
 $items_per_page = 50; // Quantos logs mostrar por página
@@ -95,7 +95,7 @@ $logs = $stmt_main->get_result()->fetch_all(MYSQLI_ASSOC);
                                 <div class="col-md-2">
                                     <label>Usuário:</label>
                                     <select name="usuario_id" class="form-select">
-                                        <option value="">Todos</option>
+                                        <option value="Todos">Todos</option>
                                         <?php foreach ($usuarios_lista as $user): ?>
                                             <option value="<?= $user['ID_Usuario'] ?>" <?= ($filtro_usuario_id == $user['ID_Usuario']) ? 'selected' : '' ?>><?= htmlspecialchars($user['Nome']) ?></option>
                                         <?php endforeach; ?>
