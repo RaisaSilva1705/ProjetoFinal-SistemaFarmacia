@@ -12,8 +12,8 @@ define('MODULO_SOLICITADO', 'PRODUTOS_GERENCIAR');
 include DEV_PATH . "Exec/validar_acesso.php";
 
 $busca_nome = $_GET['busca_nome'] ?? '';
-$categoria_id = $_GET['categoria'] ?? '';
-$status = $_GET['status'] ?? '';
+$categoria_id = (isset($_GET['categoria']) && $_GET['categoria'] !== 'Todos') ? $_GET['categoria'] : '';
+$status = (isset($_GET['status']) && $_GET['status'] !== 'Todos') ? $_GET['status'] : '';
 
 $sql = "SELECT
             P.ID_Produto,
@@ -72,8 +72,9 @@ $result = $stmt->get_result();
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Listagem de Produtos</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <title>Gestão de Produtos</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
     <body>
@@ -84,15 +85,15 @@ $result = $stmt->get_result();
             <div class="content flex-grow-1">
                 <!-- Banner -->
                 <div class="container-fluid bg-secondary text-white text-center p-4">
-                    <h3>Listagem de Produtos</h3>
+                    <h3>Gestão de Produtos</h3>
                 </div>
     
                 <div class="container mt-3 p-5">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h2>Lista de Produto</h2>
                         <div>
-                            <a href="cadastrar_produto.php" class="btn btn-primary">Cadastrar</a>
-                            <a href="../Relatorios/relatorio_produtos.php" class="btn btn-outline-secondary">Ver Relatório</a>
+                            <a href="cadastrar_produto.php" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Novo Produto</a>
+                            <a href="../Relatorios/relatorio_produtos.php" class="btn btn-outline-secondary"><i class="bi bi-bar-chart-line-fill"></i> Ver Relatório</a>
                         </div>
                     </div>
     
@@ -106,7 +107,7 @@ $result = $stmt->get_result();
                                 <div class="col-md-3">
                                     <label for="categoria" class="form-label">Categoria</label>
                                     <select name="categoria" id="categoria" class="form-select">
-                                        <option value="">Todas</option>
+                                        <option value="Todos">Todas</option>
                                         <?php
                                         $categorias_result = $conn->query("SELECT ID_Categoria, Categoria FROM CATEGORIAS ORDER BY Categoria");
                                         while ($cat = $categorias_result->fetch_assoc()) {
@@ -120,14 +121,14 @@ $result = $stmt->get_result();
                                 <div class="col-md-3">
                                     <label for="status" class="form-label">Status</label>
                                     <select name="status" id="status" class="form-select">
-                                        <option value="">Todos</option>
+                                        <option value="Todos">Todos</option>
                                         <option value="Ativo" <?= ($_GET['status'] ?? '') == 'Ativo' ? 'selected' : '' ?>>Ativo</option>
                                         <option value="Inativo" <?= ($_GET['status'] ?? '') == 'Inativo' ? 'selected' : '' ?>>Inativo</option>
                                     </select>
                                 </div>
     
                                 <div class="col-md-2 d-flex align-items-end">
-                                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+                                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel-fill"></i> Filtrar</button>
                                 </div>
                             </div>
                         </form>
@@ -137,40 +138,45 @@ $result = $stmt->get_result();
                         <table class="table table-striped table-hover table-bordered">
                             <thead class="table-dark">
                                 <tr>
-                                    <th scope="col">Produto</th>
-                                    <th scope="col">Cód. Barras</th>
-                                    <th scope="col">Categoria</th>
-                                    <th scope="col">Estoque</th>
-                                    <th scope="col">Status</th>
-                                    <th scope="col">Preço</th>
-                                    <th scope="col" class="text-center">Ações</th>
+                                    <th>Produto</th>
+                                    <th>Cód. Barras</th>
+                                    <th class="text-center">Estoque</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-end">Preço</th>
+                                    <th class="text-center">Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php
-                                    if ($result->num_rows > 0) {
-                                        while ($row = $result->fetch_assoc()) { // quebra de página após 20 resultados
-                                            $classe_estoque = ($row['Quantidade_Total'] <= $row['Quant_Minima']) ? 'table-danger' : '';
-                                            $badge_class = $row['Status'] === 'Ativo' ? 'table-success' : 'table-danger';
-    
-                                            echo "<tr class='{$classe_estoque}'>";
-                                                echo '<td>' . htmlspecialchars($row["Nome"]) . '</td>';
-                                                echo '<td>' . htmlspecialchars($row["EAN_GTIN"]) . '</td>';
-                                                echo '<td>' . htmlspecialchars($row["Categoria"]) . '</td>';
-                                                echo '<td>' . $row["Quantidade_Total"] . '</td>';
-                                                echo "<td class='{$badge_class}'>" . htmlspecialchars($row["Status"]) . "</td>";
-                                                echo '<td>R$ ' . number_format($row['Preco_Atual'] ?? 0.00, 2, ',', '.') . '</td>';
-                                                echo '<td>
-                                                        <a href="editar_produto.php?codigo=' . $row["ID_Produto"] . '" class="btn btn-warning btn-sm">Editar</a>
-                                                        <a href="inativar_produto.php?codigo=' . $row["ID_Produto"] . '" class="btn btn-danger btn-sm" onclick="return confirm(\'Tem certeza que deseja inativar este produto?\')">Inativar</a>
-                                                    </td>';
-                                            echo '</tr>';
-                                        }
-                                    } 
-                                    else {
-                                        echo '<tr><td colspan="7" class="text-center">Nenhum produto cadastrado.</td></tr>';
-                                    }
-                                ?>
+                                <?php if ($result->num_rows > 0): ?>
+                                    <?php while($row = $result->fetch_assoc()): 
+                                        $estoque_total = $row['Quantidade_Total'] ?? 0;
+                                        $classe_alerta = '';
+                                        if ($estoque_total < $row['Quant_Minima']) $classe_alerta = 'table-danger';
+                                    ?>
+                                        <tr class="<?= $classe_alerta ?>">
+                                            <td><?= htmlspecialchars($row["Nome"]) ?></td>
+                                            <td><?= htmlspecialchars($row["EAN_GTIN"]) ?></td>
+                                            <td class="text-center fw-bold"><?= intval($estoque_total) ?></td>
+                                            <td class="text-center"><span class="badge <?= $row['Status'] == 'Ativo' ? 'bg-success' : 'bg-danger' ?>"><?= $row['Status'] ?></span></td>
+                                            <td class="text-end">R$ <?= number_format($row['Preco_Atual'] ?? 0, 2, ',', '.') ?></td>
+                                            <td class="text-center">
+                                                <div class="d-flex justify-content-center gap-2">
+                                                    <a href="editar_produto.php?codigo=<?= $row['ID_Produto'] ?>" class="btn btn-warning btn-sm" title="Editar"><i class="bi bi-pencil-fill"></i></a>
+                                                    <button type="button" class="btn btn-sm <?= $row['Status'] == 'Ativo' ? 'btn-danger' : 'btn-success' ?>"
+                                                            title="<?= $row['Status'] == 'Ativo' ? 'Inativar' : 'Ativar' ?>"
+                                                            data-bs-toggle="modal" data-bs-target="#modalConfirmStatus"
+                                                            data-id="<?= $row['ID_Produto'] ?>"
+                                                            data-nome="<?= htmlspecialchars($row['Nome']) ?>"
+                                                            data-status-atual="<?= $row['Status'] ?>">
+                                                        <i class="bi <?= $row['Status'] == 'Ativo' ? 'bi-pause-circle-fill' : 'bi-play-circle-fill' ?>"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                <?php else: ?>
+                                    <tr><td colspan="6" class="text-center">Nenhum produto encontrado.</td></tr>
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -180,45 +186,62 @@ $result = $stmt->get_result();
             <?php include_once DEV_PATH . 'Views/footer.php'?>
         </div>
 
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
+        <!-- Modal de confirmação -->
+        <div class="modal fade" id="modalConfirmStatus" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirmar Alteração de Status</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="confirmText"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <form action="processa_produto.php" method="POST">
+                            <input type="hidden" name="action" value="change_status">
+                            <input type="hidden" name="id_produto" id="id_status_change">
+                            <input type="hidden" name="novo_status" id="novo_status">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary" id="btnConfirmStatus">Confirmar</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <?php include_once DEV_PATH . 'Views/toast.php'; ?>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
-            function mostrarToast(texto, tipo = 'success', titulo = 'Notificação') {
-                const toastLiveExample = document.getElementById('liveToast');
-                const toastHeader = toastLiveExample.querySelector('.toast-header');
-                
-                // Define o título padrão baseado no tipo, se não for fornecido
-                if (titulo === 'Notificação') 
-                    titulo = ucfirst(tipo === 'danger' ? 'Erro' : (tipo === 'warning' ? 'Atenção' : 'Sucesso'));
-                
-                const headerClass = `text-bg-${tipo}`;
+            const modalConfirmStatus = document.getElementById('modalConfirmStatus');
+            modalConfirmStatus.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
 
-                document.getElementById('toastTitulo').innerText = titulo;
-                document.getElementById('toastCorpo').innerText = texto;
-                
-                // Remove classes de cor antigas e adiciona a nova
-                toastHeader.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning', 'text-bg-info');
-                toastHeader.classList.add(headerClass);
+                const id = button.getAttribute('data-id');
+                const produto = button.getAttribute('data-nome');
+                const statusAtual = button.getAttribute('data-status-atual');
 
-                const toast = new bootstrap.Toast(toastLiveExample);
-                toast.show();
-            }
+                const confirmText = modalConfirmStatus.querySelector('#confirmText');
+                const idInput = modalConfirmStatus.querySelector('#id_status_change');
+                const novoStatusInput = modalConfirmStatus.querySelector('#novo_status');
+                const btnConfirm = modalConfirmStatus.querySelector('#btnConfirmStatus');
 
-            // Função auxiliar para deixar a primeira letra maiúscula (o PHP faz isso, o JS não)
-            function ucfirst(string) {
-                return string.charAt(0).toUpperCase() + string.slice(1);
-            }
+                idInput.value = id;
+
+                if (statusAtual === 'Ativo') {
+                    confirmText.textContent = `Você tem certeza que deseja INATIVAR o produto "${produto}"?`;
+                    novoStatusInput.value = 'Inativo';
+                    btnConfirm.className = 'btn btn-danger';
+                    btnConfirm.textContent = 'Sim, Inativar';
+                } 
+                else {
+                    confirmText.textContent = `Você tem certeza que deseja ATIVAR o produto "${produto}"?`;
+                    novoStatusInput.value = 'Ativo';
+                    btnConfirm.className = 'btn btn-success';
+                    btnConfirm.textContent = 'Sim, Ativar';
+                }
+            });
 
             <?php
             if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {

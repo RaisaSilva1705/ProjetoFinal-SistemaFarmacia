@@ -122,18 +122,7 @@ include DEV_PATH . "Exec/validar_acesso.php";
             <?php include_once DEV_PATH . 'Views/footer.php'?>
         </div>
 
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
-            </div>
-        </div>
-
+        <?php include_once DEV_PATH . 'Views/toast.php'?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>

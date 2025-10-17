@@ -10,140 +10,40 @@ include DEV_PATH . "Exec/validar_sessao.php";
 define('MODULO_SOLICITADO', 'PRODUTOS_GERENCIAR');
 include DEV_PATH . "Exec/validar_acesso.php";
 
-if (isset($_GET['codigo'])) {
-    $id_produto = intval($_GET['codigo']);
-
-    $sqlProduto = "SELECT * FROM PRODUTOS WHERE ID_Produto = ?";
-    $stmt = $conn->prepare($sqlProduto);
-    $stmt->bind_param("i", $id_produto);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        $produto = $result->fetch_assoc();
-
-        $medicamento = null;
-        if ($produto['ID_Categoria'] == 1) {
-            $sqlMedicamento = "SELECT * FROM MEDICAMENTOS WHERE ID_Produto = ?";
-            $stmtMed = $conn->prepare($sqlMedicamento);
-            $stmtMed->bind_param("i", $id_produto);
-            $stmtMed->execute();
-            $resMed = $stmtMed->get_result();
-            if ($resMed->num_rows > 0)
-                $medicamento = $resMed->fetch_assoc();
-        }
-
-        // Categorias
-        $sqlCategorias = "SELECT ID_Categoria, Categoria FROM CATEGORIAS";
-        $categorias = $conn->query($sqlCategorias);
-
-        // Unidades
-        $sqlUnidades = "SELECT ID_Unidade, Unidade FROM UNIDADES";
-        $unidades = $conn->query($sqlUnidades);
-
-        // Categorias de medicamentos
-        $sqlCategoriasMed = "SELECT ID_CategoriaMed, Categoria_Med FROM CATEGORIAS_MEDICAMENTOS";
-        $categoriasMed = $conn->query($sqlCategoriasMed);
-
-        // Tarjas de medicamentos
-        $sqlTarjasMed = "SELECT ID_Tarja, Tarja FROM TARJAS_MEDICAMENTOS";
-        $tarjasMed = $conn->query($sqlTarjasMed);
-    }
-    else {
-        $_SESSION["msg"] = ['texto' => 'Unidade não encontrada.', 'tipo' => 'danger'];
-        header("Location: produtos.php");
-        exit();
-    }
+$id_produto = filter_input(INPUT_GET, 'codigo', FILTER_VALIDATE_INT);
+if (!$id_produto) { 
+    header("Location: produtos.php"); 
+    exit();
 }
+
+$produto = null;
+$medicamento = null;
+
+// Busca os dados do produto
+$stmt = $conn->prepare("SELECT * FROM PRODUTOS WHERE ID_Produto = ?");
+$stmt->bind_param("i", $id_produto);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows === 1) {
+    $produto = $result->fetch_assoc();
+    if ($produto['ID_Categoria'] == 1) { 
+        $stmtMed = $conn->prepare("SELECT * FROM MEDICAMENTOS WHERE ID_Produto = ?");
+        $stmtMed->bind_param("i", $id_produto);
+        $stmtMed->execute();
+        $medicamento = $stmtMed->get_result()->fetch_assoc();
+    }
+} 
 else {
-    $_SESSION["msg"] = ['texto' => 'Código da unidade não fornecida.', 'tipo' => 'warning'];
+    $_SESSION["msg"] = ['texto' => 'Produto não encontrado.', 'tipo' => 'danger'];
     header("Location: produtos.php");
     exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nome = $_POST['nome'];
-    $id_fornecedor = $_POST['id_fornecedor'];
-    $descricao = $_POST['descricao'];
-    $id_categoria = $_POST['id_categoria'];
-    $id_unidade = $_POST['id_unidade'];
-    $quant_minima = $_POST['quant_minima'];
-    $obs = $_POST['obs'];
-    $status = $_POST['status'];
-    $ncm = $_POST['ncm'];
-    $ean_gtin = $_POST['ean_gtin'];
-    $cbenef = $_POST['cbenef'];
-    $cest = $_POST['cest'];
-    $extipi = $_POST['extipi'];
-    $cfop = $_POST['cfop'];
-    $mva = $_POST['mva'];
-    $nfci = $_POST['nfci'];
-    $cst_icms = $_POST['cst_icms'];
-    $cst_pis = $_POST['cst_pis'];
-    $cst_cofins = $_POST['cst_cofins'];
-
-    $foto = $produto['Foto'];
-    if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
-        $foto_nome = uniqid() . "_" . basename($_FILES["foto"]["name"]);
-        $foto_destino = DEV_PATH . "Imagens/" . $foto_nome;
-
-        if (move_uploaded_file($_FILES["foto"]["tmp_name"], $foto_destino)) 
-            $foto = $foto_nome;
-    }
-
-    $sqlUpdate = "UPDATE PRODUTOS 
-                  SET ID_Categoria = ?, Nome = ?, ID_Fornecedor = ?, Descricao = ?, ID_Unidade = ?, 
-                      Quant_Minima = ?, Status = ?, OBS = ?, NCM = ?, EAN_GTIN = ?, CBENEF = ?, 
-                      CEST = ?, EXTIPI = ?, CFOP = ?, MVA = ?, NFCI = ?, CST_ICMS = ?, CST_PIS = ?, 
-                      CST_COFINS = ?, Foto = ?
-                  WHERE ID_Produto = ?";
-    $stmtUpdate = $conn->prepare($sqlUpdate);
-    $stmtUpdate->bind_param("isisiisssssssidsssssi",
-        $id_categoria, $nome, $id_fornecedor, $descricao, $id_unidade,
-        $quant_minima, $status, $obs, $ncm, $ean_gtin, $cbenef, 
-        $cest, $extipi, $cfop, $mva, $nfci, $cst_icms, $cst_pis, 
-        $cst_cofins, $foto, $id_produto
-    );
-
-    if ($stmtUpdate->execute()) {
-        if ($id_categoria == 1) {
-            // Dados medicamento
-            $id_categoria_med = $_POST['id_categoria_med'];
-            $prin_ativo = $_POST['prin_ativo'];
-            $id_tarja = $_POST['id_tarja_med'];
-            $tipo = $_POST['tipo_med'];
-
-            if ($medicamento) {
-                $sqlUpdateMed = "UPDATE MEDICAMENTOS 
-                                 SET ID_CategoriaMed = ?, ID_Tarja = ?, Tipo = ?, Prin_Ativo = ?
-                                 WHERE ID_Produto = ?";
-                $stmtUpdateMed = $conn->prepare($sqlUpdateMed);
-                $stmtUpdateMed->bind_param("iissi", $id_categoria_med, $id_tarja, $tipo, $prin_ativo, $id_produto);
-                $stmtUpdateMed->execute();
-            } 
-            else {
-                $sqlInsertMed = "INSERT INTO MEDICAMENTOS (ID_Produto, ID_CategoriaMed, ID_Tarja, Tipo, Prin_Ativo)
-                                 VALUES (?, ?, ?, ?, ?)";
-                $stmtInsertMed = $conn->prepare($sqlInsertMed);
-                $stmtInsertMed->bind_param("iiiss", $id_produto, $id_categoria_med, $id_tarja, $tipo, $prin_ativo);
-                $stmtInsertMed->execute();
-            }
-        } 
-        else {
-            if ($medicamento) 
-                $conn->query("DELETE FROM MEDICAMENTOS WHERE ID_Produto = $id_produto");
-        }
-
-        $_SESSION["msg"] = ['texto' => 'Produto atualizado com sucesso!', 'tipo' => 'success'];
-        header("Location: produtos.php");
-        exit();
-    } 
-    else {
-        $_SESSION["msg"] = ['texto' => "Erro ao atualizar produto: " . $stmtUpdate->error, 'tipo' => 'danger'];
-        header("Location: editar_produto.php");
-        exit();
-    }
-}
+$categorias = $conn->query("SELECT ID_Categoria, Categoria FROM CATEGORIAS ORDER BY Categoria");
+$unidades = $conn->query("SELECT ID_Unidade, Unidade FROM UNIDADES ORDER BY Unidade");
+$fornecedores = $conn->query("SELECT ID_Fornecedor, Nome_Fantasia FROM FORNECEDORES WHERE Status = 'Ativo' ORDER BY Nome_Fantasia");
+$categoriasMed = $conn->query("SELECT ID_CategoriaMed, Categoria_Med FROM CATEGORIAS_MEDICAMENTOS ORDER BY Categoria_Med");
+$tarjasMed = $conn->query("SELECT ID_Tarja, Tarja FROM TARJAS_MEDICAMENTOS ORDER BY Tarja");
 
 $is_edit = true;
 ?>
@@ -155,12 +55,8 @@ $is_edit = true;
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Editar Produto</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
-        <style>
-            select > option:first-child {
-                display: none;
-            }
-        </style>
     </head>
     <body>
         <!-- Sidebar -->
@@ -183,19 +79,8 @@ $is_edit = true;
             <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
 
-        <!-- Toast -->
-         <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
-            </div>
-        </div>
-
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <?php include_once DEV_PATH . 'Views/toast.php'; ?>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
             document.addEventListener("DOMContentLoaded", function () {

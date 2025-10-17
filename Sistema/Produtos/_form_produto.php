@@ -1,15 +1,31 @@
-<form action="" method="POST" enctype="multipart/form-data">
-    <h5 class="mt-4">Informações do Produto</h5>
+<form action="processa_produto.php" method="POST" enctype="multipart/form-data">
+    <?php if ($is_edit): ?>
+        <input type="hidden" name="id_produto" value="<?= $id_produto ?>">
+    <?php endif; ?>
+    <h5>Informações do Produto</h5>
     <div class="row">
-        <div class="col-md-6 mb-3">
+        <div class="col-md-4 mb-3">
             <label for="nome" class="form-label">Nome do Produto</label>
             <input type="text" id="nome" name="nome" class="form-control" required value="<?= htmlspecialchars($produto['Nome'] ?? '') ?>">
         </div>
         <div class="col-md-3 mb-3">
             <label for="id_fornecedor" class="form-label">Fornecedor</label>
-            <input type="text" id="id_fornecedor" name="id_fornecedor" class="form-control" value="<?= htmlspecialchars($produto['ID_Fornecedor'] ?? '') ?>">
+            <select class="form-select" name="id_fornecedor" id="id_fornecedor" required>
+                <option value="">Selecione</option>
+                <?php
+                $fornecedores->data_seek(0);
+                while($for = $fornecedores->fetch_assoc()):
+                    $selected = (($produto['ID_Fornecedor'] ?? '') == $for['ID_Fornecedor']) ? 'selected' : '';
+                    echo "<option value='{$for['ID_Fornecedor']}' data-nome-fornecedor='" . strtolower($for['Nome_Fantasia']) . "' {$selected}>{$for['Nome_Fantasia']}</option>";
+                endwhile;
+                ?>
+            </select>
         </div>
         <div class="col-md-3 mb-3">
+            <label for="marca" class="form-label">Marca</label>
+            <input type="text" name="marca" id="marca" class="form-control" value="<?= htmlspecialchars($produto['Marca'] ?? '') ?>">
+        </div>
+        <div class="col-md-2 mb-3">
             <label for="id_categoria" class="form-label">Categoria</label>
             <select class="form-select" name="id_categoria" id="id_categoria" required>
                 <option value="">Selecione</option>
@@ -62,51 +78,64 @@
                 <small class="form-text text-muted">Atual: <?= htmlspecialchars($produto['Foto']) ?></small>
             <?php endif; ?>
         </div>
+    </div>
 
+    <hr>
+
+    <div class="row" id="campos_medicamento" style="display: none;">
         <!-- CAMPOS DE MEDICAMENTOS -->
-        <div id="campos_medicamento" style="display: none;">
-            <hr>
-            <h5 class="mt-4">Informações do Medicamento</h5>
-            <div class="row">
-                <div class="col-md-3 mb-3">
-                    <label for="id_categoria_med" class="form-label">Categoria Medicamento</label>
-                    <select class="form-select" name="id_categoria_med" id="id_categoria_med">
-                        <option value="">Selecione</option>
-                        <?php
-                        $categoriasMed->data_seek(0);
-                        while($catMed = $categoriasMed->fetch_assoc()):
-                            $selected = (($medicamento['ID_CategoriaMed'] ?? '') == $catMed['ID_CategoriaMed']) ? 'selected' : '';
-                            echo "<option value='{$catMed['ID_CategoriaMed']}' {$selected}>{$catMed['Categoria_Med']}</option>";
-                        endwhile;
-                        ?>
-                    </select>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <label for="tipo_med" class="form-label">Tipo</label>
-                    <select name="tipo_med" class="form-select" id="tipo_med">
-                        <option value="">Selecione</option>
-                        <option value="Genérico" <?= (($medicamento['Tipo'] ?? '') == 'Genérico') ? 'selected' : '' ?>>Genérico</option>
-                        <option value="Similar" <?= (($medicamento['Tipo'] ?? '') == 'Similar') ? 'selected' : '' ?>>Similar</option>
-                        <option value="Referência" <?= (($medicamento['Tipo'] ?? '') == 'Referência') ? 'selected' : '' ?>>Referência</option>
-                    </select>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <label for="id_tarja_med" class="form-label">Tarja</label>
-                    <select class="form-select" name="id_tarja_med" id="id_tarja_med">
-                        <option value="">Selecione</option>
-                        <?php
-                        $tarjasMed->data_seek(0);
-                        while($tjMed = $tarjasMed->fetch_assoc()):
-                            $selected = (($medicamento['ID_Tarja'] ?? '') == $tjMed['ID_Tarja']) ? 'selected' : '';
-                            echo "<option value='{$tjMed['ID_Tarja']}' {$selected}>{$tjMed['Tarja']}</option>";
-                        endwhile;
-                        ?>
-                    </select>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <label for="prin_ativo" class="form-label">Princípio Ativo</label>
-                    <input type="text" class="form-control" name="prin_ativo" id="prin_ativo" value="<?= htmlspecialchars($medicamento['Prin_Ativo'] ?? '') ?>">
-                </div>
+        <h5 class="mt-4">Informações do Medicamento</h5>
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <label for="id_categoria_med" class="form-label">Categoria Medicamento</label>
+                <select class="form-select" name="id_categoria_med" id="id_categoria_med">
+                    <option value="">Selecione</option>
+                    <?php
+                    $categoriasMed->data_seek(0);
+                    while($catMed = $categoriasMed->fetch_assoc()):
+                        $selected = (($medicamento['ID_CategoriaMed'] ?? '') == $catMed['ID_CategoriaMed']) ? 'selected' : '';
+                        echo "<option value='{$catMed['ID_CategoriaMed']}' {$selected}>{$catMed['Categoria_Med']}</option>";
+                    endwhile;
+                    ?>
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="tipo_med" class="form-label">Tipo</label>
+                <select name="tipo_med" class="form-select" id="tipo_med">
+                    <option value="">Selecione</option>
+                    <option value="Genérico" <?= (($medicamento['Tipo'] ?? '') == 'Genérico') ? 'selected' : '' ?>>Genérico</option>
+                    <option value="Similar" <?= (($medicamento['Tipo'] ?? '') == 'Similar') ? 'selected' : '' ?>>Similar</option>
+                    <option value="Referência" <?= (($medicamento['Tipo'] ?? '') == 'Referência') ? 'selected' : '' ?>>Referência</option>
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="id_tarja_med" class="form-label">Tarja</label>
+                <select class="form-select" name="id_tarja_med" id="id_tarja_med">
+                    <option value="">Selecione</option>
+                    <?php
+                    $tarjasMed->data_seek(0);
+                    while($tjMed = $tarjasMed->fetch_assoc()):
+                        $selected = (($medicamento['ID_Tarja'] ?? '') == $tjMed['ID_Tarja']) ? 'selected' : '';
+                        echo "<option value='{$tjMed['ID_Tarja']}' {$selected}>{$tjMed['Tarja']}</option>";
+                    endwhile;
+                    ?>
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="ms" class="form-label">MS</label>
+                <input type="number" class="form-control" name="ms" id="ms" value="<?= htmlspecialchars($medicamento['MS'] ?? '') ?>">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="controlado" class="form-label">Controlado</label>
+                <select name="controlado" class="form-select" id="controlado">
+                    <option value="">Selecione</option>
+                    <option value="Sim" <?= (($medicamento['Controlado'] ?? '') == 'Sim') ? 'selected' : '' ?>>Sim</option>
+                    <option value="Não" <?= (($medicamento['Controlado'] ?? '') == 'Não') ? 'selected' : '' ?>>Não</option>
+                </select>
+            </div>
+            <div class="col-md-9 mb-3">
+                <label for="prin_ativo" class="form-label">Princípio(s) Ativo(s)</label>
+                <input type="text" class="form-control" name="prin_ativo" id="prin_ativo" value="<?= htmlspecialchars($medicamento['Prin_Ativo'] ?? '') ?>">
             </div>
         </div>
     </div>
@@ -165,7 +194,7 @@
         </div>
         <div class="col-md-3 mb-3">
             <label for="mva" class="form-label">MVA</label>
-            <input type="text" name="mva" id="mva" class="form-control" value="<?= htmlspecialchars($produto['MVA'] ?? '') ?>">
+            <input type="number" name="mva" id="mva" class="form-control" value="<?= htmlspecialchars($produto['MVA'] ?? 0.00) ?>">
         </div>
         <div class="col-md-3 mb-3">
             <label for="nfci" class="form-label">NFCI</label>

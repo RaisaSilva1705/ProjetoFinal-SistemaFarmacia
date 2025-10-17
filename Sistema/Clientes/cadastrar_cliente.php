@@ -10,33 +10,6 @@ include DEV_PATH . "Exec/validar_sessao.php";
 define('MODULO_SOLICITADO', 'CLIENTES_GERENCIAR'); 
 include DEV_PATH . "Exec/validar_acesso.php";
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nome = $_POST['nome'];
-    $tipo = $_POST['tipo'];
-    $documento = $_POST['documento'];
-    $tel = $_POST['tel'];
-    $email = $_POST['email'];
-    $senha = password_hash($_POST['senha'], PASSWORD_DEFAULT); 
-    $status = $_POST['status'];
-    $obs = $_POST['obs'];
-
-    $sql = "INSERT INTO CLIENTES (Nome, Tipo, Documento, Tel, Email, Senha, Status, OBS)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssssssss", $nome, $tipo, $documento, $tel, $email, $senha, $status, $obs);
-
-    if ($stmt->execute()) {
-        $novo_id = $stmt->insert_id;
-        registrar_log($conn, $_SESSION['ID_Usuario'], "Cadastrou o cliente '{$nome}' (ID: {$novo_id})");
-        $_SESSION['msg'] = ['texto' => 'Cliente cadastrado com sucesso!', 'tipo' => 'success'];
-        header("Location: clientes.php");
-        exit();
-    }
-    else 
-        $_SESSION['msg'] = ['texto' => 'Erro ao cadastrar cliente: ' . $stmt->error, 'tipo' => 'danger'];
-}
-
 $is_edit = false;
 ?>
 

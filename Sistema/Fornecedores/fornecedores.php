@@ -35,9 +35,8 @@ if (!empty($status)) {
     $params[] = $status;
 }
 
-if (count($conditions) > 0) {
+if (count($conditions) > 0) 
     $sql .= " WHERE " . implode(' AND ', $conditions);
-}
 
 $sql .= " ORDER BY Nome_Fantasia ASC";
 
@@ -54,7 +53,8 @@ $result = $stmt->get_result();
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Fornecedores</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
     <body>
@@ -65,15 +65,15 @@ $result = $stmt->get_result();
             <div class="content flex-grow-1">
                 <!-- Banner -->
                 <div class="container-fluid bg-secondary text-white text-center p-4">
-                    <h3>Gerenciamento de FORNECEDORES</h3>
+                    <h3>Gerenciamento de Fornecedores</h3>
                 </div>
             
                 <div class="container p-5">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2>Lista de Fornecedores</h2>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="m-0">Lista de Fornecedores</h2>
                         <div>
-                            <a href="cadastrar_fornecedor.php" class="btn btn-primary">Cadastrar</a>
-                            <a href="../Relatorios/relatorio_fornecedores.php" class="btn btn-outline-secondary">Ver Relatório</a>
+                            <a href="cadastrar_fornecedor.php" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Novo Fornecedor</a>
+                            <a href="../Relatorios/relatorio_fornecedores.php" class="btn btn-outline-secondary"><i class="bi bi-bar-chart-line-fill"></i> Ver Relatório</a>
                         </div>
                     </div>
 
@@ -93,23 +93,21 @@ $result = $stmt->get_result();
                                     </select>
                                 </div>
                                 <div class="col-md-2">
-                                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+                                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel-fill"></i> Filtrar</button>
                                 </div>
                             </div>
                         </form>
                     </div>
 
-                    <!-- Tabela de Fornecedor -->
                     <div class="table-responsive">
                         <table class="table table-striped table-hover table-bordered">
                             <thead class="table-dark">
                                 <tr>
-                                    <th scope="col">Nome Fantasia</th>
-                                    <th scope="col">CNPJ</th>
-                                    <th scope="col">Telefone</th>
-                                    <th scope="col">Email</th>
-                                    <th scope="col">Status</th>
-                                    <th scope="col" class="text-center">Ações</th>
+                                    <th>Nome Fantasia</th>
+                                    <th>CNPJ</th>
+                                    <th>Telefone</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -119,20 +117,27 @@ $result = $stmt->get_result();
                                             <td><?= htmlspecialchars($row['Nome_Fantasia']) ?></td>
                                             <td><?= htmlspecialchars($row['CNPJ']) ?></td>
                                             <td><?= htmlspecialchars($row['Tel']) ?></td>
-                                            <td><?= htmlspecialchars($row['Email']) ?></td>
-                                            <td <?php $badge_class = $row['Status'] == 'Ativo' ? 'table-success' : 'table-danger'; echo "class='{$badge_class}'" ?>>
-                                                <?= htmlspecialchars($row['Status']) ?>
+                                            <td class="text-center">
+                                                <span class="badge <?= $row['Status'] == 'Ativo' ? 'bg-success' : 'bg-danger' ?>"><?= $row['Status'] ?></span>
                                             </td>
                                             <td class="text-center">
-                                                <a href="detalhes_fornecedor.php?id=<?= $row['ID_Fornecedor'] ?>" class="btn btn-success btn-sm">Detalhes</a>
-                                                <a href="editar_fornecedor.php?id=<?= $row['ID_Fornecedor'] ?>" class="btn btn-warning btn-sm">Editar</a>
+                                                <div class="d-flex justify-content-center gap-2">
+                                                    <a href="detalhes_fornecedor.php?id=<?= $row['ID_Fornecedor'] ?>" class="btn btn-success btn-sm" title="Ver Detalhes"><i class="bi bi-eye-fill"></i></a>
+                                                    <a href="editar_fornecedor.php?id=<?= $row['ID_Fornecedor'] ?>" class="btn btn-warning btn-sm" title="Editar"><i class="bi bi-pencil-fill"></i></a>
+                                                    <button type="button" class="btn btn-sm <?= $row['Status'] == 'Ativo' ? 'btn-danger' : 'btn-success' ?>"
+                                                            title="<?= $row['Status'] == 'Ativo' ? 'Inativar' : 'Ativar' ?>"
+                                                            data-bs-toggle="modal" data-bs-target="#modalConfirmStatus"
+                                                            data-id="<?= $row['ID_Fornecedor'] ?>"
+                                                            data-nome="<?= htmlspecialchars($row['Nome_Fantasia']) ?>"
+                                                            data-status-atual="<?= $row['Status'] ?>">
+                                                        <i class="bi <?= $row['Status'] == 'Ativo' ? 'bi-pause-circle-fill' : 'bi-play-circle-fill' ?>"></i>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endwhile; ?>
                                 <?php else: ?>
-                                    <tr>
-                                        <td colspan="6" class="text-center">Nenhum fornecedor encontrado.</td>
-                                    </tr>
+                                    <tr><td colspan="5" class="text-center">Nenhum fornecedor encontrado.</td></tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>
@@ -144,21 +149,57 @@ $result = $stmt->get_result();
             <?php include_once DEV_PATH . 'Views/footer.php'?>
         </div>
 
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
+        <div class="modal fade" id="modalConfirmStatus" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header"><h5 class="modal-title">Confirmar Alteração de Status</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body"><p id="confirmText"></p></div>
+                    <div class="modal-footer">
+                        <form action="processa_fornecedor.php" method="POST">
+                            <input type="hidden" name="action" value="change_status">
+                            <input type="hidden" name="id_fornecedor" id="id_status_change">
+                            <input type="hidden" name="novo_status" id="novo_status">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary" id="btnConfirmStatus">Confirmar</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <?php include_once DEV_PATH . 'Views/toast.php'?>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
+            const modalConfirmStatus = document.getElementById('modalConfirmStatus');
+            modalConfirmStatus.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+
+                const id = button.getAttribute('data-id');
+                const nome = button.getAttribute('data-nome');
+                const statusAtual = button.getAttribute('data-status-atual');
+
+                const confirmText = modalConfirmStatus.querySelector('#confirmText');
+                const idInput = modalConfirmStatus.querySelector('#id_status_change');
+                const novoStatusInput = modalConfirmStatus.querySelector('#novo_status');
+                const btnConfirm = modalConfirmStatus.querySelector('#btnConfirmStatus');
+
+                idInput.value = id;
+
+                if (statusAtual === 'Ativo') {
+                    confirmText.textContent = `Você tem certeza que deseja INATIVAR o fornecedor "${nome}"?`;
+                    novoStatusInput.value = 'Inativo';
+                    btnConfirm.className = 'btn btn-danger';
+                    btnConfirm.textContent = 'Sim, Inativar';
+                } 
+                else {
+                    confirmText.textContent = `Você tem certeza que deseja ATIVAR o fornecedor "${cargo}"?`;
+                    novoStatusInput.value = 'Ativo';
+                    btnConfirm.className = 'btn btn-success';
+                    btnConfirm.textContent = 'Sim, Ativar';
+                }
+            });
+
             <?php
             if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {
                 $texto = addslashes($_SESSION['msg']['texto']);

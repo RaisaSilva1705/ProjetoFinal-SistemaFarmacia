@@ -15,7 +15,10 @@ $status = $fornecedor['Status'] ?? 'Ativo';
 $obs = htmlspecialchars($fornecedor['OBS'] ?? '');
 ?>
 
-<form action="" method="POST">
+<form action="processa_fornecedor.php" method="POST">
+    <?php if ($is_edit): ?>
+        <input type="hidden" name="id_fornecedor" value="<?= $fornecedor['ID_Fornecedor'] ?>">
+    <?php endif; ?>
     <h5 class="mt-4">Dados da Empresa</h5>
     <div class="row">
         <div class="col-md-6 mb-3">
@@ -87,9 +90,9 @@ $obs = htmlspecialchars($fornecedor['OBS'] ?? '');
         </div>
     </div>
 
-    <div class="mt-4">
-        <button type="submit" class="btn btn-primary"><?= $is_edit ? 'Salvar Alterações' : 'Cadastrar Fornecedor' ?></button>
-        <a href="fornecedores.php" class="btn btn-secondary">Cancelar</a>
+    <div class="mt-4 text-end">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> <?= $is_edit ? 'Salvar Alterações' : 'Cadastrar Fornecedor' ?></button>
+        <a href="fornecedores.php" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Cancelar</a>
     </div>
 </form>
 

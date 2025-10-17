@@ -6,6 +6,7 @@ header('Content-Type: application/json');
 include "../../Dev/Exec/config.php";
 include DEV_PATH . 'Exec/conexao.php';
 include DEV_PATH . "Exec/logs.php";
+include DEV_PATH . "Exec/busca_promocoes.php";
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['sucesso' => false, 'mensagem' => 'Método não permitido.']);
@@ -25,6 +26,20 @@ if (json_last_error() !== JSON_ERROR_NONE || empty($itens)) {
     echo json_encode(['sucesso' => false, 'mensagem' => 'Nenhum item válido foi enviado.']);
     exit;
 }
+
+$_SESSION['carrinho_temp_prevenda'] = $itens;
+foreach ($_SESSION['carrinho_temp_prevenda'] as &$item) {
+    if ($item['tipo'] === 'produto') {
+        $item['id_produto'] = $item['id'];
+        $item['preco'] = $item['valor']; 
+    }
+}
+unset($item);
+
+aplicarPromocoesAoCarrinho($conn);
+
+$itens_com_desconto = $_SESSION['carrinho_temp_prevenda'];
+unset($_SESSION['carrinho_temp_prevenda']);
 
 $conn->begin_transaction();
 
@@ -63,7 +78,7 @@ try {
     if (empty($id_pre_venda_final)) throw new Exception("Falha ao processar a pré-venda.");
 
     $stmt_itens = $conn->prepare("INSERT INTO PRE_VENDAS_ITENS (ID_PreVenda, ID_Produto, ID_Servico, Quantidade, Valor_Unitario, Desconto) VALUES (?, ?, ?, ?, ?, ?)");
-    foreach ($itens as $item) {
+    foreach ($itens_com_desconto as $item) {
         $id_produto = ($item['tipo'] === 'produto') ? $item['id'] : null;
         $id_servico = ($item['tipo'] === 'servico') ? $item['id'] : null;
         $desconto = $item['desconto'] ?? 0.00;

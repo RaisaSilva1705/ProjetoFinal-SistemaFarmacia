@@ -3,32 +3,29 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-function aplicarPromocoesAoCarrinho($conn) {
-    if (!isset($_SESSION['carrinho']) || empty($_SESSION['carrinho'])) {
-        return; 
+function calcularPromocoesParaCarrinho($carrinho, $conn) {
+    if (empty($carrinho)) {
+        return [];
     }
-
-    foreach ($_SESSION['carrinho'] as &$item) {
+    
+    foreach ($carrinho as &$item) {
         unset($item['desconto_promocao_valor']);
         unset($item['desconto_promocao_desc']);
-        $item['desconto'] = $item['desconto_gerencial'] ?? 0.00;
+        $item['desconto'] = $item['desconto_gerencial'] ?? ($item['desconto'] ?? 0.00);
     }
     unset($item);
 
     $stmt = $conn->prepare(
         "SELECT p.ID_Promocao, p.Descricao AS Descricao_Promocao, p.Tipo, pi.Tipo_Item, pi.ID_Produto, pi.Quantidade, pi.Valor_Desconto_Percentual, pi.Preco_Fixo_Combo
-         FROM PROMOCOES p
-         JOIN PROMOCOES_ITENS pi ON p.ID_Promocao = pi.ID_Promocao
-         WHERE p.Status = 'Ativo'
-           AND p.Data_Inicio <= CURDATE()
-           AND (p.Data_Fim IS NULL OR p.Data_Fim >= CURDATE())
+         FROM PROMOCOES p JOIN PROMOCOES_ITENS pi ON p.ID_Promocao = pi.ID_Promocao
+         WHERE p.Status = 'Ativo' AND p.Data_Inicio <= CURDATE() AND (p.Data_Fim IS NULL OR p.Data_Fim >= CURDATE())
          ORDER BY p.ID_Promocao"
     );
     $stmt->execute();
     $regras_db = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
     
-    if (empty($regras_db)) return; 
+    if (empty($regras_db)) return $carrinho;
 
     $promocoes_organizadas = [];
     foreach ($regras_db as $regra) {
@@ -38,8 +35,8 @@ function aplicarPromocoesAoCarrinho($conn) {
     }
 
     $contagem_produtos_carrinho = [];
-    foreach ($_SESSION['carrinho'] as $item) {
-        $id_produto = $item['id_produto'];
+    foreach ($carrinho as $item) {
+        $id_produto = $item['id_produto'] ?? $item['id'];
         $contagem_produtos_carrinho[$id_produto] = ($contagem_produtos_carrinho[$id_produto] ?? 0) + $item['quantidade'];
     }
 
@@ -47,14 +44,11 @@ function aplicarPromocoesAoCarrinho($conn) {
         $condicoes = array_filter($promo['itens'], fn($i) => $i['Tipo_Item'] == 'Condicao');
         $beneficios = array_filter($promo['itens'], fn($i) => $i['Tipo_Item'] == 'Beneficio');
         
-        if (empty($condicoes) || empty($beneficios)) {
-            continue;
-        }
+        if (empty($condicoes) || empty($beneficios)) continue;
 
-        // ---- Lógica para 'LEVE_X_PAGUE_Y' e 'DESCONTO_PROGRESSIVO' ----
         if ($promo['tipo'] == 'LEVE_X_PAGUE_Y' || $promo['tipo'] == 'DESCONTO_PROGRESSIVO') {
-            $condicao_atendida = true;
             $vezes_aplicar_condicao = PHP_INT_MAX;
+            $condicao_atendida = true;
 
             foreach ($condicoes as $condicao) {
                 $id_produto_condicao = $condicao['ID_Produto'];
@@ -73,10 +67,13 @@ function aplicarPromocoesAoCarrinho($conn) {
                     $id_produto_beneficio = $beneficio['ID_Produto'];
                     $desconto_percentual = $beneficio['Valor_Desconto_Percentual'];
                     
-                    foreach ($_SESSION['carrinho'] as &$item_carrinho) {
-                        if ($item_carrinho['id_produto'] == $id_produto_beneficio) {
-                            $preco_unitario = $item_carrinho['preco'];
-                            $valor_desconto_total = ($preco_unitario * $desconto_percentual / 100) * $vezes_aplicar_condicao;
+                    $unidades_a_descontar = $vezes_aplicar_condicao * $beneficio['Quantidade'];
+
+                    foreach ($carrinho as &$item_carrinho) {
+                        $id_produto_no_carrinho = $item_carrinho['id_produto'] ?? $item_carrinho['id'];
+                        if ($id_produto_no_carrinho == $id_produto_beneficio) {
+                            $preco_unitario = $item_carrinho['preco'] ?? $item_carrinho['valor'];
+                            $valor_desconto_total = ($preco_unitario * $desconto_percentual / 100) * $unidades_a_descontar;
                             
                             $item_carrinho['desconto'] += $valor_desconto_total;
                             $item_carrinho['desconto_promocao_valor'] = ($item_carrinho['desconto_promocao_valor'] ?? 0) + $valor_desconto_total;
@@ -88,7 +85,6 @@ function aplicarPromocoesAoCarrinho($conn) {
                 }
             }
         }
-        // ---- NOVA LÓGICA PARA 'COMBO_PRECO_FIXO' ----
         elseif ($promo['tipo'] == 'COMBO_PRECO_FIXO') {
             $condicao_atendida = true;
             $preco_original_combo = 0;
@@ -134,6 +130,36 @@ function aplicarPromocoesAoCarrinho($conn) {
                 }
             }
         }
+    }
+    
+    return $carrinho;
+}
+
+function aplicarPromocoesAoCarrinho($conn) {
+    if (!isset($_SESSION['carrinho']) || empty($_SESSION['carrinho'])) 
+        return; 
+
+    $carrinho_pdv_apenas = [];
+    foreach ($_SESSION['carrinho'] as $item) {
+        if (!isset($item['origem']) || $item['origem'] !== 'prevenda') 
+            $carrinho_pdv_apenas[] = $item;
+    }
+
+    if (empty($carrinho_pdv_apenas)) 
+        return;
+
+    $carrinho_pdv_calculado = calcularPromocoesParaCarrinho($carrinho_pdv_apenas, $conn);
+
+    foreach ($carrinho_pdv_calculado as $item_calculado) {
+        foreach ($_SESSION['carrinho'] as &$item_sessao) {
+            if ($item_sessao['id_produto'] == $item_calculado['id_produto']) {
+                $item_sessao['desconto'] = $item_calculado['desconto'];
+                $item_sessao['desconto_promocao_valor'] = $item_calculado['desconto_promocao_valor'] ?? null;
+                $item_sessao['desconto_promocao_desc'] = $item_calculado['desconto_promocao_desc'] ?? null;
+                break;
+            }
+        }
+        unset($item_sessao);
     }
 }
 ?>

@@ -16,8 +16,6 @@ if (!isset($_SESSION['ID_Caixa'], $_SESSION['ID_CaixaAberto'], $_SESSION['Saldo_
 $id_caixa = $_SESSION['ID_Caixa'];
 $id_caixaAberto = $_SESSION['ID_CaixaAberto'];
 $saldoInicial = $_SESSION['Saldo_Inicial'];
-$suprimento = $_SESSION['Suprimento'] ?? 0;
-$sangria = $_SESSION['Sangria'] ?? 0;
 
 // 1. Busca relatórios
 $sqlRelatorio = "SELECT COUNT(*) AS total_vendas, SUM(Valor_Total) AS valor_total FROM VENDAS WHERE ID_CaixaAberto = ?";
@@ -29,6 +27,26 @@ $relatorioCaixa = $resultado->fetch_assoc();
 
 $total_vendas = $relatorioCaixa['total_vendas'] ?? 0;
 $valor_total = $relatorioCaixa['valor_total'] ?? 0.0;
+
+$total_entradas = 0;
+$total_saidas = 0;
+
+$sqlMovimentacoes = "SELECT Tipo, SUM(Valor) as Total_Movimentado 
+                     FROM MOVIMENTACOES_CAIXA 
+                     WHERE ID_Caixa = ? 
+                       AND Data_Movimentacao >= (SELECT Data_Abertura FROM CAIXAS_ABERTOS WHERE ID_CaixaAberto = ?)
+                     GROUP BY Tipo";
+$stmtMov = $conn->prepare($sqlMovimentacoes);
+$stmtMov->bind_param("ii", $id_caixa, $id_caixaAberto);
+$stmtMov->execute();
+$resultMov = $stmtMov->get_result();
+
+while ($rowMov = $resultMov->fetch_assoc()) {
+    if ($rowMov['Tipo'] === 'Entrada') 
+        $total_entradas = (float)$rowMov['Total_Movimentado'];
+    elseif ($rowMov['Tipo'] === 'Saída') 
+        $total_saidas = (float)$rowMov['Total_Movimentado'];
+}
 
 $sqlCaixaEDatas = "SELECT C.Caixa,
                             CA.Data_Abertura,
@@ -82,8 +100,8 @@ while ($row = $resultMetodos->fetch_assoc()){
     }
 }
 
-$dinheiroEmCaixa = ($saldoInicial + $suprimento - $sangria) + $valor_dinheiro - $troco;
-$saldoFinal = ($saldoInicial + $suprimento - $sangria) + $valor_total - $troco;
+$dinheiroEmCaixa = ($saldoInicial + $total_entradas + $valor_dinheiro) - ($total_saidas + $troco);
+$saldoFinal = ($saldoInicial + $total_entradas + $valor_total) - ($total_saidas + $troco);
 $dataAtual = date('Y-m-d H:i:s');
 
 
@@ -135,7 +153,7 @@ $conn->close();
     <head>
         <meta charset="UTF-8">
         <title>Relatório - Caixa</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/resumoCaixa.css">
     </head>
@@ -180,17 +198,17 @@ $conn->close();
                                 <hr>
                                 <div class="small">
                                     Dinheiro em Caixa: R$ <?= number_format($dinheiroEmCaixa, 2, ',', '.') ?><br>
-                                    (Abert. + Dinheiro + Suprim.) - (Sangria + Troco)
+                                    (Abert. + Dinheiro + Entradas.) - (Saídas + Troco)
                                 </div>
                                 <hr>
                                 <div class="small">
                                     Saldo Final: R$ <?= number_format($saldoFinal, 2, ',', '.') ?><br>
-                                    (Abert. + Total Vendido + Suprim.) - (Sangria + Troco)
+                                    (Abert. + Total Vendido + Entradas) - (Sáidas + Troco)
                                 </div>
                                 <hr>
                                 <div class="small">
-                                    Valor Suprimentos: R$ <?= number_format($suprimento, 2, ',', '.') ?><br>
-                                    Valor Sangrias: R$ <?= number_format($sangria, 2, ',', '.') ?>
+                                    Valor Suprimentos (Entradas): R$ <?= number_format($total_entradas, 2, ',', '.') ?><br>
+                                    Valor Sangrias (Saídas): R$ <?= number_format($total_saidas, 2, ',', '.') ?>
                                 </div>
                             </div>
                         </div>
@@ -209,19 +227,8 @@ $conn->close();
             <?php include_once DEV_PATH . 'Views/footer.php'?>
         </div>
 
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
-            </div>
-        </div>
-
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <?php include_once DEV_PATH . 'Views/toast.php'?>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
             function sangria() {

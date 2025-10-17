@@ -28,28 +28,19 @@ if ($resultCliente->num_rows === 0) {
 }
 $cliente = $resultCliente->fetch_assoc();
 
-$stmtEnderecos = $conn->prepare("SELECT * FROM CLI_ENDERECOS WHERE ID_Cliente = ? ORDER BY ID_Endereco_Cli");
+$stmtDocumentos = $conn->prepare("SELECT Tipo, Numero FROM CLIENTES_DOCUMENTOS WHERE ID_Cliente = ? ORDER BY Tipo");
+$stmtDocumentos->bind_param("i", $id_cliente);
+$stmtDocumentos->execute();
+$documentos = $stmtDocumentos->get_result();
+
+$stmtEnderecos = $conn->prepare("SELECT * FROM CLI_ENDERECOS WHERE ID_Cliente = ?");
 $stmtEnderecos->bind_param("i", $id_cliente);
 $stmtEnderecos->execute();
 $enderecos = $stmtEnderecos->get_result();
 
-$historico_compras = []; 
-// Verifica se o cargo do usuário na sessão é Gerente ou Administrador
+$historico_compras = null;
 if (isset($_SESSION['Cargo']) && ($_SESSION['Cargo'] == 'Gerente' || $_SESSION['Cargo'] == 'Administrador')) {
-    $stmtHistorico = $conn->prepare("
-        SELECT
-            V.ID_Venda,
-            V.DataHora_Venda,
-            P.Nome AS Nome_Produto,
-            IV.Quantidade,
-            IV.Valor_Total
-        FROM VENDAS AS V
-        JOIN ITENS_VENDA AS IV ON V.ID_Venda = IV.ID_Venda
-        JOIN PRODUTOS AS P ON IV.ID_Produto = P.ID_Produto
-        WHERE V.ID_Cliente = ?
-        ORDER BY V.DataHora_Venda DESC
-        LIMIT 20 -- Limita aos últimos 20 itens para não sobrecarregar a página
-    ");
+    $stmtHistorico = $conn->prepare("SELECT V.ID_Venda, V.DataHora_Venda, P.Nome AS Nome_Produto, IV.Quantidade, IV.Valor_Total FROM VENDAS AS V JOIN ITENS_VENDA AS IV ON V.ID_Venda = IV.ID_Venda JOIN PRODUTOS AS P ON IV.ID_Produto = P.ID_Produto WHERE V.ID_Cliente = ? ORDER BY V.DataHora_Venda DESC LIMIT 20");
     $stmtHistorico->bind_param("i", $id_cliente);
     $stmtHistorico->execute();
     $historico_compras = $stmtHistorico->get_result();
@@ -60,119 +51,95 @@ if (isset($_SESSION['Cargo']) && ($_SESSION['Cargo'] == 'Gerente' || $_SESSION['
 <html lang="pt-BR">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Detalhes de Cliente</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <title>Detalhes de Cliente: <?= htmlspecialchars($cliente['Nome']) ?></title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
-    <body>
-        <!-- Navbar -->
-        <?php include_once DEV_PATH . 'Views/sidebar.php'?>
+    <body class="bg-light">
 
-       <div class="content d-flex flex-column min-vh-100">
+        <?php include_once DEV_PATH . 'Views/sidebar.php';?>
+
+        <div class="content d-flex flex-column min-vh-100">
             <div class="content flex-grow-1">
-                <!-- Banner -->
                 <div class="container-fluid bg-secondary text-white text-center p-4">
                     <h3>Detalhes do Cliente</h3>
                 </div>
-            
+                
                 <div class="container p-5">
-                    <a href="fornecedores.php" class="btn btn-outline-secondary mb-4">
-                        <i class="bi bi-arrow-left"></i> Voltar para a Lista
-                    </a>
-                    <div class="card shadow-sm mb-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h4 class="m-0"><?= htmlspecialchars($cliente['Nome']) ?></h4>
-                            <a href="editar_cliente.php?id=<?= $cliente['ID_Cliente'] ?>" class="btn btn-warning btn-sm">Editar Dados Principais</a>
-                        </div>
-                        <div class="card-body">
-                            <p><strong><i class="bi bi-file-person-fill"></i> Documento:</strong> <?= htmlspecialchars($cliente['Documento']) ?> (<?= $cliente['Tipo'] ?>)</p>
-                            <p><strong><i class="bi bi-telephone-fill me-2"></i> Contato:</strong> <?= htmlspecialchars($cliente['Tel']) ?></p>
-                            <p><strong><i class="bi bi-envelope-fill me-2"></i> Email:</strong> <?= htmlspecialchars($cliente['Email']) ?></p>
-                            <p>
-                                <?php
-                                $badge_class = $cliente['Status'] == 'Ativo' ? 'bg-success' : 'bg-danger';
-                                echo "<strong>Status:</strong> <span class='badge {$badge_class}'>" . htmlspecialchars($cliente['Status']) . "</span>";
-                                ?>
-                            </p>
-                        </div>
-                    </div>
+                    <a href="clientes.php" class="btn btn-outline-secondary mb-4"><i class="bi bi-arrow-left-circle"></i> Voltar para a Lista</a>
 
-                    <div class="card shadow-sm">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="m-0">Endereços Cadastrados</h5>
-                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalEndereco">
-                                Adicionar Novo Endereço
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <tbody>
-                                        <?php if ($enderecos->num_rows > 0): ?>
-                                            <?php while($end = $enderecos->fetch_assoc()): ?>
-                                                <tr>
-                                                    <td>
-                                                        <strong>CEP:</strong> <?= htmlspecialchars($end['CEP']) ?><br>
-                                                        <?= htmlspecialchars("{$end['Endereco']}, {$end['End_Numero']} - {$end['Bairro']}, {$end['Cidade']}/{$end['Estado']}") ?>
-                                                    </td>
-                                                    <td class="text-end">
-                                                        <button class="btn btn-outline-warning btn-sm">Editar</button>
-                                                        <button class="btn btn-outline-danger btn-sm">Excluir</button>
-                                                    </td>
-                                                </tr>
-                                            <?php endwhile; ?>
-                                        <?php else: ?>
-                                            <tr><td>Nenhum endereço cadastrado.</td></tr>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
+                    <div class="row">
+                        <div class="col-lg-5">
+                            <div class="card shadow-sm mb-4">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h4 class="m-0"><i class="bi bi-person-circle text-primary"></i> <?= htmlspecialchars($cliente['Nome']) ?></h4>
+                                    <a href="editar_cliente.php?id=<?= $cliente['ID_Cliente'] ?>" class="btn btn-warning btn-sm" title="Editar"><i class="bi bi-pencil-fill"></i></a>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong><i class="bi bi-telephone-fill me-2"></i>Contato:</strong> <?= htmlspecialchars($cliente['Tel']) ?></p>
+                                    <p><strong><i class="bi bi-envelope-fill me-2"></i>Email:</strong> <?= htmlspecialchars($cliente['Email']) ?></p>
+                                    <p><strong>Status:</strong> <span class="badge <?= $cliente['Status'] == 'Ativo' ? 'bg-success' : 'bg-danger' ?>"><?= htmlspecialchars($cliente['Status']) ?></span></p>
+                                    <p><strong>Crédito em Loja:</strong> <span class="badge bg-info">R$ <?= number_format($cliente['Saldo_Credito'], 2, ',', '.') ?></span></p>
+                                </div>
+                            </div>
+
+                            <div class="card shadow-sm">
+                                <div class="card-header"><h5 class="m-0">Documentos</h5></div>
+                                <ul class="list-group list-group-flush">
+                                    <?php if ($documentos->num_rows > 0): ?>
+                                        <?php while($doc = $documentos->fetch_assoc()): ?>
+                                            <li class="list-group-item"><strong><?= htmlspecialchars($doc['Tipo']) ?>:</strong> <?= htmlspecialchars($doc['Numero']) ?></li>
+                                        <?php endwhile; ?>
+                                    <?php else: ?>
+                                        <li class="list-group-item">Nenhum documento cadastrado.</li>
+                                    <?php endif; ?>
+                                </ul>
                             </div>
                         </div>
-                    </div>
 
-                    <?php if (isset($_SESSION['Cargo']) && ($_SESSION['Cargo'] == 'Gerente' || $_SESSION['Cargo'] == 'Administrador')): ?>
-                    <div class="card shadow-sm mt-4">
-                        <div class="card-header">
-                            <h5 class="m-0">Histórico de Compras Recentes</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-sm table-bordered table-striped table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Data</th>
-                                            <th>Venda Nº</th>
-                                            <th>Produto</th>
-                                            <th class="text-center">Qtd.</th>
-                                            <th class="text-end">Valor</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php if ($historico_compras->num_rows > 0): ?>
+                        <div class="col-lg-7">
+                            <div class="card shadow-sm mb-4">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="m-0">Endereços</h5>
+                                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalEndereco"><i class="bi bi-plus-circle"></i> Novo Endereço</button>
+                                </div>
+                                <div class="card-body">
+                                    <?php if ($enderecos->num_rows > 0): ?>
+                                        <?php while($end = $enderecos->fetch_assoc()): ?>
+                                            <p class="mb-1"><strong><?= htmlspecialchars("{$end['Endereco']}, {$end['End_Numero']} - {$end['Bairro']}") ?></strong></p>
+                                            <p class="text-muted small"><?= htmlspecialchars("{$end['Cidade']}/{$end['Estado']} - CEP: {$end['CEP']}") ?></p>
+                                            <hr>
+                                        <?php endwhile; ?>
+                                    <?php else: ?>
+                                        <p>Nenhum endereço cadastrado.</p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+
+                            <?php if ($historico_compras && $historico_compras->num_rows > 0): ?>
+                            <div class="card shadow-sm">
+                                <div class="card-header"><h5 class="m-0">Histórico de Compras Recentes</h5></div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-striped table-hover mb-0">
+                                        <tbody>
                                             <?php while($compra = $historico_compras->fetch_assoc()): ?>
                                                 <tr>
-                                                    <td><?= date('d/m/Y H:i', strtotime($compra['DataHora_Venda'])) ?></td>
-                                                    <td><?= $compra['ID_Venda'] ?></td>
+                                                    <td><small><?= date('d/m/Y', strtotime($compra['DataHora_Venda'])) ?></small></td>
                                                     <td><?= htmlspecialchars($compra['Nome_Produto']) ?></td>
-                                                    <td class="text-center"><?= $compra['Quantidade'] ?></td>
                                                     <td class="text-end">R$ <?= number_format($compra['Valor_Total'], 2, ',', '.') ?></td>
                                                 </tr>
                                             <?php endwhile; ?>
-                                        <?php else: ?>
-                                            <tr><td colspan="5" class="text-center">Nenhum histórico de compras para este cliente.</td></tr>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
+                            <?php endif; ?>
                         </div>
                     </div>
-                    <?php endif; ?>
                 </div>
             </div>
-        
-            <!-- Footer -->
-            <?php include_once DEV_PATH . 'Views/footer.php'?>
+            <?php include_once DEV_PATH . 'Views/footer.php';?>
         </div>
 
         <div class="modal fade" id="modalEndereco" tabindex="-1">
@@ -237,18 +204,7 @@ if (isset($_SESSION['Cargo']) && ($_SESSION['Cargo'] == 'Gerente' || $_SESSION['
             </div>
         </div>
 
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
-            </div>
-        </div>
-
+        <?php include_once DEV_PATH . 'Views/toast.php';?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>

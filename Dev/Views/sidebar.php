@@ -2,7 +2,7 @@
 
 <style>
     .sidebar {
-        width: 210px; 
+        width: 220px; 
         height: 100vh;
         background-color: #343a40;
         top: 0;
@@ -70,9 +70,18 @@
         <div class="nav-item dropdown">
             <a class="dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-box-seam-fill"></i>Estoque</a>
             <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Produtos/produtos.php">Cadastro de Produtos</a></li>
-                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Estoque/estoque.php">Posição de Estoque</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Produtos/produtos.php">Produtos</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Estoque/estoque.php">Estoque</a></li>
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Fornecedores/fornecedores.php">Fornecedores</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Etiquetas/etiquetas.php">Imprimir Etiquetas</a></li>
+            </ul>
+        </div>
+
+        <div class="nav-item dropdown">
+            <a class="dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-arrow-return-left"></i>Devoluções</a>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Devolucoes/devolucao_cliente.php">Devolução de Cliente</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Devolucoes/devolucao_fornecedor.php">Devolução a Fornecedor</a></li>
             </ul>
         </div>
 
@@ -110,7 +119,7 @@
             <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Caixas/caixas.php">Caixas</a></li>
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Cargos/cargos.php">Cargos e Permissões</a></li>
-                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Unidades/unidades.php">Unidades de Medida</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/ConfiguracoesProdutos/configuracoes_produtos.php">Configuração de Produto</a></li>
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Pagamentos/formas_pagamentos.php">Formas de Pagamento</a></li>
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Servicos/servicos.php">Cadastro de Serviços</a></li>
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Financeiro/categorias_despesa.php">Categorias de Despesa</a></li>

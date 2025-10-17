@@ -5,6 +5,7 @@ ini_set('display_errors', 1);
 
 include "../../../Dev/Exec/config.php";
 include DEV_PATH . 'Exec/conexao.php';
+include DEV_PATH . 'Exec/logs.php';
 include DEV_PATH . "Exec/validar_sessao.php";
 define('MODULO_SOLICITADO', 'CONFIGURACOES_GERENCIAR'); 
 include DEV_PATH . "Exec/validar_acesso.php";
@@ -62,44 +63,24 @@ $result = $stmt->get_result();
 
         <div class="content d-flex flex-column min-vh-100">
             <div class="content flex-grow-1">
-                <!-- Banner -->
                 <div class="container-fluid bg-secondary text-white text-center p-4">
-                    <h3>Gestão de CAIXAS</h3>
+                    <h3>Configurações do Sistema</h3>
                 </div>
                 <div class="container p-5">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2 class="m-0">Lista de Caixas</h2>
+                        <h2 class="m-0">Gestão de Caixas</h2>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCaixa">
-                            Adicionar Novo Caixa
+                            <i class="bi bi-plus-circle"></i> Novo Caixa
                         </button>
                     </div>
 
                     <div class="card card-body mb-4">
                         <form method="GET" action="caixas.php">
-                            <div class="row align-items-end">
-                                <div class="col-md-4">
-                                    <label for="busca_texto" class="form-label">Buscar por Forma de Pagamento</label>
-                                    <input type="text" name="busca_texto" id="busca_texto" class="form-control" value="<?= htmlspecialchars($busca_texto) ?>">
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="status" class="form-label">Status</label>
-                                    <select name="status" id="status" class="form-select">
-                                        <option value="">Todos</option>
-                                        <option value="Aberto" <?= $status == 'Aberto' ? 'selected' : '' ?>>Aberto</option>
-                                        <option value="Fechado" <?= $status == 'Fechado' ? 'selected' : '' ?>>Fechado</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="status_cadastrado" class="form-label">Status Cadastrado</label>
-                                    <select name="status_cadastrado" id="status_cadastrado" class="form-select">
-                                        <option value="">Todos</option>
-                                        <option value="Ativo" <?= $statusCadastrado == 'Ativo' ? 'selected' : '' ?>>Ativo</option>
-                                        <option value="Inativo" <?= $statusCadastado == 'Inativo' ? 'selected' : '' ?>>Inativo</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
-                                </div>
+                            <div class="row g-3 align-items-end">
+                                <div class="col-md-4"><label for="busca_texto" class="form-label">Buscar por Nome</label><input type="text" name="busca_texto" id="busca_texto" class="form-control" value="<?= htmlspecialchars($busca_texto) ?>"></div>
+                                <div class="col-md-3"><label for="status" class="form-label">Status Operacional</label><select name="status" id="status" class="form-select"><option value="">Todos</option><option value="Aberto" <?= $status == 'Aberto' ? 'selected' : '' ?>>Aberto</option><option value="Fechado" <?= $status == 'Fechado' ? 'selected' : '' ?>>Fechado</option></select></div>
+                                <div class="col-md-3"><label for="status_cadastrado" class="form-label">Status do Cadastro</label><select name="status_cadastrado" id="status_cadastrado" class="form-select"><option value="">Todos</option><option value="Ativo" <?= $statusCadastrado == 'Ativo' ? 'selected' : '' ?>>Ativo</option><option value="Inativo" <?= $statusCadastrado == 'Inativo' ? 'selected' : '' ?>>Inativo</option></select></div>
+                                <div class="col-md-2"><button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel-fill"></i> Filtrar</button></div>
                             </div>
                         </form>
                     </div>
@@ -109,8 +90,8 @@ $result = $stmt->get_result();
                             <thead class="table-dark">
                                 <tr>
                                     <th>Caixa</th>
-                                    <th>Status Operacional</th>
-                                    <th>Status no Cadastro</th>
+                                    <th class="text-center">Status Operacional</th>
+                                    <th class="text-center">Status no Cadastro</th>
                                     <th class="text-center">Ações</th>
                                 </tr>
                             </thead>
@@ -119,32 +100,34 @@ $result = $stmt->get_result();
                                     <?php while($row = $result->fetch_assoc()): ?>
                                         <tr>
                                             <td><?= htmlspecialchars($row['Caixa']) ?></td>
-                                            <td <?php $class = $row['Status'] == 'Aberto' ? 'table-info' : 'table-warning'; echo "class='{$class}'"?>> 
-                                                <?= htmlspecialchars($row['Status']) ?>
-                                            </td>
-                                            <td <?php $class = $row['StatusCadastrado'] == 'Ativo' ? 'table-success' : 'table-danger'; echo "class='{$class}'"?>> 
-                                                <?= htmlspecialchars($row['StatusCadastrado']) ?>
+                                            <td class="text-center">
+                                                <span class="badge <?= $row['Status'] == 'Aberto' ? 'bg-info text-dark' : 'bg-secondary' ?>"><?= $row['Status'] ?></span>
                                             </td>
                                             <td class="text-center">
-                                                <button type="button" class="btn btn-warning btn-sm btn-edit"
-                                                        data-bs-toggle="modal" data-bs-target="#modalCaixa"
-                                                        data-id="<?= $row['ID_Caixa'] ?>"
-                                                        data-caixa="<?= htmlspecialchars($row['Caixa']) ?>">
-                                                    Editar
-                                                </button>
-                                                <button type="button" class="btn btn-sm <?= $row['StatusCadastrado'] == 'Ativo' ? 'btn-danger' : 'btn-success' ?>"
-                                                        data-bs-toggle="modal" data-bs-target="#modalConfirmStatus"
-                                                        data-id="<?= $row['ID_Caixa'] ?>"
-                                                        data-caixa="<?= htmlspecialchars($row['Caixa']) ?>"
-                                                        data-status-atual="<?= $row['StatusCadastrado'] ?>"
-                                                        data-status-op="<?= $row['Status'] ?>">
-                                                    <?= $row['StatusCadastrado'] == 'Ativo' ? 'Inativar' : 'Ativar' ?>
-                                                </button>
+                                                <span class="badge <?= $row['StatusCadastrado'] == 'Ativo' ? 'bg-success' : 'bg-danger' ?>"><?= $row['StatusCadastrado'] ?></span>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="d-flex justify-content-center gap-2">
+                                                    <button type="button" class="btn btn-warning btn-sm" title="Editar"
+                                                            data-bs-toggle="modal" data-bs-target="#modalCaixa"
+                                                            data-id="<?= $row['ID_Caixa'] ?>"
+                                                            data-caixa="<?= htmlspecialchars($row['Caixa']) ?>">
+                                                        <i class="bi bi-pencil-fill"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm <?= $row['StatusCadastrado'] == 'Ativo' ? 'btn-danger' : 'btn-success' ?>"
+                                                            title="<?= $row['StatusCadastrado'] == 'Ativo' ? 'Inativar' : 'Ativar' ?>"
+                                                            data-bs-toggle="modal" data-bs-target="#modalConfirmStatus"
+                                                            data-id="<?= $row['ID_Caixa'] ?>"
+                                                            data-caixa="<?= htmlspecialchars($row['Caixa']) ?>"
+                                                            data-status-atual="<?= $row['StatusCadastrado'] ?>">
+                                                        <i class="bi <?= $row['StatusCadastrado'] == 'Ativo' ? 'bi-pause-circle-fill' : 'bi-play-circle-fill' ?>"></i>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endwhile; ?>
                                 <?php else: ?>
-                                    <tr><td colspan="4" class="text-center">Nenhum caixa cadastrado.</td></tr>
+                                    <tr><td colspan="4" class="text-center">Nenhum caixa encontrado com os filtros aplicados.</td></tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>
@@ -152,13 +135,12 @@ $result = $stmt->get_result();
                 </div>
             </div>
 
-            <!-- Footer -->
-            <?php include_once DEV_PATH . 'Views/footer.php'?>
+            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
         
         <!-- Modal Cadastro/Edição -->
         <div class="modal fade" id="modalCaixa" tabindex="-1">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="modalCaixaLabel">Adicionar Caixa</h5>
@@ -206,18 +188,7 @@ $result = $stmt->get_result();
             </div>
         </div>
 
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
-            </div>
-        </div>
-        
+        <?php include_once DEV_PATH . 'Views/toast.php'; ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>

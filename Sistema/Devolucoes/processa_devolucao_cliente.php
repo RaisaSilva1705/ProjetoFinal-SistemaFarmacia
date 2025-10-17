@@ -15,21 +15,27 @@ $id_venda_original = filter_input(INPUT_POST, 'id_venda_original', FILTER_VALIDA
 $id_cliente = filter_input(INPUT_POST, 'id_cliente', FILTER_VALIDATE_INT) ?: null;
 $tipo_resolucao = $_POST['tipo_resolucao'] ?? '';
 $id_funcionario = $_SESSION['ID_Funcionario'];
-$id_caixa = $_SESSION['ID_Caixa']; 
+$id_caixa = $_SESSION['ID_Caixa'] ?? null; 
 $itens_para_devolver = $_POST['itens'] ?? [];
 
 $itens_selecionados = array_filter($itens_para_devolver, function($item) {
     return isset($item['devolver']) && $item['devolver'] == '1' && !empty($item['quantidade']);
 });
 
-if (!$id_venda_original || empty($itens_selecionados) || empty($tipo_resolucao)) {
-    $_SESSION['msg'] = ['texto' => 'Dados da devolução incompletos. Verifique a venda, os itens e a forma de resolução.', 'tipo' => 'warning'];
+if ($tipo_resolucao === 'Credito_Loja' && is_null($id_cliente)) {
+    $_SESSION['msg'] = ['texto' => 'Não é possível dar crédito em loja para um "Consumidor Final". O cliente precisa ser identificado na venda original.', 'tipo' => 'danger'];
     header('Location: devolucao_cliente.php');
     exit;
 }
 
-if ($tipo_resolucao === 'Credito_Loja' && is_null($id_cliente)) {
-    $_SESSION['msg'] = ['texto' => 'Não é possível dar crédito em loja para um "Consumidor Final". O cliente precisa ser identificado na venda original.', 'tipo' => 'danger'];
+if ($tipo_resolucao === 'Reembolso' && is_null($id_caixa)) {
+    $_SESSION['msg'] = ['texto' => 'Não é possível processar um REEMBOLSO. Nenhum caixa está aberto nesta sessão.', 'tipo' => 'danger'];
+    header('Location: devolucao_cliente.php');
+    exit;
+}
+
+if (!$id_venda_original || empty($itens_selecionados) || empty($tipo_resolucao)) {
+    $_SESSION['msg'] = ['texto' => 'Dados da devolução incompletos. Verifique a venda, os itens e a forma de resolução.', 'tipo' => 'warning'];
     header('Location: devolucao_cliente.php');
     exit;
 }

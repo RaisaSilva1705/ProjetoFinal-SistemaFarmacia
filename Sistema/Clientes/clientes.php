@@ -13,7 +13,10 @@ include DEV_PATH . "Exec/validar_acesso.php";
 $busca_texto = $_GET['busca_texto'] ?? '';
 $status = $_GET['status'] ?? '';
 
-$sql = "SELECT ID_Cliente, Nome, Documento, Tel, Email, Status FROM CLIENTES";
+$sql = "SELECT 
+            C.ID_Cliente, C.Nome, C.Tel, C.Email, C.Status,
+            (SELECT CD.Numero FROM CLIENTES_DOCUMENTOS CD WHERE CD.ID_Cliente = C.ID_Cliente AND (CD.Tipo = 'CPF' OR CD.Tipo = 'CNPJ') LIMIT 1) AS DocumentoPrincipal
+        FROM CLIENTES C";
 
 $conditions = [];
 $params = [];
@@ -47,49 +50,35 @@ $result = $stmt->get_result();
 <html lang="pt-BR">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Clientes</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <title>Gestão de Clientes</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
-    <body>
-        <!-- Navbar -->
-        <?php include_once DEV_PATH . 'Views/sidebar.php'?>
+    <body class="bg-light">
 
-       <div class="content d-flex flex-column min-vh-100">
+        <?php include_once DEV_PATH . 'Views/sidebar.php';?>
+
+        <div class="content d-flex flex-column min-vh-100">
             <div class="content flex-grow-1">
-                <!-- Banner -->
                 <div class="container-fluid bg-secondary text-white text-center p-4">
-                    <h3>Gerenciamento de CLIENTES</h3>
+                    <h3>Clientes</h3>
                 </div>
-            
                 <div class="container p-5">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2 class="m-0">Lista de Clientes</h2>
+                        <h2 class="m-0">Gestão de Clientes</h2>
                         <div>
-                            <a href="cadastrar_cliente.php" class="btn btn-primary">Cadastrar Novo Cliente</a>
-                            <a href="../Relatorios/relatorio_clientes.php" class="btn btn-outline-secondary">Ver Relatório</a>
+                            <a href="cadastrar_cliente.php" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Novo Cliente</a>
+                            <a href="../Relatorios/relatorio_clientes.php" class="btn btn-outline-secondary"><i class="bi bi-bar-chart-line-fill"></i> Ver Relatório</a>
                         </div>
                     </div>
 
                     <div class="card card-body mb-4">
                         <form method="GET" action="clientes.php">
-                            <div class="row align-items-end">
-                                <div class="col-md-6">
-                                    <label for="busca_texto" class="form-label">Buscar por Nome ou Documento (CPF/CNPJ)</label>
-                                    <input type="text" name="busca_texto" id="busca_texto" class="form-control" value="<?= htmlspecialchars($busca_texto) ?>">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="status" class="form-label">Status</label>
-                                    <select name="status" id="status" class="form-select">
-                                        <option value="">Todos</option>
-                                        <option value="Ativo" <?= $status == 'Ativo' ? 'selected' : '' ?>>Ativo</option>
-                                        <option value="Inativo" <?= $status == 'Inativo' ? 'selected' : '' ?>>Inativo</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
-                                </div>
+                            <div class="row g-3 align-items-end">
+                                <div class="col-md-6"><label for="busca_texto">Buscar por Nome ou Documento</label><input type="text" name="busca_texto" id="busca_texto" class="form-control" value="<?= htmlspecialchars($busca_texto) ?>"></div>
+                                <div class="col-md-4"><label for="status">Status</label><select name="status" id="status" class="form-select"><option value="">Todos</option><option value="Ativo" <?= $status == 'Ativo' ? 'selected' : '' ?>>Ativo</option><option value="Inativo" <?= $status == 'Inativo' ? 'selected' : '' ?>>Inativo</option></select></div>
+                                <div class="col-md-2"><button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel-fill"></i> Filtrar</button></div>
                             </div>
                         </form>
                     </div>
@@ -99,10 +88,9 @@ $result = $stmt->get_result();
                             <thead class="table-dark">
                                 <tr>
                                     <th>Nome</th>
-                                    <th>Documento</th>
+                                    <th>Documento Principal</th>
                                     <th>Telefone</th>
-                                    <th>Email</th>
-                                    <th>Status</th>
+                                    <th class="text-center">Status</th>
                                     <th class="text-center">Ações</th>
                                 </tr>
                             </thead>
@@ -111,45 +99,32 @@ $result = $stmt->get_result();
                                     <?php while($row = $result->fetch_assoc()): ?>
                                         <tr>
                                             <td><?= htmlspecialchars($row['Nome']) ?></td>
-                                            <td><?= htmlspecialchars($row['Documento']) ?></td>
+                                            <td><?= htmlspecialchars($row['DocumentoPrincipal'] ?? 'N/A') ?></td>
                                             <td><?= htmlspecialchars($row['Tel']) ?></td>
-                                            <td><?= htmlspecialchars($row['Email']) ?></td>
-                                            <td <?php $badge_class = $row['Status'] == 'Ativo' ? 'table-success' : 'table-danger'; echo "class='{$badge_class}'"?>>
-                                                <?= htmlspecialchars($row['Status']) ?>
+                                            <td class="text-center">
+                                                <span class="badge <?= $row['Status'] == 'Ativo' ? 'bg-success' : 'bg-danger' ?>"><?= $row['Status'] ?></span>
                                             </td>
                                             <td class="text-center">
-                                                <a href="detalhes_cliente.php?id=<?= $row['ID_Cliente'] ?>" class="btn btn-success btn-sm">Ver Detalhes</a>
-                                                <a href="editar_cliente.php?id=<?= $row['ID_Cliente'] ?>" class="btn btn-warning btn-sm">Editar</a>
+                                                <div class="d-flex justify-content-center gap-2">
+                                                    <a href="detalhes_cliente.php?id=<?= $row['ID_Cliente'] ?>" class="btn btn-info btn-sm" title="Ver Detalhes"><i class="bi bi-eye-fill"></i></a>
+                                                    <a href="editar_cliente.php?id=<?= $row['ID_Cliente'] ?>" class="btn btn-warning btn-sm" title="Editar"><i class="bi bi-pencil-fill"></i></a>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endwhile; ?>
                                 <?php else: ?>
-                                    <tr>
-                                        <td colspan="6" class="text-center">Nenhum cliente encontrado.</td>
-                                    </tr>
+                                    <tr><td colspan="5" class="text-center">Nenhum cliente encontrado.</td></tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-            <!-- Footer -->
-            <?php include_once DEV_PATH . 'Views/footer.php'?>
+            <?php include_once DEV_PATH . 'Views/footer.php';?>
         </div>
-
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
-            </div>
-        </div>
-
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        
+        <?php include_once DEV_PATH . 'Views/toast.php'; ?>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
             <?php

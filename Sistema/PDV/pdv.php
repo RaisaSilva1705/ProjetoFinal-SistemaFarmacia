@@ -17,6 +17,17 @@ if (!isset($_SESSION['ID_Caixa'])){
     exit();
 }
 
+$idClientePreVenda = '';
+$nomeClientePreVenda = '';
+if (isset($_SESSION['id_cliente_pdv']) && isset($_SESSION['nome_cliente_pdv'])) {
+    $idClientePreVenda = $_SESSION['id_cliente_pdv'];
+    $nomeClientePreVenda = $_SESSION['nome_cliente_pdv'];
+
+    // Limpa a sessão para não afetar a próxima venda
+    unset($_SESSION['id_cliente_pdv']);
+    unset($_SESSION['nome_cliente_pdv']);
+}
+
 // Busca dados da empresa (quant_max_parcelas e valor_min_parcelas)
 $sqlInfoParcelas =  "SELECT Quant_Max_Parcelas, Valor_Min_Parcelas FROM CONFIGURACOES";
 $stmtInfoParcelas = $conn->prepare($sqlInfoParcelas);
@@ -133,8 +144,8 @@ if (isset($_POST['codigo'])) {
                     </div>
                     <div class="col-md-3">
                         <label for="busca_cliente_cpf" class="form-label">CPF/CNPJ do Cliente</label>
-                        <input type="text" id="busca_cliente_cpf" class="form-control" placeholder="Digite o documento...">
-                        <input type="hidden" id="id_cliente_consulta" name="id_cliente_consulta" value="">
+                        <input type="text" id="busca_cliente_cpf" class="form-control" placeholder="Digite o documento..." value="<?= htmlspecialchars($nomeClientePreVenda) ?>">
+                        <input type="hidden" id="id_cliente_consulta" name="id_cliente_consulta" value="<?= htmlspecialchars($idClientePreVenda) ?>">
                     </div>
                     <div class="col-md-3">
                         <label for="funcionario" class="form-label">Vendedor:</label>
@@ -374,7 +385,7 @@ if (isset($_POST['codigo'])) {
                         </div>
                         
                         <div class="modal-footer">
-                            <input type="hidden" name="id_cliente_hidden" id="id_cliente_hidden" value="">
+                            <input type="hidden" name="id_cliente_hidden" id="id_cliente_hidden" value="<?= htmlspecialchars($idClientePreVenda) ?>">
                             <button class="btn btn-success w-100" id="confirmarPagamento" type="submit">Confirmar Pagamento</button>
                             <div id="card-errors"></div>
                         </div>
@@ -588,18 +599,15 @@ if (isset($_POST['codigo'])) {
                     .then(response => response.json())
                     .then(data => {
                         if (data.sucesso) {
-                            if (data.cliente) {
-                                const idClienteHidden = document.getElementById('id_cliente_hidden');
-                                const buscaClienteInput = document.getElementById('busca_cliente_cpf');
+                            /*if (data.cliente) {
+                                document.getElementById('id_cliente_hidden').value = data.cliente.id;
+                                document.getElementById('id_cliente_consulta').value = data.cliente.id;
+                                document.getElementById('busca_cliente_cpf').value = data.cliente.nome; 
                                 
-                                if (idClienteHidden) idClienteHidden.value = data.cliente.id;
-                                if (buscaClienteInput) {
-                                    buscaClienteInput.value = data.cliente.nome;
-                                    buscaClienteInput.dispatchEvent(new Event('change')); 
-                                }
-                            }
+                                document.getElementById('busca_cliente_cpf').dispatchEvent(new Event('change'));
+                            }*/
                             mostrarToast(data.mensagem || 'Itens carregados com sucesso!', 'success');
-                            setTimeout(() => location.reload(), 1000); 
+                            setTimeout(() => location.reload(), 100); 
                         } 
                         else {
                             mostrarToast(data.mensagem || 'Pré-venda não encontrada.', 'danger');

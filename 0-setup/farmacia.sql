@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `CONFIGURACOES` (
     `Valor_Min_Parcelas` DECIMAL(10,2) NOT NULL,
     `Quant_Max_Parcelas` INT NOT NULL,
     `Margem_Lucro_Padrao` DECIMAL(10,2) NOT NULL DEFAULT 100.00,
-    `Max_Desconto_Item` DECIMAL(5,2) NOT NULL DEFAULT 20.00,
+    `Max_Desconto_Item` DECIMAL(5,2) NOT NULL DEFAULT 50.00,
     `Data_Alteracao` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB;
 /* drop table CONFIGURACOES; */
@@ -41,7 +41,6 @@ CREATE TABLE IF NOT EXISTS `CLIENTES` (
     `Tipo` ENUM('PJ', 'PF') NOT NULL,
     `Sexo` ENUM('Masculino', 'Feminino') NULL,
     `Data_Nascimento` DATE NULL,
-    `Documento` VARCHAR(18) NOT NULL UNIQUE,
     `Tel` VARCHAR(20) NOT NULL,
     `Email` VARCHAR(100) NOT NULL UNIQUE,
     `Senha` VARCHAR(255) NOT NULL,
@@ -55,7 +54,21 @@ CREATE TABLE IF NOT EXISTS `CLIENTES` (
 /* select * from CLIENTES; */
 
 -- -----------------------------------------------------
--- Table `CLI_ENDERECOS`         INTEGRAR COM API VIACEP
+-- Table `CLIENTES_DOCUMENTOS`         
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `CLIENTES_DOCUMENTOS` (
+  `ID_Documento` INT AUTO_INCREMENT PRIMARY KEY,
+  `ID_Cliente` INT NOT NULL,
+  `Tipo` VARCHAR(50) NOT NULL,
+  `Numero` VARCHAR(50) NOT NULL,
+  FOREIGN KEY (`ID_Cliente`) REFERENCES `CLIENTES`(`ID_Cliente`) ON DELETE CASCADE,
+  UNIQUE (`Tipo`, `Numero`) -- Garante que não haja dois RGs ou CPFs iguais no sistema
+) ENGINE = InnoDB;
+/* drop table CLIENTES_DOCUMENTOS; */
+/* select * from CLIENTES_DOCUMENTOS; */
+
+-- -----------------------------------------------------
+-- Table `CLI_ENDERECOS`         
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `CLI_ENDERECOS` (
     `ID_Endereco_Cli` INT AUTO_INCREMENT PRIMARY KEY,
@@ -274,7 +287,7 @@ CREATE TABLE IF NOT EXISTS `MEDICAMENTOS` (
     `ID_Tarja` INT NOT NULL,
     `Tipo` ENUM('Genérico', 'Similar', 'Referência') NOT NULL,
     `Prin_Ativo` VARCHAR(255) DEFAULT NULL,
-    `MS` VARCHAR(20) NOT NULL,
+    `MS` VARCHAR(13) NOT NULL,
     `Controlado` ENUM ('Sim', 'Não') DEFAULT 'Não',
     FOREIGN KEY (`ID_Produto`) REFERENCES `PRODUTOS` (`ID_Produto`) ON DELETE CASCADE,
     FOREIGN KEY (`ID_Tarja`) REFERENCES `TARJAS_MEDICAMENTOS` (`ID_Tarja`),

@@ -56,7 +56,8 @@ $total_produtos_distintos = $produtos_fornecidos->num_rows;
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Detalhes de Fornecedor</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
     <body>
@@ -67,13 +68,14 @@ $total_produtos_distintos = $produtos_fornecidos->num_rows;
             <div class="content flex-grow-1">
                 <!-- Banner -->
                 <div class="container-fluid bg-secondary text-white text-center p-4">
-                    <h3>Detalhes do Fornecedor</h3>
+                    <h3>Fornecedores</h3>
                 </div>
             
                 <div class="container p-5">
-                    <a href="fornecedores.php" class="btn btn-outline-secondary mb-4">
-                        <i class="bi bi-arrow-left"></i> Voltar para a Lista
-                    </a>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="m-0">Detalhes do Fornecedor</h2>
+                        <a href="fornecedores.php" class="btn btn-outline-secondary"><i class="bi bi-arrow-left-circle"></i> Voltar para a Lista</a>
+                    </div>
                     <div class="row">
                         <div class="col-md-8">
                             <div class="card shadow-sm h-100">
@@ -148,6 +150,6 @@ $total_produtos_distintos = $produtos_fornecidos->num_rows;
             <!-- Footer -->
             <?php include_once DEV_PATH . 'Views/footer.php'?>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

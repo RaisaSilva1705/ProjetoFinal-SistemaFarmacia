@@ -29,38 +29,10 @@ else {
     exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Coleta os dados do formulário
-    $nome = $_POST['nome'];
-    $tipo = $_POST['tipo'];
-    $documento = $_POST['documento'];
-    $tel = $_POST['tel'];
-    $email = $_POST['email'];
-    $status = $_POST['status'];
-    $obs = $_POST['obs'];
-
-    // Lógica para atualizar a senha apenas se uma nova for fornecida
-    if (!empty($_POST['senha'])) {
-        $senha = password_hash($_POST['senha'], PASSWORD_DEFAULT);
-        $sql = "UPDATE CLIENTES SET Nome = ?, Tipo = ?, Documento = ?, Tel = ?, Email = ?, Senha = ?, Status = ?, OBS = ? WHERE ID_Cliente = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssssssssi", $nome, $tipo, $documento, $tel, $email, $senha, $status, $obs, $id_cliente);
-    } 
-    else {
-        $sql = "UPDATE CLIENTES SET Nome = ?, Tipo = ?, Documento = ?, Tel = ?, Email = ?, Status = ?, OBS = ? WHERE ID_Cliente = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sssssssi", $nome, $tipo, $documento, $tel, $email, $status, $obs, $id_cliente);
-    }
-
-    if ($stmt->execute()) {
-        registrar_log($conn, $_SESSION['ID_Usuario'], "Editou o cliente '{$nome}' (ID: {$id_cliente})");
-        $_SESSION['msg'] = ['texto' => 'Cliente atualizado com sucesso!', 'tipo' => 'success'];
-        header("Location: clientes.php");
-        exit();
-    } 
-    else 
-        $_SESSION['msg'] = ['texto' => 'Erro ao atualizar cliente: ' . $stmt->error, 'tipo' => 'danger'];
-}
+$stmt_docs = $conn->prepare("SELECT ID_Documento, Tipo, Numero FROM CLIENTES_DOCUMENTOS WHERE ID_Cliente = ? ORDER BY ID_Documento");
+$stmt_docs->bind_param("i", $id_cliente);
+$stmt_docs->execute();
+$documentos_cliente = $stmt_docs->get_result()->fetch_all(MYSQLI_ASSOC);
 
 $is_edit = true; 
 ?>

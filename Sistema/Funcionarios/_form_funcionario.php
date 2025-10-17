@@ -11,7 +11,10 @@ $obs = htmlspecialchars($funcionario['OBS'] ?? '');
 $usuario_login = htmlspecialchars($usuario['Usuario'] ?? '');
 ?>
 
-<form action="" method="POST">
+<form action="processa_funcionario.php" method="POST">
+    <?php if ($is_edit): ?>
+        <input type="hidden" name="id_funcionario" value="<?= $id_funcionario ?>">
+    <?php endif; ?>
     <h5 class="mt-4">Dados Pessoais e Contrato</h5>
     <div class="row">
         <div class="col-md-8 mb-3">

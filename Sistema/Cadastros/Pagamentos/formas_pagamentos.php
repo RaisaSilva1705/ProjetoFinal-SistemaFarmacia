@@ -62,30 +62,18 @@ $result = $stmt->get_result();
                 </div>
                 <div class="container p-5">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2 class="m-0">Lista de Formas de Pagamentos</h2>
+                        <h2 class="m-0">Formas de Pagamento</h2>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalFormasPagamento">
-                            Adicionar Nova Forma
+                            <i class="bi bi-plus-circle"></i> Nova Forma de Pagamento
                         </button>
                     </div>
 
                     <div class="card card-body mb-4">
                         <form method="GET" action="formas_pagamentos.php">
-                            <div class="row align-items-end">
-                                <div class="col-md-6">
-                                    <label for="busca_texto" class="form-label">Buscar por Forma de Pagamento</label>
-                                    <input type="text" name="busca_texto" id="busca_texto" class="form-control" value="<?= htmlspecialchars($busca_texto) ?>">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="status" class="form-label">Status</label>
-                                    <select name="status" id="status" class="form-select">
-                                        <option value="">Todos</option>
-                                        <option value="Ativo" <?= $status == 'Ativo' ? 'selected' : '' ?>>Ativo</option>
-                                        <option value="Inativo" <?= $status == 'Inativo' ? 'selected' : '' ?>>Inativo</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
-                                </div>
+                            <div class="row g-3 align-items-end">
+                                <div class="col-md-6"><label for="busca_texto" class="form-label">Buscar por Nome</label><input type="text" name="busca_texto" id="busca_texto" class="form-control" value="<?= htmlspecialchars($busca_texto) ?>"></div>
+                                <div class="col-md-4"><label for="status" class="form-label">Status</label><select name="status" id="status" class="form-select"><option value="">Todos</option><option value="Ativo" <?= $status == 'Ativo' ? 'selected' : '' ?>>Ativo</option><option value="Inativo" <?= $status == 'Inativo' ? 'selected' : '' ?>>Inativo</option></select></div>
+                                <div class="col-md-2"><button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel-fill"></i> Filtrar</button></div>
                             </div>
                         </form>
                     </div>
@@ -94,8 +82,8 @@ $result = $stmt->get_result();
                         <table class="table table-striped table-hover table-bordered">
                             <thead class="table-dark">
                                 <tr>
-                                    <th>Tipo</th>
-                                    <th>Status</th>
+                                    <th>Tipo de Pagamento</th>
+                                    <th class="text-center">Status</th>
                                     <th class="text-center">Ações</th>
                                 </tr>
                             </thead>
@@ -104,31 +92,31 @@ $result = $stmt->get_result();
                                     <?php while($row = $result->fetch_assoc()): ?>
                                         <tr>
                                             <td><?= htmlspecialchars($row['Tipo']) ?></td>
-                                            <td <?php $badge_class = $row['Status'] == 'Ativo' ? 'table-success' : 'table-danger'; echo "class='{$badge_class}'"?>>
-                                                <?= htmlspecialchars($row['Status']) ?>
+                                            <td class="text-center">
+                                                <span class="badge <?= $row['Status'] == 'Ativo' ? 'bg-success' : 'bg-danger' ?>"><?= $row['Status'] ?></span>
                                             </td>
                                             <td class="text-center">
-                                                <button type="button" class="btn btn-warning btn-sm btn-edit"
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#modalFormasPagamento"
-                                                        data-id="<?= $row['ID_Forma_Pag'] ?>"
-                                                        data-tipo="<?= htmlspecialchars($row['Tipo']) ?>"
-                                                        data-status="<?= htmlspecialchars($row['Status']) ?>">
-                                                    Editar
-                                                </button>
-                                                <button type="button" class="btn btn-sm <?= $row['Status'] == 'Ativo' ? 'btn-danger' : 'btn-success' ?> btn-status"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#modalConfirmStatus"
-                                                        data-id="<?= $row['ID_Forma_Pag'] ?>"
-                                                        data-nome="<?= htmlspecialchars($row['Tipo']) ?>"
-                                                        data-status-atual="<?= $row['Status'] ?>">
-                                                    <?= $row['Status'] == 'Ativo' ? 'Inativar' : 'Ativar' ?>
-                                                </button>
+                                                <div class="d-flex justify-content-center gap-2">
+                                                    <button type="button" class="btn btn-warning btn-sm" title="Editar"
+                                                            data-bs-toggle="modal" data-bs-target="#modalFormasPagamento"
+                                                            data-id="<?= $row['ID_Forma_Pag'] ?>"
+                                                            data-tipo="<?= htmlspecialchars($row['Tipo']) ?>">
+                                                        <i class="bi bi-pencil-fill"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm <?= $row['Status'] == 'Ativo' ? 'btn-danger' : 'btn-success' ?>"
+                                                            title="<?= $row['Status'] == 'Ativo' ? 'Inativar' : 'Ativar' ?>"
+                                                            data-bs-toggle="modal" data-bs-target="#modalConfirmStatus"
+                                                            data-id="<?= $row['ID_Forma_Pag'] ?>"
+                                                            data-nome="<?= htmlspecialchars($row['Tipo']) ?>"
+                                                            data-status-atual="<?= $row['Status'] ?>">
+                                                        <i class="bi <?= $row['Status'] == 'Ativo' ? 'bi-pause-circle-fill' : 'bi-play-circle-fill' ?>"></i>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endwhile; ?>
                                 <?php else: ?>
-                                    <tr><td colspan="3" class="text-center">Nenhuma forma de pagamento cadastrada.</td></tr>
+                                    <tr><td colspan="3" class="text-center">Nenhuma forma de pagamento encontrada.</td></tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>
@@ -190,18 +178,7 @@ $result = $stmt->get_result();
             </div>
         </div>
 
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
-            </div>
-        </div>
-        
+        <?php include_once DEV_PATH . 'Views/toast.php' ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
