@@ -95,6 +95,13 @@ try {
     }
 
     $conn->commit();
+
+    // Salva os dados da venda na tela do cliente para a avaliação
+    $modo_avaliacao = 'Avaliacao';
+    $status_avaliacao = json_encode(['id_venda' => $idVenda, 'id_funcionario' => $id_funcionario]);
+    $stmt_tela = $conn->prepare("UPDATE CAIXAS SET Tela_Cliente_Modo = ?, Tela_Cliente_Status = ? WHERE ID_Caixa = ?");
+    $stmt_tela->bind_param("ssi", $modo_avaliacao, $status_avaliacao, $id_caixa);
+    $stmt_tela->execute();
     
     unset($_SESSION['carrinho']);
     unset($_SESSION['codigo_prevenda_ativa']);

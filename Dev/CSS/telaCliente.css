@@ -1,0 +1,82 @@
+html, body { height: 100%; overflow: hidden; background-color: #f8f9fa; }
+.container-tela { display: flex; justify-content: center; align-items: center; height: 100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+.card-tela {
+    width: 95%; height: 95%;
+    border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    display: grid; place-items: center;
+    border-radius: 15px; /* Bordas mais suaves */
+}
+.screen {
+    grid-area: 1 / 1;
+    transition: opacity 0.5s ease-in-out;
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    padding: 3rem; /* Aumenta o padding geral */
+}
+.screen:not(.active) { opacity: 0; pointer-events: none; position: absolute; }
+.screen.active { opacity: 1; }
+
+/* Estilos Tela Aguardando, Avaliação e Inativo (textos maiores) */
+.tela-centro { justify-content: center; align-items: center; text-align: center; }
+.tela-centro h1 { font-size: 4.5rem; font-weight: bold; color: #0d6efd; line-height: 1.2; } /* Aumentado */
+.tela-centro p { font-size: 2.2rem; color: #6c757d; margin-top: 1rem; } /* Aumentado */
+.tela-centro .logo { max-width: 300px; margin-bottom: 3rem; } /* Aumenta a logo */
+
+/* Estilos Tela Venda (Carrinho mais amigável e colorido) */
+#lista-itens-cliente { flex-grow: 1; overflow-y: auto; font-size: 1.6rem; padding-right: 1rem; }
+.item-lista { 
+    display: grid; 
+    grid-template-columns: 4fr 1fr 1.5fr; /* Ajusta colunas para melhor visualização */
+    gap: 0.8rem; padding: 1rem 0; 
+    border-bottom: 1px dashed #e0e0e0; /* Linha tracejada para separar */
+    align-items: center;
+}
+.item-lista:last-child { border-bottom: none; } /* Remove a borda do último item */
+.item-nome { font-weight: bold; color: #343a40; }
+.item-quantidade { text-align: center; color: #6c757d; font-size: 1.3rem; }
+.item-subtotal { text-align: end; font-weight: bold; color: #28a745; font-size: 1.8rem; }
+.promocao-badge { 
+    font-size: 0.9rem; margin-left: 0.5rem; 
+    background-color: #28a745; /* Cor verde para promoção */
+    color: #fff;
+    padding: 0.3em 0.6em;
+    border-radius: 0.3rem;
+    display: inline-flex; /* Para alinhamento */
+    align-items: center;
+}
+.promocao-badge i { margin-right: 0.3em; }
+
+#total-container {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #0d6efd; /* Linha de destaque para o total */
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+#total-venda-label { font-size: 3.8rem; font-weight: bold; color: #0d6efd; } /* Cor para a label do total */
+#total-venda-cliente { font-size: 5.5rem; font-weight: bolder; color: #dc3545; } /* Cor de destaque para o valor total */
+
+/* Estilos Tela Avaliação */
+.faces-avaliacao { margin-top: 3rem; }
+.faces-avaliacao i { font-size: 7rem; margin: 0 1rem; cursor: pointer; transition: transform 0.2s, color 0.3s; } /* Um pouco menor para caber 5 */
+.faces-avaliacao i:hover { transform: scale(1.15); }
+
+.face-pessimo{ color: #dc3545 !important; }   /* Vermelho */
+.face-ruim { color: #fd7e14 !important; }     /* Laranja */
+.face-neutro { color: #ffc107 !important; }    /* Amarelo */
+.face-bom { color: #0dcaf0 !important; }       /* Azul Claro */
+.face-excelente { color: #198754 !important; }
+
+/* A nova paleta de cores para a transição */
+.face-pessimo:hover { color: #d00216 !important; }   /* Vermelho */
+.face-ruim:hover { color: #ff6a00 !important; }     /* Laranja */
+.face-neutro:hover { color: #ffae00 !important; }    /* Amarelo */
+.face-bom:hover { color: #00e1ff !important; }       /* Azul Claro */
+.face-excelente:hover { color: #08a45b !important; } /* Verde */
+
+/* Rolagem customizada para lista de itens (opcional, para navegadores modernos) */
+#lista-itens-cliente::-webkit-scrollbar { width: 10px; }
+#lista-itens-cliente::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 5px; }
+#lista-itens-cliente::-webkit-scrollbar-thumb { background: #888; border-radius: 5px; }
+#lista-itens-cliente::-webkit-scrollbar-thumb:hover { background: #555; }

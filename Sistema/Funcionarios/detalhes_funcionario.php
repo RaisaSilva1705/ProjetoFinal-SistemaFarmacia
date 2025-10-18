@@ -27,6 +27,27 @@ if ($result->num_rows === 0) {
 }
 $funcionario = $result->fetch_assoc();
 
+$stmtAvaliacoes = $conn->prepare("SELECT Nota, COUNT(*) as Quantidade FROM AVALIACOES WHERE ID_Funcionario = ? GROUP BY Nota");
+$stmtAvaliacoes->bind_param("i", $id_funcionario);
+$stmtAvaliacoes->execute();
+$avaliacoes_result = $stmtAvaliacoes->get_result();
+
+$contagem_notas = [
+    5 => 0, // Excelente
+    4 => 0, // Bom
+    3 => 0, // Neutro
+    2 => 0, // Ruim
+    1 => 0  // Péssimo
+];
+$total_avaliacoes = 0;
+$soma_notas = 0;
+while ($row = $avaliacoes_result->fetch_assoc()) {
+    $contagem_notas[$row['Nota']] = $row['Quantidade'];
+    $total_avaliacoes += $row['Quantidade'];
+    $soma_notas += $row['Nota'] * $row['Quantidade'];
+}
+$media_geral = ($total_avaliacoes > 0) ? $soma_notas / $total_avaliacoes : 0;
+
 $atividades = null;
 $stmtAtividades = $conn->prepare("
     (SELECT 'Venda' as Fonte, ID_Venda as ID, DataHora_Venda as Data, 'Venda Realizada' as Tipo, Valor_Total as Valor FROM VENDAS WHERE ID_Funcionario = ? ORDER BY DataHora_Venda DESC LIMIT 5) 
@@ -116,6 +137,47 @@ $atividades = $stmtAtividades->get_result();
                             </div>
                         </div>
                         <?php endif; ?>
+                    </div>
+
+                    <div class="col-lg-12 mb-2">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header">
+                                <h5 class="m-0">Resumo de Avaliações de Clientes</h5>
+                            </div>
+                            <div class="card-body">
+                                <?php if ($total_avaliacoes > 0): ?>
+                                    <div class="row align-items-center">
+                                        <div class="col-md-3 text-center border-end">
+                                            <h6 class="text-muted">MÉDIA GERAL</h6>
+                                            <h1 class="display-4 fw-bold text-primary"><?= number_format($media_geral, 2, ',', '.') ?></h1>
+                                            <p class="text-muted">(<?= $total_avaliacoes ?> avaliações)</p>
+                                        </div>
+                                        <div class="col-md-9 px-4">
+                                            <?php
+                                                $labels = [5 => 'Excelente', 4 => 'Bom', 3 => 'Neutro', 2 => 'Ruim', 1 => 'Péssimo'];
+                                                $cores = [5 => 'success', 4 => 'info', 3 => 'secondary', 2 => 'warning', 1 => 'danger'];
+                                                $icones = [5 => 'emoji-laughing', 4 => 'emoji-smile', 3 => 'emoji-neutral', 2 => 'emoji-frown', 1 => 'emoji-angry'];
+                                            ?>
+                                            <?php foreach($contagem_notas as $nota => $qtd): 
+                                                $percentual = ($total_avaliacoes > 0) ? ($qtd / $total_avaliacoes) * 100 : 0;
+                                            ?>
+                                                <div class="mb-2">
+                                                    <div class="d-flex justify-content-between">
+                                                        <span><i class="bi bi-<?= $icones[$nota] ?>-fill text-<?= $cores[$nota] ?>"></i> <?= $labels[$nota] ?></span>
+                                                        <span class="fw-bold"><?= $qtd ?></span>
+                                                    </div>
+                                                    <div class="progress" style="height: 10px;">
+                                                        <div class="progress-bar bg-<?= $cores[$nota] ?>" style="width: <?= $percentual ?>%;"></div>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                <?php else: ?>
+                                    <p class="text-center text-muted p-3">Este funcionário ainda não recebeu nenhuma avaliação.</p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

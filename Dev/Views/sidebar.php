@@ -65,7 +65,9 @@
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>PreVendas/prevendas.php">Nova Pré-Venda</a></li>
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>PreVendas/listagem_prevendas.php">Conferir Pré-Vendas</a></li>
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Cadastros/Caixas/caixas.php">Situação do Caixa</a></li>
+                <li><hr class="dropdown-divider" style="border-color: #495057;"></li>
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Consulta/terminal_consulta.php">Terminal de Consulta</a></li>
+                <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>PDV/tela_cliente.php">Tela do Cliente</a></li>
             </ul>
         </div>
         
@@ -75,6 +77,7 @@
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Produtos/produtos.php">Produtos</a></li>
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Estoque/estoque.php">Estoque</a></li>
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Fornecedores/fornecedores.php">Fornecedores</a></li>
+                <li><hr class="dropdown-divider" style="border-color: #495057;"></li>
                 <li><a class="dropdown-item" href="<?php echo SISTEMA_URL ?>Etiquetas/etiquetas.php">Imprimir Etiquetas</a></li>
             </ul>
         </div>

@@ -421,6 +421,21 @@ CREATE TABLE IF NOT EXISTS `VENDAS` (
 /* select * from VENDAS; */
 
 -- -----------------------------------------------------
+-- Table `AVALIACOES`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `AVALIACOES` (
+    `ID_Avaliacao` INT AUTO_INCREMENT PRIMARY KEY,
+    `ID_Venda` INT NOT NULL,
+    `ID_Funcionario` INT NOT NULL,
+    `Nota` INT NOT NULL,
+    `Data_Avaliacao` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`ID_Venda`) REFERENCES `VENDAS` (`ID_Venda`),
+    FOREIGN KEY (`ID_Funcionario`) REFERENCES `FUNCIONARIOS` (`ID_Funcionario`)
+) ENGINE = InnoDB;
+/* drop table AVALIACOES; */
+/* select * from AVALIACOES; */
+
+-- -----------------------------------------------------
 -- Table `MOVIMENTACAO_ESTOQUE`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `MOVIMENTACAO_ESTOQUE` (
@@ -482,10 +497,10 @@ CREATE TABLE IF NOT EXISTS `ITENS_VENDA` (
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `LOGS` (
   `ID_Log` INT AUTO_INCREMENT PRIMARY KEY,
-  `ID_Usuario` INT,
+  `ID_Usuario` INT NOT NULL,
   `Acao` TEXT NOT NULL,
   `Timestamp` DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (`ID_Usuario`) REFERENCES `USUARIOS`(`ID_Usuario`)
+  FOREIGN KEY (`ID_Usuario`) REFERENCES `USUARIOS` (`ID_Usuario`)
 ) ENGINE = InnoDB;
 /* drop table LOGS; */
 /* select * from LOGS; */
@@ -655,7 +670,7 @@ CREATE TABLE IF NOT EXISTS `PROMOCOES_ITENS` (
   FOREIGN KEY (`ID_Produto`) REFERENCES `PRODUTOS`(`ID_Produto`)
 ) ENGINE = InnoDB;
 /* drop table PROMOCOES_ITENS; */
- select * from PROMOCOES_ITENS; 
+/* select * from PROMOCOES_ITENS; */
 
 -- -----------------------------------------------------
 -- Table `DEVOLUCOES_FORNECEDORES`

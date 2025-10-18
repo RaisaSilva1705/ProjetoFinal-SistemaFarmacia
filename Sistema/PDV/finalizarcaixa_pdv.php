@@ -123,6 +123,11 @@ if (isset($_GET['acao']) && $_GET['acao'] == 'confirmar_fechamento') {
     $stmt->bind_param("sddi", $dataAtual, $dinheiroEmCaixa, $valor_total, $id_caixaAberto);
     
     if($stmt->execute() && $stmtFechar->execute()){
+        $modo_inativo = 'Inativo';
+        $stmt_tela = $conn->prepare("UPDATE CAIXAS SET Tela_Cliente_Modo = ?, Tela_Cliente_Status = NULL WHERE ID_Caixa = ?");
+        $stmt_tela->bind_param("si", $modo_inativo, $id_caixa);
+        $stmt_tela->execute();
+
         registrar_log($conn, $_SESSION['ID_Usuario'], "Fechou o caixa aberto {$id_caixaAberto} (ID Caixa: {$id_caixa})");
         
         unset(

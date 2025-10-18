@@ -96,11 +96,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         <title>Seleção de Caixa</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
-        <style>
-            select > option:first-child {
-                display: none;
-            }
-        </style>
     </head>
     <body class="bg-light">
         <!-- Navbar -->

@@ -6,7 +6,6 @@ ini_set('display_errors', 1);
 include "../../Dev/Exec/config.php";
 include DEV_PATH . 'Exec/conexao.php';
 include DEV_PATH . "Exec/logs.php";
-include DEV_PATH . "Exec/validar_sessao.php";
 define('MODULO_SOLICITADO', 'PDV_ACESSAR');
 include DEV_PATH . "Exec/validar_acesso.php";
 include DEV_PATH . "Exec/busca_promocoes.php";
@@ -487,18 +486,7 @@ if (isset($_POST['codigo'])) {
             </div>
         </div>
 
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
-            </div>
-        </div>
-        
+        <?php include_once DEV_PATH . 'Views/toast.php'?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script> 
@@ -620,6 +608,8 @@ if (isset($_POST['codigo'])) {
                     });
                     return; 
                 }
+
+                atualizarTelaCliente();
             });
 
             // MUDAR OS VALORES POR NOME DO PRODUTO
@@ -1113,6 +1103,9 @@ if (isset($_POST['codigo'])) {
             }
 
             document.addEventListener('keydown', gerenciarAtalhos);
+            document.getElementById('formCancelarVenda').addEventListener('submit', function() {
+                atualizarTelaCliente(); 
+            });
 
             // -------------------------------------------------------------------------
             // -------------------------------------------------------------------------
@@ -1185,6 +1178,8 @@ if (isset($_POST['codigo'])) {
                             }
                         });
                 }
+
+                atualizarTelaCliente();
             });
             
             // -------------------------------------------------------------------------
@@ -1354,10 +1349,21 @@ if (isset($_POST['codigo'])) {
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.sucesso)
+                    if (data.sucesso){
                         location.reload();
+                        atualizarTelaCliente();
+                    }
                     else
                         document.getElementById('erroSenha').textContent = data.erro || 'Ocorreu um erro.';
+                });
+            }
+
+            function atualizarTelaCliente() {
+                // Envia o estado atual do carrinho (window.carrinhoSessao) para o servidor
+                fetch('../../Dev/Exec/atualiza_tela_cliente.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(window.carrinhoSessao)
                 });
             }
 

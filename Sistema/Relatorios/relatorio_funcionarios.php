@@ -16,18 +16,19 @@ $busca_nome = $_GET['busca_nome'] ?? '';
 
 $sql = "SELECT
             F.Nome, C.Cargo,
-            COUNT(V.ID_Venda) AS Total_Vendas,
-            SUM(V.Valor_Total) AS Faturamento_Total
+            COUNT(DISTINCT V.ID_Venda) AS Total_Vendas,
+            SUM(V.Valor_Total) AS Faturamento_Total,
+            AVG(A.Nota) AS Media_Avaliacoes
         FROM FUNCIONARIOS F
-        JOIN VENDAS V ON F.ID_Funcionario = V.ID_Funcionario
-        JOIN CARGOS C ON F.ID_Cargo = C.ID_Cargo
-        WHERE DATE(V.DataHora_Venda) BETWEEN ? AND ?";
+        LEFT JOIN VENDAS V ON F.ID_Funcionario = V.ID_Funcionario AND DATE(V.DataHora_Venda) BETWEEN ? AND ?
+        LEFT JOIN AVALIACOES A ON V.ID_Venda = A.ID_Venda
+        LEFT JOIN CARGOS C ON F.ID_Cargo = C.ID_Cargo";
 
 $params = [$data_inicio, $data_fim];
 $types = 'ss';
 
 if (!empty($busca_nome)) {
-    $sql .= " AND F.Nome LIKE ?";
+    $sql .= " WHERE F.Nome LIKE ?";
     $types .= 's';
     $params[] = "%" . $busca_nome . "%";
 }
@@ -107,6 +108,7 @@ $ticket_medio_venda = ($total_vendas_periodo > 0) ? $faturamento_total_periodo /
                                         <th>Cargo</th>
                                         <th class="text-center">Nº de Vendas</th>
                                         <th class="text-end">Faturamento Total</th>
+                                        <th class="text-center">Avaliação Média</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -119,10 +121,20 @@ $ticket_medio_venda = ($total_vendas_periodo > 0) ? $faturamento_total_periodo /
                                                 <td><?= htmlspecialchars($funcionario['Cargo']) ?></td>
                                                 <td class="text-center"><?= $funcionario['Total_Vendas'] ?></td>
                                                 <td class="text-end fw-bold text-success">R$ <?= number_format($funcionario['Faturamento_Total'], 2, ',', '.') ?></td>
+                                                <td class="text-center">
+                                                    <?php if($funcionario['Media_Avaliacoes']): ?>
+                                                        <span class="badge bg-primary fs-6">
+                                                            <i class="bi bi-star-fill"></i>
+                                                            <?= number_format($funcionario['Media_Avaliacoes'], 2, ',', '.') ?>
+                                                        </span>
+                                                    <?php else: ?>
+                                                        <span class="text-muted">N/A</span>
+                                                    <?php endif; ?>
+                                                </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php else: ?>
-                                        <tr><td colspan="5" class="text-center p-4">Nenhum funcionário realizou vendas no período selecionado.</td></tr>
+                                        <tr><td colspan="6" class="text-center p-4">Nenhum funcionário realizou vendas no período selecionado.</td></tr>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
