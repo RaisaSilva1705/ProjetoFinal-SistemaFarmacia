@@ -34,10 +34,10 @@ try {
     $idVenda = $stmtVenda->insert_id;
     if ($idVenda == 0) throw new Exception("Falha ao criar a venda.");
 
-    $stmtMovCaixa = $conn->prepare("INSERT INTO MOVIMENTACOES_CAIXA (ID_Caixa, ID_Funcionario, Tipo, Valor, Descricao) VALUES (?, ?, 'Entrada', ?, ?)");
+    /*$stmtMovCaixa = $conn->prepare("INSERT INTO MOVIMENTACOES_CAIXA (ID_Caixa, ID_Funcionario, Tipo, Valor, Descricao) VALUES (?, ?, 'Entrada', ?, ?)");
     $descricaoMov = "Venda #$idVenda";
     $stmtMovCaixa->bind_param("iids", $id_caixa, $id_funcionario, $valor_total, $descricaoMov);
-    $stmtMovCaixa->execute();
+    $stmtMovCaixa->execute();*/
 
     $stmtPag = $conn->prepare("INSERT INTO VENDA_PAGAMENTOS (ID_Venda, ID_Forma_Pag, Valor, Troco, Quant_Vezes) VALUES (?, ?, ?, ?, ?)");
     $trocoCalculado = max(0, $total_pago - $valor_total);

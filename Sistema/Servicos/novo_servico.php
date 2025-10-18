@@ -164,13 +164,13 @@ include DEV_PATH . "Exec/validar_acesso.php";
                                 campoIdCliente.value = data.id_cliente;
                                 campoCPFPaciente.value = documento;
                                 campoNomeCliente.value = data.nome_cliente;
-                                campoNomeCliente.readOnly = true;
+                                //campoNomeCliente.readOnly = true;
                                 campoDataNascimento.value = data.data_nascimento;
-                                campoDataNascimento.readOnly = true;
+                                //campoDataNascimento.readOnly = true;
                                 checkAgeAndToggleResponsibleField(data.data_nascimento);
                                 if (data.sexo) 
                                     document.querySelector(`input[name="sexo_paciente"][value="${data.sexo}"]`).checked = true;
-                                radiosSexo.forEach(radio => radio.disabled = true);
+                                //radiosSexo.forEach(radio => radio.disabled = true);
                                 mostrarToast('Cliente encontrado e selecionado!', 'success');
                             }
                             else {

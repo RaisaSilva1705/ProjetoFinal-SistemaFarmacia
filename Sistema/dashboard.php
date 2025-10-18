@@ -22,7 +22,24 @@ $clientesAtivos = $conn->query("SELECT COUNT(ID_Cliente) as total FROM CLIENTES 
 $totalEstoqueBaixo = $conn->query("SELECT COUNT(*) AS total_baixo FROM (SELECT P.Quant_Minima, SUM(E.Quantidade) AS Quantidade_Total FROM PRODUTOS P LEFT JOIN LOTES L ON P.ID_Produto = L.ID_Produto LEFT JOIN ESTOQUE E ON L.ID_Lote = E.ID_Lote WHERE P.Status = 'Ativo' GROUP BY P.ID_Produto, P.Quant_Minima) AS subquery WHERE Quantidade_Total < Quant_Minima")->fetch_assoc()['total_baixo'] ?? 0;
 
 // Box: Últimas Movimentações (sem alteração)
-$resultMovimentacoes = $conn->query("SELECT Tipo, Valor, Descricao FROM MOVIMENTACOES_CAIXA ORDER BY Data_Movimentacao DESC LIMIT 5");
+$sql_movimentacoes_combinadas = "
+    (SELECT 
+        'Entrada' AS Tipo, 
+        Valor_Total AS Valor, 
+        CONCAT('Venda #', ID_Venda) AS Descricao, 
+        DataHora_Venda AS Data_Ordenacao 
+     FROM VENDAS)
+    UNION ALL
+    (SELECT 
+        Tipo, 
+        Valor, 
+        Descricao, 
+        Data_Movimentacao AS Data_Ordenacao 
+     FROM MOVIMENTACOES_CAIXA)
+    ORDER BY Data_Ordenacao DESC 
+    LIMIT 5";
+
+$resultMovimentacoes = $conn->query($sql_movimentacoes_combinadas);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">

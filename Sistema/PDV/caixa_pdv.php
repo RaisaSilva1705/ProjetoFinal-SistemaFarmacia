@@ -70,6 +70,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
             $_SESSION['ID_CaixaAberto'] = $stmt->insert_id;
             $_SESSION['ID_Caixa'] = $id_caixa;
             $_SESSION['Saldo_Inicial'] = $saldoInicial;
+
+            $desc_mov = "Suprimento - Abertura de Caixa";
+            $sqlMov = "INSERT INTO MOVIMENTACOES_CAIXA (ID_Caixa, ID_Funcionario, Tipo, Valor, Descricao) VALUES (?, ?, 'Entrada', ?, ?)";
+            $stmtMov = $conn->prepare($sqlMov);
+            $stmtMov->bind_param("iids", $id_caixa, $id_funcionario, $saldoInicial, $desc_mov);
+            $stmtMov->execute();
             
             registrar_log($conn, $_SESSION['ID_Usuario'], "Abriu o caixa {$_SESSION['ID_CaixaAberto']} com R$ {$saldoInicial}. (ID Caixa: {$id_caixa})");
             header("Location: pdv.php");

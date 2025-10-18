@@ -100,8 +100,8 @@ while ($row = $resultMetodos->fetch_assoc()){
     }
 }
 
-$dinheiroEmCaixa = ($saldoInicial + $total_entradas + $valor_dinheiro) - ($total_saidas + $troco);
-$saldoFinal = ($saldoInicial + $total_entradas + $valor_total) - ($total_saidas + $troco);
+$dinheiroEmCaixa = ($total_entradas + $valor_dinheiro) - ($total_saidas + $troco);
+$saldoFinal = ($total_entradas + $valor_total) - ($total_saidas + $troco);
 $dataAtual = date('Y-m-d H:i:s');
 
 
@@ -120,7 +120,7 @@ if (isset($_GET['acao']) && $_GET['acao'] == 'confirmar_fechamento') {
     // 5. Fecha o caixa aberto
     $sql = "UPDATE CAIXAS_ABERTOS SET Data_Fechamento = ?, Saldo_Final = ?, Valor_Vendido = ? WHERE ID_CaixaAberto = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sddi", $dataAtual, $dinheiroEmCaixa, $valor_total, $id_caixaAberto);
+    $stmt->bind_param("sddi", $dataAtual, $saldoFinal, $valor_total, $id_caixaAberto);
     
     if($stmt->execute() && $stmtFechar->execute()){
         $modo_inativo = 'Inativo';
@@ -203,12 +203,12 @@ $conn->close();
                                 <hr>
                                 <div class="small">
                                     Dinheiro em Caixa: R$ <?= number_format($dinheiroEmCaixa, 2, ',', '.') ?><br>
-                                    (Abert. + Dinheiro + Entradas.) - (Saídas + Troco)
+                                    (Entradas + Vendas em Dinheiro) - (Saídas + Troco)
                                 </div>
                                 <hr>
                                 <div class="small">
                                     Saldo Final: R$ <?= number_format($saldoFinal, 2, ',', '.') ?><br>
-                                    (Abert. + Total Vendido + Entradas) - (Sáidas + Troco)
+                                    (Entradas + Total Vendido) - (Saídas + Troco)
                                 </div>
                                 <hr>
                                 <div class="small">
