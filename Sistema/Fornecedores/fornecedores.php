@@ -15,7 +15,7 @@ $order_dir = "ASC";
 $status_filter = ""; 
 
 $busca_nome = $_GET['busca_nome'] ?? '';
-$status = $_GET['status'] ?? '';
+$status = (isset($_GET['status']) && $_GET['status'] !== 'Todos') ? $_GET['status'] : '';
 
 $sql = "SELECT ID_Fornecedor, Nome_Fantasia, CNPJ, Tel, Email, Status FROM FORNECEDORES";
 
@@ -87,7 +87,7 @@ $result = $stmt->get_result();
                                 <div class="col-md-4">
                                     <label for="status" class="form-label">Status</label>
                                     <select name="status" id="status" class="form-select">
-                                        <option value="">Todos</option>
+                                        <option value="Todos">Todos</option>
                                         <option value="Ativo" <?= $status == 'Ativo' ? 'selected' : '' ?>>Ativo</option>
                                         <option value="Inativo" <?= $status == 'Inativo' ? 'selected' : '' ?>>Inativo</option>
                                     </select>
@@ -122,7 +122,7 @@ $result = $stmt->get_result();
                                             </td>
                                             <td class="text-center">
                                                 <div class="d-flex justify-content-center gap-2">
-                                                    <a href="detalhes_fornecedor.php?id=<?= $row['ID_Fornecedor'] ?>" class="btn btn-success btn-sm" title="Ver Detalhes"><i class="bi bi-eye-fill"></i></a>
+                                                    <a href="detalhes_fornecedor.php?id=<?= $row['ID_Fornecedor'] ?>" class="btn btn-info btn-sm" title="Ver Detalhes"><i class="bi bi-eye-fill"></i></a>
                                                     <a href="editar_fornecedor.php?id=<?= $row['ID_Fornecedor'] ?>" class="btn btn-warning btn-sm" title="Editar"><i class="bi bi-pencil-fill"></i></a>
                                                     <button type="button" class="btn btn-sm <?= $row['Status'] == 'Ativo' ? 'btn-danger' : 'btn-success' ?>"
                                                             title="<?= $row['Status'] == 'Ativo' ? 'Inativar' : 'Ativar' ?>"
@@ -167,9 +167,38 @@ $result = $stmt->get_result();
             </div>
         </div>
 
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-truck"></i> Gestão de Fornecedores</h4>
+            <hr>
+            <p>Esta tela centraliza o cadastro de todos os seus parceiros comerciais e distribuidores. Manter esta lista organizada é fundamental para o controle de compras, a gestão de estoque e o relacionamento com a indústria.</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtros de Busca</h6>
+            <p>Utilize os campos no topo da página para localizar um fornecedor rapidamente:</p>
+            <ul>
+                <li><strong>Buscar por Nome Fantasia ou CNPJ:</strong> Digite o nome ou o CNPJ do fornecedor que deseja encontrar.</li>
+                <li><strong>Status:</strong> Filtre entre fornecedores <strong>Ativos</strong> e <strong>Inativos</strong>.</li>
+            </ul>
+
+            <h6><i class="bi bi-plus-circle-fill"></i> Novo Fornecedor e Relatório</h6>
+            <ul>
+                <li><strong>Novo Fornecedor:</strong> Leva à tela de cadastro para adicionar um novo parceiro à sua base.</li>
+                <li><strong>Ver Relatório:</strong> Acessa a área de relatórios focada em fornecedores, com análises de compras e desempenho.</li>
+            </ul>
+
+            <h6><i class="bi bi-pencil-fill"></i> Ações na Lista</h6>
+            <p>Para cada fornecedor listado, as seguintes ações estão disponíveis:</p>
+            <ul>
+                <li><i class="bi bi-eye-fill text-success"></i> <strong>Ver Detalhes:</strong> Abre uma tela com um perfil completo do fornecedor, incluindo todos os produtos que ele fornece para a sua farmácia.</li>
+                <li><i class="bi bi-pencil-fill text-warning"></i> <strong>Editar:</strong> Abre o formulário de cadastro preenchido, permitindo a alteração de qualquer dado do fornecedor.</li>
+                <li><i class="bi bi-pause-circle-fill text-danger"></i> / <i class="bi bi-play-circle-fill text-success"></i> <strong>Inativar/Ativar:</strong> Altera o status do fornecedor. Um fornecedor inativo não pode ser associado a novos produtos.</li>
+            </ul>
+            <p class="alert alert-warning mt-3"><strong>Regra de Negócio:</strong> Por segurança, o sistema não permitirá inativar um fornecedor se ele ainda estiver associado a algum produto cadastrado no seu sistema. É necessário primeiro desvincular os produtos deste fornecedor.</p>
+        </div>
+
         <?php include_once DEV_PATH . 'Views/toast.php'?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             const modalConfirmStatus = document.getElementById('modalConfirmStatus');
             modalConfirmStatus.addEventListener('show.bs.modal', function (event) {

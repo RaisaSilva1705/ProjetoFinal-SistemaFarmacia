@@ -88,9 +88,39 @@ include DEV_PATH . "Exec/validar_acesso.php";
             <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
 
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-arrow-return-left"></i> Registrar Devolução de Cliente</h4>
+            <hr>
+            <p>Esta tela gerencia o processo de devolução de produtos por parte de um cliente. O fluxo é projetado para ser seguro e garantir que todas as etapas sejam registradas corretamente no sistema.</p>
+
+            <h6><i class="bi bi-search"></i> Passo 1: Localizar a Venda Original</h6>
+            <p>Para iniciar uma devolução, é <strong>obrigatório</strong> localizar a transação original. Digite o <strong>número da venda</strong> (que pode ser encontrado no cupom do cliente) no campo de busca e clique em "Buscar Venda".</p>
+            <p>O sistema carregará as informações da venda e a lista de produtos que foram comprados.</p>
+
+            <h6><i class="bi bi-list-check"></i> Passo 2: Selecionar Itens para Devolver</h6>
+            <p>Na tabela de itens, configure a devolução:</p>
+            <ol>
+                <li><strong>Marque a caixa "Devolver?"</strong> para os produtos que o cliente está devolvendo. Isso habilitará os outros campos da linha.</li>
+                <li><strong>Qtd. a Devolver:</strong> Informe a quantidade de unidades que estão sendo devolvidas.</li>
+                <li><strong>Motivo:</strong> Selecione o motivo da devolução.</li>
+                <li><strong>Retornar ao Estoque?:</strong> Mantenha esta caixa marcada se o produto estiver em perfeitas condições e puder ser vendido novamente. Desmarque-a se o produto estiver avariado, vencido ou impróprio para venda (nesse caso, ele não voltará para o estoque disponível).</li>
+            </ol>
+
+            <h6><i class="bi bi-arrow-repeat"></i> Passo 3: Resolução</h6>
+            <p>Escolha como o cliente será compensado pela devolução:</p>
+            <ul>
+                <li><strong>Reembolso:</strong> O valor será devolvido ao cliente em dinheiro. Esta opção exige que um caixa esteja aberto no sistema, pois registrará uma saída de dinheiro (sangria).</li>
+                <li><strong>Gerar Crédito em Loja:</strong> O valor será adicionado como saldo na conta do cliente para ser usado em compras futuras. Esta opção só está disponível se o cliente foi identificado na venda original.</li>
+            </ul>
+
+            <h6><i class="bi bi-check-circle-fill"></i> Passo 4: Confirmar</h6>
+            <p>Após preencher todos os dados, clique em <strong>"Confirmar Devolução"</strong>. O sistema registrará a devolução, ajustará o estoque (se aplicável) e processará o reembolso ou o crédito.</p>
+        </div>
+
         <?php include_once DEV_PATH . 'Views/toast.php'; ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const btnBuscar = document.getElementById('btn_buscar_venda');

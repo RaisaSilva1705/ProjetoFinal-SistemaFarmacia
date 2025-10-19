@@ -157,6 +157,24 @@ $stmt_hist->close();
             <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
         
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-pie-chart-fill"></i> Análise de Categoria de Despesa</h4>
+            <hr>
+            <p>Esta tela oferece um mergulho profundo nos gastos de uma categoria específica, ajudando você a entender para onde o dinheiro está indo e a identificar padrões de custo ao longo do tempo.</p>
+
+            <h6><i class="bi bi-bar-chart-line-fill"></i> Indicadores da Categoria</h6>
+            <p>Os cards no topo da página resumem o comportamento de gastos para esta categoria, considerando todo o histórico de pagamentos:</p>
+            <ul>
+                <li><strong>Total Gasto:</strong> A soma de todos os pagamentos já registrados nesta categoria.</li>
+                <li><strong>Média por Pagamento:</strong> O valor médio de cada lançamento feito.</li>
+                <li><strong>Maior Gasto Único:</strong> O valor do maior pagamento já registrado nesta categoria.</li>
+                <li><strong>Nº de Pagamentos:</strong> A quantidade total de lançamentos registrados.</li>
+            </ul>
+            
+            <h6><i class="bi bi-list-ol"></i> Histórico de Pagamentos</h6>
+            <p>A tabela principal exibe um histórico detalhado de todos os pagamentos já realizados e classificados nesta categoria, ordenados do mais recente para o mais antigo. Use esta lista para auditar gastos e conferir lançamentos passados.</p>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
     </body>
 </html>

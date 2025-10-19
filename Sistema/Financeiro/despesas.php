@@ -13,7 +13,7 @@ include DEV_PATH . "Exec/validar_acesso.php";
 // Lógica de Filtros (inicial)
 $data_inicio = $_GET['data_inicio'] ?? date('Y-m-01');
 $data_fim = $_GET['data_fim'] ?? date('Y-m-d');
-$status_despesa = $_GET['status'] ?? '';
+$status_despesa = (isset($_GET['status']) && $_GET['status'] !== 'Todos') ? $_GET['status'] : '';
 
 // Query para buscar as despesas
 $sql = "SELECT 
@@ -87,7 +87,7 @@ $despesas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                 <div class="col-md-2">
                                     <label for="status">Status:</label>
                                     <select name="status" class="form-select">
-                                        <option value="">Todos</option>
+                                        <option value="Todos">Todos</option>
                                         <option value="Pendente" <?= $status_despesa == 'Pendente' ? 'selected' : '' ?>>Pendente</option>
                                         <option value="Paga" <?= $status_despesa == 'Paga' ? 'selected' : '' ?>>Paga</option>
                                     </select>
@@ -152,18 +152,6 @@ $despesas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
 
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
-            </div>
-        </div>
-
         <!-- Modal para cancelar despesa -->
         <div class="modal fade" id="confirmCancelModal" tabindex="-1" aria-labelledby="modalLabelCancel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -185,8 +173,37 @@ $despesas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             </div>
         </div>
 
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-wallet2"></i> Gestão de Despesas (Contas a Pagar e Pagas)</h4>
+            <hr>
+            <p>Esta é a sua central de controle de contas a pagar. Nela, você pode registrar, gerenciar e acompanhar todas as despesas operacionais da farmácia, garantindo que suas obrigações financeiras estejam sempre em dia.</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtros de Busca</h6>
+            <p>Utilize os filtros para encontrar lançamentos específicos:</p>
+            <ul>
+                <li><strong>Período de: / Até:</strong> Defina o intervalo de datas com base na <strong>data de registro</strong> da despesa no sistema.</li>
+                <li><strong>Status:</strong> Filtre entre despesas que estão <strong>Pagas</strong> ou <strong>Pendentes</strong>.</li>
+            </ul>
+
+            <h6><i class="bi bi-plus-circle-fill"></i> Ações Principais</h6>
+            <ul>
+                <li><strong>Ver Relatório DRE:</strong> Atalho para o Relatório Financeiro, onde o total das despesas pagas impacta o cálculo do seu lucro.</li>
+                <li><strong>Nova Despesa:</strong> Abre o formulário para registrar uma nova conta a pagar.</li>
+                <li><strong>Gerenciar Categorias:</strong> Leva à tela de cadastro e edição das categorias de despesas (ex: Aluguel, Salários, Marketing).</li>
+            </ul>
+
+            <h6><i class="bi bi-pencil-fill"></i> Ações na Lista</h6>
+            <p>Para cada despesa listada, as seguintes ações estão disponíveis:</p>
+            <ul>
+                <li><i class="bi bi-pencil-fill text-warning"></i> <strong>Editar:</strong> Permite alterar qualquer informação do lançamento, como descrição, valor, datas ou status.</li>
+                <li><i class="bi bi-x-circle text-danger"></i> <strong>Cancelar Lançamento:</strong> Remove o registro da despesa do sistema. Esta ação é útil para corrigir lançamentos feitos por engano.</li>
+            </ul>
+        </div>
+
+        <?php include_once DEV_PATH . 'Views/toast.php'; ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             const confirmCancelModal = document.getElementById('confirmCancelModal');
             if (confirmCancelModal) {

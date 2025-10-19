@@ -101,6 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         <meta charset="UTF-8">
         <title>Seleção de Caixa</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
     <body class="bg-light">
@@ -162,25 +163,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
                     </div>
                 </div>
             </div>
-
-            <!-- Footer -->
             <?php include_once DEV_PATH . 'Views/footer.php'?>
         </div>
 
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
-            </div>
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-box-arrow-right"></i> Abertura de Caixa</h4>
+            <hr>
+            <p>Esta é a primeira etapa para iniciar as operações de venda do dia ou do seu turno. O preenchimento correto das informações aqui é fundamental para a conferência no final do expediente.</p>
+            
+            <h6><i class="bi bi-123"></i> Passo a Passo para Abrir o Caixa</h6>
+            <ol>
+                <li><strong>Selecione o Caixa:</strong> Escolha na lista o terminal físico (PDV) que você está operando. Caixas que já estão abertos por outros operadores não podem ser selecionados.</li>
+                <li><strong>Turno:</strong> O sistema seleciona automaticamente o turno (Manhã, Tarde, Noite) com base no horário atual.</li>
+                <li><strong>Saldo Inicial:</strong> Informe o valor exato em dinheiro que está no caixa no início do seu turno (o "fundo de troco"). Este valor é crucial para o fechamento.</li>
+                <li>Clique em <strong>"Abrir Caixa"</strong> para ser direcionado à tela de vendas (PDV).</li>
+            </ol>
+            
+            <p class="alert alert-info">Ao abrir o caixa, o sistema registra automaticamente uma <strong>Entrada (Suprimento)</strong> no valor do Saldo Inicial, garantindo que o seu relatório de fechamento seja preciso.</p>
         </div>
         
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <?php include_once DEV_PATH . 'Views/toast.php'?>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             <?php
             if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {

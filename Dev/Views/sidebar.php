@@ -92,7 +92,7 @@
 
         <a class="nav-item" href="<?php echo SISTEMA_URL ?>Servicos/servicos.php"><i class="bi bi-clipboard2-pulse-fill"></i>Serviços</a>
         
-        <a class="nav-item" href="<?php echo SISTEMA_URL ?>Controlados/dispensacao_controlados.php"><i class="bi bi-shield-lock-fill"></i>Controlados</a>
+        <a class="nav-item" href="<?php echo SISTEMA_URL ?>Controlados/controlados.php"><i class="bi bi-shield-lock-fill"></i>Controlados</a>
 
         <div class="nav-item dropdown">
             <a class="dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-cash-coin"></i>Financeiro</a>

@@ -18,11 +18,6 @@ include DEV_PATH . "Exec/validar_acesso.php";
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
-        <style>
-            select > option:first-child {
-                display: none;
-            }
-        </style>
     </head>
     <body>
         <?php include_once DEV_PATH . 'Views/sidebar.php'; ?>
@@ -264,24 +259,48 @@ include DEV_PATH . "Exec/validar_acesso.php";
                         </div>
                     </form>
                 </div>
+                <?php include_once DEV_PATH . 'Views/footer.php'; ?>
             </div>
-            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
 
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
-            </div>
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-shield-check"></i> Dispensação de Medicamento Controlado</h4>
+            <hr>
+            <p>Esta é uma das telas mais importantes e reguladas do sistema. Ela foi projetada para garantir um registro seguro e completo de toda a venda (dispensação) de medicamentos de controle especial, seguindo as normas da vigilância sanitária.</p>
+            <p>O processo é dividido em 3 etapas e, ao final, gera uma <strong>Pré-Venda</strong> que deve ser levada ao caixa para o pagamento.</p>
+
+            <h6><i class="bi bi-people-fill"></i> Passo 1: Paciente e Comprador</h6>
+            <p>Nesta seção, você identifica as pessoas envolvidas na retirada do medicamento.</p>
+            <ul>
+                <li><strong>Buscar Paciente por CPF:</strong> Se o paciente já for um cliente cadastrado, digite seu CPF para preencher automaticamente seus dados. Se não for, preencha manualmente.</li>
+                <li><strong>Paciente é o Comprador:</strong> Marque esta opção se a pessoa que está comprando é o próprio paciente. Se for um terceiro (cuidador, familiar), desmarque a opção para habilitar e preencher os dados do comprador.</li>
+            </ul>
+
+            <h6><i class="bi bi-file-earmark-medical-fill"></i> Passo 2: Dados da Prescrição</h6>
+            <p>Transcreva cuidadosamente todas as informações da receita médica para o sistema:</p>
+            <ul>
+                <li><strong>Dados do Paciente na Receita:</strong> Confirme o nome, data de nascimento e sexo conforme escritos na receita.</li>
+                <li><strong>Dados da Receita:</strong> Preencha o número da receita, o tipo (Notificação Amarela, Azul, Receita Especial, etc.) e a data em que ela foi emitida pelo médico.</li>
+                <li><strong>Dados do Prescritor:</strong> Insira o nome completo do profissional de saúde, seu conselho (CRM, CRO, etc.), o número do registro e a UF.</li>
+            </ul>
+            <p class="alert alert-danger"><strong>Validade da Receita:</strong> O sistema calcula automaticamente a validade da receita com base no tipo e na data de emissão. Se a receita estiver vencida, o sistema emitirá um alerta e não permitirá prosseguir.</p>
+
+            <h6><i class="bi bi-capsule-pill"></i> Passo 3: Medicamentos da Receita</h6>
+            <ol>
+                <li>Use o campo <strong>"Buscar Medicamento Controlado"</strong> para encontrar o item prescrito.</li>
+                <li>Selecione o <strong>Lote</strong> que será dispensado. O sistema mostrará o estoque e a validade de cada lote disponível.</li>
+                <li>Informe a <strong>Quantidade</strong> de caixas/unidades que serão vendidas.</li>
+                <li>Clique em <strong>"Adicionar"</strong> para incluir o medicamento na lista de dispensação. Repita o processo para todos os medicamentos da receita.</li>
+            </ol>
+
+            <h6><i class="bi bi-receipt"></i> Passo 4: Gerar Pré-Venda</h6>
+            <p>Após adicionar todos os medicamentos, clique no botão <strong>"Salvar Prescrição e Gerar Pré-Venda"</strong>. O sistema salvará todos os dados para fins de auditoria, gerará um código de barras e te redirecionará para a tela de pré-venda, onde você poderá imprimir o cupom para o cliente levar ao caixa e finalizar o pagamento.</p>
         </div>
         
+        <?php include_once DEV_PATH . 'Views/toast.php'; ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 // --- ESTADO DA APLICAÇÃO ---
@@ -590,6 +609,7 @@ include DEV_PATH . "Exec/validar_acesso.php";
                     .then(data => {
                         if (data.sucesso && data.redirectUrl) {
                             mostrarToast('Prescrição salva! Redirecionando para a pré-venda...', 'success');
+                            window.open(`termo_dispensacao.php?id=${data.id_prescricao}`, '_blank');
                             setTimeout(() => {
                                 window.location.href = data.redirectUrl;
                             }, 1500);

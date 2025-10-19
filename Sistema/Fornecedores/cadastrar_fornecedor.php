@@ -37,15 +37,38 @@ $is_edit = false;
                 <div class="container p-5">
                     <?php include '_form_fornecedor.php'; ?>
                 </div>
+
+                <!-- Footer -->
+                <?php include_once DEV_PATH . 'Views/footer.php'?>
             </div>
-        
-            <!-- Footer -->
-            <?php include_once DEV_PATH . 'Views/footer.php'?>
+        </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-building-fill-add"></i> Cadastro de Novo Fornecedor</h4>
+            <hr>
+            <p>Utilize este formulário para registrar um novo parceiro comercial no sistema. O preenchimento correto das informações agiliza o processo de compra e o contato.</p>
+
+            <h6><i class="bi bi-card-list"></i> Dados da Empresa</h6>
+            <p>Preencha as informações fiscais e de contato do fornecedor, como <strong>Nome Fantasia</strong>, <strong>Razão Social</strong>, <strong>CNPJ</strong>, <strong>Telefone</strong> e <strong>Email</strong>.</p>
+
+            <h6><i class="bi bi-geo-alt-fill"></i> Endereço</h6>
+            <p>Preencha os dados de localização do fornecedor.</p>
+            <p class="alert alert-info"><strong>Dica de Agilidade:</strong> Comece digitando o <strong>CEP</strong>. O sistema buscará e preencherá automaticamente os campos de Endereço, Bairro, Cidade e Estado. Você precisará apenas completar o Número e o Complemento.</p>
+
+            <h6><i class="bi bi-info-circle"></i> Informações Adicionais</h6>
+            <ul>
+                <li><strong>Status:</strong> Defina se o fornecedor já estará <strong>Ativo</strong> ou <strong>Inativo</strong> no momento do cadastro.</li>
+                <li><strong>Observações:</strong> Use este campo para qualquer anotação relevante (ex: "Entregas somente às terças-feiras", "Contato principal: João").</li>
+            </ul>
+            
+            <h6><i class="bi bi-check-circle-fill"></i> Salvar</h6>
+            <p>Após preencher os dados, clique em <strong>"Cadastrar Fornecedor"</strong> para concluir.</p>
         </div>
 
         <?php include_once DEV_PATH . 'Views/toast.php'?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             <?php
             if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {

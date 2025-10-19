@@ -157,22 +157,40 @@ $categorias_lista = $conn->query("SELECT ID_Categoria, Categoria FROM CATEGORIAS
                         </div>
                     </div>
                 </div>
+                <?php include_once DEV_PATH . 'Views/footer.php'; ?>
             </div>
-            
-            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
+        </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-box-seam"></i> Relatório de Posição de Estoque</h4>
+            <hr>
+            <p>Este relatório é uma fotografia do seu inventário. Ele mostra a quantidade e o valor de todos os produtos que você possui em estoque, sendo uma ferramenta vital para o controle financeiro e de compras.</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtros de Busca</h6>
+            <ul>
+                <li><strong>Filtrar por Categoria:</strong> Permite analisar o estoque de uma categoria de produtos específica.</li>
+                <li><strong>Filtrar por Status:</strong> Ajuda a focar nos produtos mais importantes:
+                    <ul>
+                        <li><strong>Abaixo do Mínimo:</strong> Lista apenas os produtos que precisam de reposição urgente.</li>
+                        <li><strong>Estoque Normal:</strong> Mostra os produtos com estoque saudável.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h6><i class="bi bi-graph-up"></i> Indicadores de Valor</h6>
+            <p>Os cards no topo da página fornecem uma visão macro do seu inventário:</p>
+            <ul>
+                <li><strong>Valor do Estoque (Custo):</strong> Indica quanto dinheiro sua empresa tem "investido" em produtos parados no estoque, com base no preço de custo.</li>
+                <li><strong>Lucro Bruto Potencial:</strong> Simula o lucro total que você teria se vendesse todo o seu estoque atual, sem considerar outras despesas.</li>
+                <li><strong>Itens em Estoque:</strong> A quantidade de produtos distintos que você possui.</li>
+                <li><strong>Itens Abaixo do Mínimo:</strong> Um alerta rápido sobre quantos produtos precisam de atenção imediata para compra.</li>
+            </ul>
+
+            <h6><i class="bi bi-table"></i> Detalhes do Estoque</h6>
+            <p>A tabela principal detalha a situação de cada produto, mostrando a quantidade atual, a quantidade mínima definida e os valores totais de custo e venda. As linhas destacadas em <strong>vermelho</strong> são aquelas que estão abaixo do estoque mínimo, facilitando a identificação dos itens que precisam ser comprados.</p>
         </div>
         
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="<?= DEV_URL ?>JS/toast.js"></script>
-        <script>
-            <?php
-            if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {
-                $texto = addslashes($_SESSION['msg']['texto']);
-                $tipo = $_SESSION['msg']['tipo'];
-                echo "mostrarToast('{$texto}', '{$tipo}');";
-                unset($_SESSION['msg']);
-            }
-            ?>
-        </script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
     </body>
 </html>

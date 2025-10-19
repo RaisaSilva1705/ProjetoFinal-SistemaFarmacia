@@ -159,6 +159,7 @@ $conn->close();
         <meta charset="UTF-8">
         <title>Relatório - Caixa</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/resumoCaixa.css">
     </head>
@@ -227,14 +228,40 @@ $conn->close();
                     </div>
                 </div>
             </div>
-            
-            <!-- Footer -->
             <?php include_once DEV_PATH . 'Views/footer.php'?>
+        </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-safe2-fill"></i> Fechamento e Conferência de Caixa</h4>
+            <hr>
+            <p>Esta tela é o passo final do seu turno. Ela apresenta um resumo completo de todas as operações realizadas desde a abertura do caixa e guia você no processo de fechamento seguro.</p>
+
+            <h6><i class="bi bi-receipt"></i> Resumo do Caixa</h6>
+            <p>O resumo à esquerda mostra todos os cálculos do sistema:</p>
+            <ul>
+                <li><strong>Saldo Inicial:</strong> O valor que você informou na abertura.</li>
+                <li><strong>Vendas por Meio de Pagamento:</strong> O total recebido em Dinheiro, Crédito, Débito e PIX.</li>
+                <li><strong>Dinheiro em Caixa:</strong> O valor total em <strong>espécie</strong> que o sistema calcula que deve haver na gaveta. A fórmula é: `(Entradas + Vendas em Dinheiro) - (Saídas + Troco)`.</li>
+                <li><strong>Entradas e Saídas:</strong> O total de suprimentos (entradas) e sangrias/reembolsos (saídas) realizados durante o turno.</li>
+            </ul>
+
+            <h6><i class="bi bi-arrow-down-up"></i> Passo 1: Sangria (Retirada de Dinheiro)</h6>
+            <p>Antes de fechar o caixa, você deve registrar a retirada do dinheiro.</p>
+            <ol>
+                <li>Clique no botão <strong>"Sangria"</strong>.</li>
+                <li>O sistema sugerirá a retirada do valor total de "Dinheiro em Caixa". Confirme o valor.</li>
+                <li>Clique em <strong>"Confirmar"</strong>. A página irá recarregar, e o "Dinheiro em Caixa" deverá estar zerado.</li>
+            </ol>
+
+            <h6><i class="bi bi-lock-fill"></i> Passo 2: Confirmar e Fechar Caixa</h6>
+            <p>Somente após o "Dinheiro em Caixa" estar zerado, o botão <strong>"Confirmar e Fechar Caixa Definitivamente"</strong> estará liberado.</p>
+            <p>Ao clicar nele, seu turno será encerrado, o registro de fechamento será salvo para auditoria, e a tela do cliente (se houver) será desativada. Após esta ação, não será mais possível realizar vendas neste caixa até que ele seja aberto novamente.</p>
         </div>
 
         <?php include_once DEV_PATH . 'Views/toast.php'?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             function sangria() {
                 document.getElementById('btnSangria').disabled = true; 

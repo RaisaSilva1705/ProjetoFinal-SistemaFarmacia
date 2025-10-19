@@ -241,36 +241,38 @@ else
                             </table>
                         </div>
                     </div>
-
                 </div>
-            </div>
-            
-            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
-        </div>
-
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
+                <?php include_once DEV_PATH . 'Views/footer.php'; ?>
             </div>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="<?php echo DEV_URL ?>JS/toast.js"></script>
-        <script>
-            <?php
-            if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {
-                $texto = addslashes($_SESSION['msg']['texto']);
-                $tipo = $_SESSION['msg']['tipo'];
-                echo "mostrarToast('{$texto}', '{$tipo}');";
-                unset($_SESSION['msg']);
-            }
-            ?>
-        </script>
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-graph-up-arrow"></i> Relatório Financeiro (DRE)</h4>
+            <hr>
+            <p>Este é o relatório mais importante para a saúde financeira do seu negócio. O <strong>Demonstrativo do Resultado do Exercício (DRE)</strong> mostra de forma clara e estruturada se a farmácia está tendo <strong>lucro ou prejuízo</strong> em um determinado período.</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtro por Período</h6>
+            <p>Utilize os campos de data no topo para definir o período que você deseja analisar. Por padrão, o relatório exibe os resultados do mês atual.</p>
+
+            <h6><i class="bi bi-calculator-fill"></i> Entendendo os Indicadores</h6>
+            <ul>
+                <li><strong>Receita Bruta Total:</strong> A soma de todo o dinheiro que entrou através das vendas, antes de qualquer dedução.</li>
+                <li><strong>Custos + Despesas:</strong> A soma de tudo que saiu para a operação funcionar, incluindo o custo dos produtos vendidos (CMV) e as despesas operacionais (aluguel, salários, etc.).</li>
+                <li><strong>Lucro Líquido:</strong> O resultado final. É o que realmente "sobrou" para o negócio após pagar todos os custos e despesas. Um valor positivo indica lucro; um valor negativo indica prejuízo.</li>
+                <li><strong>Margem Líquida:</strong> A porcentagem da sua receita que se transformou em lucro. É um indicador vital da eficiência e rentabilidade da sua farmácia.</li>
+            </ul>
+
+            <h6><i class="bi bi-table"></i> Lendo o Demonstrativo</h6>
+            <p>A tabela principal detalha o cálculo do Lucro Líquido passo a passo:</p>
+            <ol>
+                <li>Começa com a <strong>Receita Bruta</strong>.</li>
+                <li>Subtrai o <strong>Custo da Mercadoria Vendida (CMV)</strong>, que é o valor de custo dos produtos que você vendeu. O resultado é o <strong>Lucro Bruto</strong>.</li>
+                <li>Do Lucro Bruto, subtrai todas as <strong>Despesas Operacionais</strong> (como contas pagas e perdas de estoque), detalhadas por categoria.</li>
+                <li>O resultado final é o <strong>Lucro Líquido</strong> do período.</li>
+            </ol>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
     </body>
 </html>

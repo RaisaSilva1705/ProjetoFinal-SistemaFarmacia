@@ -198,10 +198,32 @@ $canceladas = array_filter($todas_prevendas, fn($pv) => $pv['Status'] == 'Cancel
                 </div>
             </div>
         </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-list-task"></i> Gerenciamento de Pré-Vendas</h4>
+            <hr>
+            <p>Esta tela funciona como um painel de controle para monitorar o status de todas as pré-vendas geradas no sistema. Ela é dividida em abas para facilitar a organização do fluxo de trabalho.</p>
+
+            <h6><i class="bi bi-clock-history"></i> Abas de Status</h6>
+            <ul>
+                <li><strong>Pendentes:</strong> Lista todas as pré-vendas que foram geradas e estão aguardando o cliente passar no caixa para finalizar o pagamento. Esta é a sua principal aba de trabalho.</li>
+                <li><strong>Finalizadas:</strong> Mostra um histórico de todas as pré-vendas que já foram processadas e concluídas no PDV.</li>
+                <li><strong>Canceladas:</strong> Exibe as pré-vendas que foram canceladas antes da finalização.</li>
+            </ul>
+
+            <h6><i class="bi bi-pencil-fill"></i> Ações Disponíveis (na Aba "Pendentes")</h6>
+            <p>Para cada pré-venda pendente, você pode realizar as seguintes ações:</p>
+            <ul>
+                <li><i class="bi bi-printer-fill text-info"></i> <strong>Reimprimir Cupom:</strong> Gera novamente o cupom com o código de barras, caso o cliente o tenha perdido.</li>
+                <li><i class="bi bi-pencil-fill text-warning"></i> <strong>Editar:</strong> Permite reabrir a pré-venda para adicionar ou remover itens, alterar o cliente ou reaplicar descontos.</li>
+                <li><i class="bi bi-x-circle-fill text-danger"></i> <strong>Cancelar:</strong> Invalida a pré-venda, impedindo que ela seja finalizada no caixa. Esta ação é útil caso o cliente desista da compra.</li>
+            </ul>
+        </div>
         
         <?php include_once DEV_PATH . 'Views/toast.php'; ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             const modalCancelamento = new bootstrap.Modal(document.getElementById('modalConfirmarCancelamento'));
 

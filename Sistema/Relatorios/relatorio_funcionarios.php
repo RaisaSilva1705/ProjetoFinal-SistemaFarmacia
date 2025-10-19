@@ -13,12 +13,30 @@ include DEV_PATH . "Exec/validar_acesso.php";
 $data_inicio = $_GET['data_inicio'] ?? date('Y-m-01');
 $data_fim = $_GET['data_fim'] ?? date('Y-m-d');
 $busca_nome = $_GET['busca_nome'] ?? ''; 
+$ordenar_por = $_GET['ordenar_por'] ?? 'maior_faturamento'; 
+
+$order_by_sql = '';
+switch ($ordenar_por) {
+    case 'melhor_avaliacao':
+        $order_by_sql = "ORDER BY Media_Avaliacoes DESC";
+        break;
+    case 'pior_avaliacao':
+        $order_by_sql = "ORDER BY Media_Avaliacoes ASC";
+        break;
+    case 'menor_faturamento':
+        $order_by_sql = "ORDER BY Faturamento_Total ASC";
+        break;
+    case 'maior_faturamento':
+    default:
+        $order_by_sql = "ORDER BY Faturamento_Total DESC";
+        break;
+}
 
 $sql = "SELECT
             F.Nome, C.Cargo,
             COUNT(DISTINCT V.ID_Venda) AS Total_Vendas,
-            SUM(V.Valor_Total) AS Faturamento_Total,
-            AVG(A.Nota) AS Media_Avaliacoes
+            COALESCE(SUM(V.Valor_Total), 0) AS Faturamento_Total,
+            COALESCE(AVG(A.Nota), 0) AS Media_Avaliacoes
         FROM FUNCIONARIOS F
         LEFT JOIN VENDAS V ON F.ID_Funcionario = V.ID_Funcionario AND DATE(V.DataHora_Venda) BETWEEN ? AND ?
         LEFT JOIN AVALIACOES A ON V.ID_Venda = A.ID_Venda
@@ -32,24 +50,19 @@ if (!empty($busca_nome)) {
     $types .= 's';
     $params[] = "%" . $busca_nome . "%";
 }
-$sql .= " GROUP BY F.ID_Funcionario, F.Nome, C.Cargo ORDER BY Faturamento_Total DESC";
+$sql .= " GROUP BY F.ID_Funcionario, F.Nome, C.Cargo " . $order_by_sql; 
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param($types, ...$params);
 $stmt->execute();
 $funcionarios_ranking = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
-$funcionario_destaque = ['Nome' => 'N/A', 'Faturamento_Total' => 0];
-$faturamento_total_periodo = 0;
-$total_vendas_periodo = 0;
-
-if (count($funcionarios_ranking) > 0) {
-    $funcionario_destaque = $funcionarios_ranking[0];
-    $faturamento_total_periodo = array_sum(array_column($funcionarios_ranking, 'Faturamento_Total'));
-    $total_vendas_periodo = array_sum(array_column($funcionarios_ranking, 'Total_Vendas'));
-}
-
+// O restante do seu PHP de cálculo de KPIs continua igual e correto
+$faturamento_total_periodo = array_sum(array_column($funcionarios_ranking, 'Faturamento_Total'));
+$total_vendas_periodo = array_sum(array_column($funcionarios_ranking, 'Total_Vendas'));
 $ticket_medio_venda = ($total_vendas_periodo > 0) ? $faturamento_total_periodo / $total_vendas_periodo : 0;
+// Pega o primeiro do ranking (que agora pode ser por faturamento ou avaliação)
+$funcionario_destaque = count($funcionarios_ranking) > 0 ? $funcionarios_ranking[0] : ['Nome' => 'N/A', 'Faturamento_Total' => 0];
 ?>
 
 <!DOCTYPE html>
@@ -80,9 +93,18 @@ $ticket_medio_venda = ($total_vendas_periodo > 0) ? $faturamento_total_periodo /
                     <div class="card card-body mb-4 no-print">
                         <form method="GET" action="relatorio_funcionarios.php">
                             <div class="row g-3 align-items-end">
-                                <div class="col-md-3"><label for="data_inicio">Período de:</label><input type="date" name="data_inicio" class="form-control" value="<?= htmlspecialchars($data_inicio) ?>"></div>
-                                <div class="col-md-3"><label for="data_fim">Até:</label><input type="date" name="data_fim" class="form-control" value="<?= htmlspecialchars($data_fim) ?>"></div>
-                                <div class="col-md-4"><label for="busca_nome">Buscar Funcionário:</label><input type="text" name="busca_nome" class="form-control" placeholder="Digite o nome..." value="<?= htmlspecialchars($busca_nome) ?>"></div>
+                                <div class="col-md-2"><label for="data_inicio">Período de:</label><input type="date" name="data_inicio" class="form-control" value="<?= htmlspecialchars($data_inicio) ?>"></div>
+                                <div class="col-md-2"><label for="data_fim">Até:</label><input type="date" name="data_fim" class="form-control" value="<?= htmlspecialchars($data_fim) ?>"></div>
+                                <div class="col-md-3"><label for="busca_nome">Buscar Funcionário:</label><input type="text" name="busca_nome" class="form-control" placeholder="Digite o nome..." value="<?= htmlspecialchars($busca_nome) ?>"></div>
+                                <div class="col-md-3">
+                                    <label for="ordenar_por">Ordenar por:</label>
+                                    <select name="ordenar_por" id="ordenar_por" class="form-select">
+                                        <option value="maior_faturamento" <?= $ordenar_por == 'maior_faturamento' ? 'selected' : '' ?>>Maior Faturamento</option>
+                                        <option value="menor_faturamento" <?= $ordenar_por == 'menor_faturamento' ? 'selected' : '' ?>>Menor Faturamento</option>
+                                        <option value="melhor_avaliacao" <?= $ordenar_por == 'melhor_avaliacao' ? 'selected' : '' ?>>Melhor Avaliação</option>
+                                        <option value="pior_avaliacao" <?= $ordenar_por == 'pior_avaliacao' ? 'selected' : '' ?>>Pior Avaliação</option>
+                                    </select>
+                                </div>
                                 <div class="col-md-2"><button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel-fill"></i> Filtrar</button></div>
                             </div>
                         </form>
@@ -141,11 +163,41 @@ $ticket_medio_venda = ($total_vendas_periodo > 0) ? $faturamento_total_periodo /
                         </div>
                     </div>
                 </div>
+                <?php include_once DEV_PATH . 'Views/footer.php'; ?>
             </div>
-            
-            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
+        </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-person-check-fill"></i> Relatório de Desempenho de Funcionários</h4>
+            <hr>
+            <p>Este relatório permite analisar e comparar a performance da sua equipe de vendas. Utilize esta ferramenta para identificar funcionários destaque, reconhecer bons desempenhos e encontrar oportunidades de treinamento.</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtros de Análise</h6>
+            <ul>
+                <li><strong>Período (De/Até):</strong> Defina o intervalo de datas para a análise.</li>
+                <li><strong>Buscar Funcionário:</strong> Filtre o relatório para ver o desempenho de um único funcionário.</li>
+                <li><strong>Ordenar por:</strong> Permite classificar o ranking de funcionários por diferentes critérios. Use esta opção para obter diferentes perspectivas sobre o desempenho, como identificar quem mais vende (faturamento) ou quem melhor atende (avaliação).</li>
+            </ul>
+
+            <h6><i class="bi bi-bar-chart-line-fill"></i> Indicadores Gerais da Equipe</h6>
+            <p>Os cards no topo da página fornecem um resumo do desempenho de toda a equipe no período filtrado:</p>
+            <ul>
+                <li><strong>Faturamento Total:</strong> A soma de todas as vendas realizadas pela equipe.</li>
+                <li><strong>Funcionário Destaque:</strong> O vendedor que gerou o maior faturamento no período.</li>
+                <li><strong>Total de Vendas:</strong> O número total de transações concluídas pela equipe.</li>
+                <li><strong>Ticket Médio por Venda:</strong> O valor médio de cada venda realizada, um indicador da qualidade do atendimento e da capacidade de agregar valor.</li>
+            </ul>
+
+            <h6><i class="bi bi-award-fill"></i> Ranking de Funcionários</h6>
+            <p>A tabela principal classifica os funcionários com base no <strong>faturamento total</strong>, do maior para o menor. Para cada um, são apresentadas as seguintes métricas:</p>
+            <ul>
+                <li><strong>Nº de Vendas:</strong> Quantas transações o funcionário realizou.</li>
+                <li><strong>Faturamento Total:</strong> O valor total gerado por suas vendas.</li>
+                <li><strong>Avaliação Média:</strong> A nota média recebida dos clientes nos atendimentos, variando de 1 (Péssimo) a 5 (Excelente). Esta é uma métrica crucial da qualidade do serviço prestado.</li>
+            </ul>
         </div>
         
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
     </body>
 </html>

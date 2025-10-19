@@ -36,7 +36,7 @@ $where_sql = count($where_clauses) > 0 ? 'WHERE ' . implode(' AND ', $where_clau
 
 $sql = "SELECT 
             p.ID_Promocao, p.Descricao, p.Tipo, p.Data_Inicio, p.Data_Fim, p.Status,
-            GROUP_CONCAT(prod.Nome SEPARATOR ', ') AS Produtos
+            GROUP_CONCAT(DISTINCT prod.Nome SEPARATOR ', ') AS Produtos
         FROM PROMOCOES p
         LEFT JOIN PROMOCOES_ITENS pi ON p.ID_Promocao = pi.ID_Promocao
         LEFT JOIN PRODUTOS prod ON pi.ID_Produto = prod.ID_Produto
@@ -126,6 +126,7 @@ function traduzirTipoPromocao($tipo) {
                                     <tr>
                                         <th>Descrição</th>
                                         <th>Tipo</th>
+                                        <th>Produtos</th>
                                         <th>Vigência</th>
                                         <th class="text-center">Status</th>
                                         <th class="text-center">Ações</th>
@@ -135,37 +136,40 @@ function traduzirTipoPromocao($tipo) {
                                     <?php if (count($promocoes) > 0): ?>
                                         <?php foreach ($promocoes as $promo): ?>
                                             <tr>
-                                                <td><?php echo htmlspecialchars($promo['Descricao']); ?></td>
+                                                <td><strong><?php echo htmlspecialchars($promo['Descricao']); ?></strong></td>
+                                                <td><span class="badge bg-info"><?php echo traduzirTipoPromocao($promo['Tipo']); ?></span></td>
                                                 <td>
-                                                    <span class="badge bg-info"><?php echo traduzirTipoPromocao($promo['Tipo']); ?></span>
+                                                    <small class="text-muted">
+                                                        <?php 
+                                                            $produtos = $promo['Produtos'] ?? 'Nenhum produto associado.';
+                                                            if (strlen($produtos) > 50)
+                                                                echo htmlspecialchars(substr($produtos, 0, 50)) . '...';
+                                                            else 
+                                                                echo htmlspecialchars($produtos);
+                                                        ?>
+                                                    </small>
                                                 </td>
                                                 <td>
                                                     <?php 
                                                         echo date('d/m/Y', strtotime($promo['Data_Inicio']));
-                                                        echo $promo['Data_Fim'] ? ' - ' . date('d/m/Y', strtotime($promo['Data_Fim'])) : ' - Sem data final';
+                                                        echo $promo['Data_Fim'] ? ' - ' . date('d/m/Y', strtotime($promo['Data_Fim'])) : ' - Indeterminado';
                                                     ?>
                                                 </td>
                                                 <td class="text-center">
-                                                    <?php if ($promo['Status'] == 'Ativo'): ?>
-                                                        <span class="badge bg-success">Ativa</span>
-                                                    <?php else: ?>
-                                                        <span class="badge bg-secondary">Inativa</span>
-                                                    <?php endif; ?>
+                                                    <span class="badge <?= $promo['Status'] == 'Ativo' ? 'bg-success' : 'bg-danger' ?>"><?= $promo['Status'] ?></span>
                                                 </td>
                                                 <td class="text-center">
                                                     <a href="editar_promocao.php?id=<?php echo $promo['ID_Promocao']; ?>" class="btn btn-sm btn-warning" title="Editar"><i class="bi bi-pencil"></i></a>
-                                                    <?php if ($promo['Status'] == 'Ativo'): ?>
-                                                        <a href="processa_status_promocao.php?id=<?php echo $promo['ID_Promocao']; ?>&acao=inativar" class="btn btn-sm btn-danger" title="Inativar" onclick="return confirm('Tem certeza que deseja inativar esta promoção?')"><i class="bi bi-pause-circle"></i></a>
-                                                    <?php else: ?>
-                                                        <a href="processa_status_promocao.php?id=<?php echo $promo['ID_Promocao']; ?>&acao=ativar" class="btn btn-sm btn-success" title="Ativar" onclick="return confirm('Tem certeza que deseja ativar esta promoção?')"><i class="bi bi-play-circle"></i></a>
-                                                    <?php endif; ?>
+                                                    <button type="button" class="btn btn-sm <?= $promo['Status'] == 'Ativo' ? 'btn-danger' : 'btn-success' ?>" 
+                                                            onclick="abrirModalStatus(<?= $promo['ID_Promocao'] ?>, '<?= htmlspecialchars($promo['Descricao']) ?>', '<?= $promo['Status'] ?>')"
+                                                            title="<?= $promo['Status'] == 'Ativo' ? 'Inativar' : 'Ativar' ?>">
+                                                        <i class="bi <?= $promo['Status'] == 'Ativo' ? 'bi-pause-circle' : 'bi-play-circle' ?>"></i>
+                                                    </button>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php else: ?>
-                                        <tr>
-                                            <td colspan="5" class="text-center p-4">Nenhuma promoção cadastrada.</td>
-                                        </tr>
+                                        <tr><td colspan="6" class="text-center p-4">Nenhuma promoção encontrada para os filtros selecionados.</td></tr>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
@@ -177,10 +181,72 @@ function traduzirTipoPromocao($tipo) {
             <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
 
+        <div class="modal fade" id="modalConfirmStatus" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header"><h5 class="modal-title">Confirmar Alteração</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body"><p id="confirmText"></p></div>
+                    <div class="modal-footer">
+                        <a href="#" id="btnConfirmStatus" class="btn btn-primary">Confirmar</a>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-tag-fill"></i> Gestão de Promoções</h4>
+            <hr>
+            <p>Esta é a sua central de marketing, onde você pode criar, gerenciar e analisar todas as promoções e ofertas da sua farmácia. Um bom gerenciamento de promoções pode aumentar significativamente suas vendas e a fidelidade dos clientes.</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtros de Busca</h6>
+            <p>Utilize os filtros para encontrar uma promoção específica de forma rápida:</p>
+            <ul>
+                <li><strong>Buscar por Descrição:</strong> Digite uma palavra-chave da descrição da promoção.</li>
+                <li><strong>Tipo:</strong> Filtre por um tipo específico de promoção (ex: Leve X, Pague Y).</li>
+                <li><strong>Status:</strong> Filtre entre promoções <strong>Ativas</strong> (em vigor no PDV) e <strong>Inativas</strong>.</li>
+            </ul>
+
+            <h6><i class="bi bi-plus-circle-fill"></i> Nova Promoção</h6>
+            <p>Clique no botão <strong>"Nova Promoção"</strong> para ser direcionado ao construtor de promoções, onde você poderá definir as regras de uma nova oferta.</p>
+
+            <h6><i class="bi bi-pencil-fill"></i> Ações na Lista</h6>
+            <p>Para cada promoção listada, as seguintes ações estão disponíveis:</p>
+            <ul>
+                <li><i class="bi bi-pencil-fill text-warning"></i> <strong>Editar:</strong> Permite alterar todas as regras e informações de uma promoção existente.</li>
+                <li><i class="bi bi-pause-circle-fill text-danger"></i> / <i class="bi bi-play-circle-fill text-success"></i> <strong>Inativar/Ativar:</strong> Altera o status da promoção. Uma promoção inativa não será aplicada automaticamente no PDV.</li>
+            </ul>
+            <p class="alert alert-info mt-3"><strong>Lembrete:</strong> O sistema possui um evento automático que inativa as promoções cuja data final já passou, garantindo que ofertas expiradas não sejam aplicadas.</p>
+        </div>
+
         <?php include_once DEV_PATH . 'Views/toast.php'; ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="<?php echo DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
+            const modalStatus = new bootstrap.Modal(document.getElementById('modalConfirmStatus'));
+            function abrirModalStatus(id, nome, statusAtual) {
+                const confirmText = document.getElementById('confirmText');
+                const btnConfirm = document.getElementById('btnConfirmStatus');
+                let acao = '';
+                
+                if (statusAtual === 'Ativo') {
+                    acao = 'inativar';
+                    confirmText.textContent = `Tem certeza que deseja INATIVAR a promoção "${nome}"?`;
+                    btnConfirm.className = 'btn btn-danger';
+                    btnConfirm.textContent = 'Sim, Inativar';
+                } 
+                else {
+                    acao = 'ativar';
+                    confirmText.textContent = `Tem certeza que deseja ATIVAR a promoção "${nome}"?`;
+                    btnConfirm.className = 'btn btn-success';
+                    btnConfirm.textContent = 'Sim, Ativar';
+                }
+                
+                btnConfirm.href = `processa_status_promocao.php?id=${id}&acao=${acao}`;
+                modalStatus.show();
+            }
+
             <?php
             if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {
                 $texto = addslashes($_SESSION['msg']['texto']);

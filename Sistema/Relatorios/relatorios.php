@@ -153,11 +153,44 @@ include DEV_PATH . "Exec/validar_acesso.php";
                         </div>
                     </div>
                 </div>
+                <?php include_once DEV_PATH . 'Views/footer.php'; ?>
             </div>
-            
-            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
+        </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-graph-up-arrow"></i> Central de Relatórios</h4>
+            <hr>
+            <p>Bem-vindo(a) à Central de Relatórios, o cérebro analítico do seu sistema. Esta página organiza todas as ferramentas de análise em categorias lógicas para ajudá-lo(a) a tomar decisões mais inteligentes e a gerenciar sua farmácia com base em dados concretos.</p>
+            <p>Cada card representa um relatório específico. Clique em <strong>"Acessar Relatório"</strong> para ser direcionado à análise detalhada.</p>
+
+            <h6 class="mt-4"><i class="bi bi-currency-dollar"></i> Análises Estratégicas e Financeiras</h6>
+            <p>Este grupo de relatórios foca na saúde financeira e operacional do negócio.</p>
+            <ul>
+                <li><strong>Relatório Financeiro (DRE):</strong> O mais importante. Mostra se a sua operação está dando lucro ou prejuízo.</li>
+                <li><strong>Relatório de Vendas (PDV):</strong> Fornece o detalhe de cada venda realizada, permitindo auditorias e análises de faturamento.</li>
+                <li><strong>Posição de Estoque:</strong> Apresenta o valor total do seu inventário e alerta sobre produtos que precisam de reposição.</li>
+            </ul>
+
+            <h6 class="mt-4"><i class="bi bi-trophy-fill"></i> Análises de Desempenho</h6>
+            <p>Estes relatórios ajudam a identificar quem e o que está performando melhor.</p>
+            <ul>
+                <li><strong>Desempenho de Produtos:</strong> Descubra seus produtos "campeões" em vendas e rentabilidade.</li>
+                <li><strong>Desempenho de Clientes:</strong> Identifique seus clientes mais valiosos e analise seus padrões de compra.</li>
+                <li><strong>Desempenho de Funcionários:</strong> Compare a performance da sua equipe de vendas com base em faturamento e na qualidade do atendimento (avaliações).</li>
+            </ul>
+
+            <h6 class="mt-4"><i class="bi bi-shield-lock-fill"></i> Auditoria e Conformidade</h6>
+            <p>Este conjunto de relatórios é essencial para a segurança, controle e cumprimento de regulamentações.</p>
+            <ul>
+                <li><strong>Dispensação de Controlados:</strong> Rastreia todas as vendas de medicamentos controlados, vital para auditorias e SNGPC.</li>
+                <li><strong>Atividades do Sistema (Logs):</strong> O "olho que tudo vê". Registra cada ação importante realizada pelos usuários, garantindo total rastreabilidade.</li>
+                <li><strong>Histórico de Caixas:</strong> Fornece um registro detalhado de todos os fechamentos de caixa para conferência financeira.</li>
+                <li><strong>Serviços Farmacêuticos:</strong> Analisa o volume e o faturamento gerado pelos serviços clínicos.</li>
+                <li><strong>Análise de Fornecedores:</strong> Mostra quais parceiros comerciais são mais estratégicos para o seu faturamento.</li>
+            </ul>
         </div>
         
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
     </body>
 </html>

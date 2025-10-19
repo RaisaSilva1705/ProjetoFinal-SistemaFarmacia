@@ -96,11 +96,31 @@ $resultMovimentacoes = $conn->query($sql_movimentacoes_combinadas);
             </div>
             <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-speedometer2"></i> Painel de Controle (Dashboard)</h4>
+            <hr>
+            <p>Esta tela apresenta um resumo em tempo real das principais métricas da sua farmácia, servindo como ponto de partida para suas análises diárias.</p>
+            <h6><i class="bi bi-card-text"></i> Cards de Indicadores</h6>
+            <p>Os quatro cards no topo da página mostram os indicadores mais importantes do dia. <strong>Cada card é clicável</strong> e funciona como um atalho para o relatório detalhado correspondente:</p>
+            <ul>
+                <li><strong>Vendas Hoje:</strong> Leva ao relatório de vendas, já filtrado para o dia atual.</li>
+                <li><strong>Contas a Pagar Hoje:</strong> Leva à tela de despesas, filtrada para mostrar as contas pendentes com vencimento hoje.</li>
+                <li><strong>Clientes Cadastrados:</strong> Leva ao relatório geral de clientes.</li>
+                <li><strong>Estoque Baixo:</strong> Leva à tela de estoque, filtrada para exibir apenas os itens com quantidade abaixo do mínimo.</li>
+            </ul>
+            <h6><i class="bi bi-bar-chart-fill"></i> Gráficos de Desempenho</h6>
+            <p>Os gráficos oferecem uma análise visual rápida sobre a performance da farmácia em diferentes áreas, como vendas ao longo da semana, formas de pagamento mais utilizadas, produtos e categorias mais vendidos, e os horários de maior movimento.</p>
+
+            <h6><i class="bi bi-list-ul"></i> Últimas Movimentações</h6>
+            <p>Este painel exibe uma linha do tempo das 5 operações mais recentes do caixa, incluindo vendas, suprimentos (entradas) e sangrias (saídas), oferecendo uma visão instantânea da atividade financeira.</p>
+        </div>
         
         <?php include_once DEV_PATH . 'Views/toast.php'; ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="<?php echo DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
+        <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const generateColors = (num) => Array.from({length: num}, () => `rgba(${Math.floor(Math.random()*200)}, ${Math.floor(Math.random()*200)}, ${Math.floor(Math.random()*200)}, 0.7)`);

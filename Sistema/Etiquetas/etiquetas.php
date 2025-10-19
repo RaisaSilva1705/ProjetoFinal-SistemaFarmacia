@@ -78,9 +78,37 @@ include DEV_PATH . "Exec/validar_acesso.php";
             <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
 
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-tags-fill"></i> Gerador de Etiquetas de Preço</h4>
+            <hr>
+            <p>Esta ferramenta foi projetada para facilitar a impressão de etiquetas de preço para as gôndolas da sua farmácia. O processo é rápido e permite a personalização do visual das etiquetas para destacar produtos normais e em promoção.</p>
+
+            <h6><i class="bi bi-search"></i> Passo 1: Buscar e Adicionar Produtos</h6>
+            <p>Comece a montar sua folha de impressão buscando os produtos desejados:</p>
+            <ol>
+                <li>Digite o nome ou o código de barras (EAN) do produto no campo de busca.</li>
+                <li>Uma lista de sugestões aparecerá. Clique no produto desejado.</li>
+                <li>O produto será automaticamente adicionado à <strong>"Fila de Impressão"</strong> abaixo.</li>
+            </ol>
+            <p>Repita este processo para todos os produtos para os quais você deseja gerar etiquetas.</p>
+
+            <h6><i class="bi bi-card-list"></i> Passo 2: Configurar a Fila de Impressão</h6>
+            <p>Na tabela "Fila de Impressão", você pode personalizar cada etiqueta individualmente antes de gerar o arquivo final:</p>
+            <ul>
+                <li><strong>Modelo da Etiqueta:</strong> Escolha o visual da etiqueta. Use "Normal" para preços padrão e os modelos coloridos ("Promoção", "Oferta") para destacar itens com descontos. O sistema buscará o preço atual do produto, incluindo qualquer promoção ativa.</li>
+                <li><strong>Tamanho:</strong> Selecione o tamanho físico da etiqueta que melhor se adapta à sua gôndola.</li>
+                <li><strong>Ação:</strong> Clique no ícone de lixeira <i class="bi bi-trash text-danger"></i> para remover um produto da fila.</li>
+            </ul>
+
+            <h6><i class="bi bi-printer-fill"></i> Passo 3: Gerar e Imprimir</h6>
+            <p>Após adicionar e configurar todos os produtos na fila, clique no botão <strong>"Gerar Etiquetas para Impressão"</strong>.</p>
+            <p>Uma nova aba será aberta com as etiquetas formatadas em uma página pronta para impressão. Utilize a função de impressão do seu navegador (geralmente `Ctrl+P` ou `Cmd+P`) para enviar o documento para a impressora.</p>
+        </div>
+
         <?php include_once DEV_PATH . 'Views/toast.php'; ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const campoBusca = document.getElementById('busca_produto');

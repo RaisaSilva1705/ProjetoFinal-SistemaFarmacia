@@ -37,7 +37,8 @@ unset($_SESSION['entrada_xml']);
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Confirmar Entrada de Estoque via XML</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
     <body>
@@ -148,10 +149,35 @@ unset($_SESSION['entrada_xml']);
                         </div>
                     </form>
                 </div>
+                <?php include_once DEV_PATH . 'Views/footer.php'; ?>
             </div>
-            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-check2-square"></i> Revisão da Nota Fiscal (XML)</h4>
+            <hr>
+            <p>Esta tela serve como uma etapa de conferência e ajuste após a importação de um arquivo XML. O sistema já leu a nota, identificou os produtos e agora precisa da sua ajuda para finalizar os detalhes do lote e da precificação.</p>
+
+            <h6><i class="bi bi-exclamation-triangle-fill text-danger"></i> Alerta: Fornecedor não Cadastrado</h6>
+            <p>Se um alerta vermelho aparecer no topo, significa que o CNPJ do fornecedor na nota fiscal não foi encontrado no seu sistema. Você <strong>precisa cadastrá-lo antes de continuar</strong>. Clique no botão <strong>"Cadastrar este Fornecedor"</strong> para abrir a tela de cadastro em uma nova aba.</p>
+
+            <h6><i class="bi bi-list-check"></i> Produtos Encontrados</h6>
+            <p>Esta tabela lista todos os produtos da nota fiscal que o sistema conseguiu encontrar no seu cadastro (pelo código de barras/EAN).</p>
+            <ol>
+                <li><strong>Importar?:</strong> Por padrão, todos os itens vêm marcados. Desmarque a caixa para qualquer item que você não queira dar entrada no estoque.</li>
+                <li><strong>Lote e Validade:</strong> Preencha estas duas informações <strong>obrigatórias</strong> para cada item que será importado.</li>
+                <li><strong>Margem (%) e Preço de Venda:</strong> O sistema preenche o Preço de Venda com base na sua margem de lucro padrão. Você pode ajustar a <strong>Margem</strong> (o preço de venda recalcula) ou o <strong>Preço de Venda</strong> (a margem recalcula), dando total flexibilidade na precificação.</li>
+            </ol>
+            
+            <h6><i class="bi bi-patch-question-fill text-warning"></i> Produtos Não Cadastrados</h6>
+            <p>Se esta seção aparecer, ela listará os produtos da nota que não existem no seu sistema. Você precisa cadastrá-los primeiro. Clique no botão <strong>"Cadastrar"</strong> ao lado de cada item para abrir o formulário de cadastro de produto (já com o nome e EAN pré-preenchidos) em uma nova aba.</p>
+
+            <h6><i class="bi bi-check-circle-fill"></i> Finalizar a Entrada</h6>
+            <p>Após preencher todos os campos obrigatórios e revisar os preços, clique em <strong>"Confirmar e Dar Entrada no Estoque"</strong>. O sistema criará os novos lotes e adicionará as quantidades ao seu inventário.</p>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const tabelaItens = document.getElementById('tabelaItens');

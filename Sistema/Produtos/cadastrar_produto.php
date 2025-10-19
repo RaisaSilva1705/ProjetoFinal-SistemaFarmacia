@@ -53,18 +53,41 @@ $is_edit = false;
                     <h3>Cadastrar novo Produto</h3>
                 </div>
     
-                <!-- Formulário de Cadastro -->
                 <div class="container p-5">
                     <?php include '_form_produto.php'; ?>
                 </div>
+
+                <!-- Footer -->
+                <?php include_once DEV_PATH . 'Views/footer.php'; ?>
             </div>
-            
-            <!-- Footer -->
-            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
+        </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-box-seam-fill"></i> Cadastro de Novo Produto</h4>
+            <hr>
+            <p>Este é o formulário mais detalhado do sistema, usado para registrar um novo item no seu inventário. O preenchimento correto de todas as informações é crucial para a gestão fiscal, de estoque e de vendas.</p>
+
+            <h6><i class="bi bi-card-list"></i> Informações do Produto</h6>
+            <p>Preencha os dados básicos do item:</p>
+            <ul>
+                <li><strong>Nome, Fornecedor, Marca, Categoria e Unidade:</strong> Informações essenciais para identificação e organização.</li>
+                <li><strong>Quantidade Mínima:</strong> Defina o número mínimo de unidades em estoque. Quando a quantidade total for menor que este número, o produto será destacado em vermelho na listagem.</li>
+                <li><strong>Foto do Produto:</strong> Envie uma imagem para facilitar a identificação visual no sistema.</li>
+            </ul>
+
+            <h6><i class="bi bi-capsule-pill"></i> Informações do Medicamento (Campos Dinâmicos)</h6>
+            <p class="alert alert-info"><strong>Funcionalidade Inteligente:</strong> Se você selecionar a <strong>Categoria "Medicamento"</strong>, uma nova seção aparecerá no formulário com campos específicos para medicamentos, como <strong>Princípio Ativo, Tarja, MS e se é Controlado</strong>. Para outros tipos de produto, esta seção fica oculta.</p>
+
+            <h6><i class="bi bi-receipt"></i> Informações Fiscais</h6>
+            <p>Esta seção é de extrema importância para a correta emissão de notas e para a conformidade fiscal do seu negócio. Preencha os campos como <strong>NCM, EAN/GTIN e os códigos CST</strong> com base nas informações fornecidas pelo seu contador ou pelo fabricante do produto.</p>
+
+            <h6><i class="bi bi-check-circle-fill"></i> Salvar</h6>
+            <p>Após preencher todos os dados obrigatórios, clique em <strong>"Cadastrar Produto"</strong> para finalizar.</p>
         </div>
 
         <?php include_once DEV_PATH . 'Views/toast.php'; ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
             document.addEventListener("DOMContentLoaded", function () {

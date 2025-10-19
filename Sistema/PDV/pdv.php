@@ -445,6 +445,7 @@ if (isset($_POST['codigo'])) {
                                 <button class="btn btn-danger m-2" onclick="selecionarFuncionalidade('saida')">Sangria (Saída de Dinheiro)</button>
                                 <button class="btn btn-success m-2" onclick="selecionarFuncionalidade('entrada')">Entrada de Dinheiro</button>
                                 <a href="../Devolucoes/devolucao_cliente.php" class="btn btn-warning m-2">Devolução de Produto</a>
+                                <button type="button" class="btn btn-info m-2" data-bs-toggle="modal" data-bs-target="#modalAjudaPDV">Ajuda e Atalhos</button>
                             </div>
                         </div>
                         <div class="modal-footer" id="funcionalidadesFooter" style="display: none;">
@@ -485,9 +486,10 @@ if (isset($_POST['codigo'])) {
                 </div>
             </div>
         </div>
-
+        
+        <?php include_once DEV_PATH . 'Views/_modal_ajuda_pdv.php'; ?>
         <?php include_once DEV_PATH . 'Views/toast.php'?>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script> 
             window.carrinhoSessao = <?= json_encode(array_values($_SESSION['carrinho'])) ?>;

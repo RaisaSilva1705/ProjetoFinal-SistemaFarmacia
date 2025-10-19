@@ -58,15 +58,35 @@ $is_edit = true;
                 <div class="container p-5">
                     <?php include '_form_fornecedor.php'; ?>
                 </div>
+
+                <!-- Footer -->
+                <?php include_once DEV_PATH . 'Views/footer.php'?>
             </div>
-        
-            <!-- Footer -->
-            <?php include_once DEV_PATH . 'Views/footer.php'?>
+        </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-pencil-square"></i> Edição de Fornecedor</h4>
+            <hr>
+            <p>Esta tela permite atualizar e corrigir todas as informações de um fornecedor já cadastrado. Mantenha os dados, especialmente de contato e endereço, sempre atualizados.</p>
+            
+            <h6><i class="bi bi-pencil-fill"></i> O que você pode alterar?</h6>
+            <p>Todos os campos do cadastro do fornecedor estão disponíveis para edição, incluindo:</p>
+            <ul>
+                <li>Dados da Empresa (Razão Social, CNPJ, etc.).</li>
+                <li>Informações de Contato (Telefone e Email).</li>
+                <li>Endereço completo.</li>
+                <li>Status (Ativo/Inativo).</li>
+                <li>Observações.</li>
+            </ul>
+
+            <h6><i class="bi bi-save-fill"></i> Salvar</h6>
+            <p>Após realizar as modificações, clique em <strong>"Salvar Alterações"</strong> para registrar as novas informações no sistema.</p>
         </div>
 
         <?php include_once DEV_PATH . 'Views/toast.php'?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             <?php
             if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {

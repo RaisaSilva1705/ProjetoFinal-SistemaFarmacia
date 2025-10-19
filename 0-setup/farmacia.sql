@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS `CLIENTES` (
     `Nome` VARCHAR(255) NOT NULL,
     `Tipo` ENUM('PJ', 'PF') NOT NULL,
     `Sexo` ENUM('Masculino', 'Feminino') NULL,
+    `Genero` ENUM('Mulher Cis', 'Homem Cis', 'Mulher Trans', 'Homem Trans', 'Não Binário') NULL,
     `Data_Nascimento` DATE NULL,
     `Tel` VARCHAR(20) NOT NULL,
     `Email` VARCHAR(100) NOT NULL UNIQUE,
@@ -192,7 +193,8 @@ CREATE TABLE IF NOT EXISTS `FORNECEDORES` (
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `CATEGORIAS` (
     `ID_Categoria` INT AUTO_INCREMENT PRIMARY KEY,
-    `Categoria` VARCHAR(255) NOT NULL
+    `Categoria` VARCHAR(255) NOT NULL,
+    `Status` ENUM('Ativo', 'Inativo') DEFAULT 'Ativo'
 ) ENGINE = InnoDB;
 /* drop table CATEGORIAS; */
 /* select * from CATEGORIAS; */
@@ -262,7 +264,8 @@ CREATE TABLE IF NOT EXISTS `LOTES` (
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `CATEGORIAS_MEDICAMENTOS` (
     `ID_CategoriaMed` INT AUTO_INCREMENT PRIMARY KEY,
-    `Categoria_Med` VARCHAR(255) NOT NULL
+    `Categoria_Med` VARCHAR(255) NOT NULL,
+    `Status` ENUM('Ativo', 'Inativo') DEFAULT 'Ativo'
 ) ENGINE = InnoDB;
 /* drop table CATEGORIAS_MEDICAMENTOS; */
 /* select * from CATEGORIAS_MEDICAMENTOS; */
@@ -272,7 +275,8 @@ CREATE TABLE IF NOT EXISTS `CATEGORIAS_MEDICAMENTOS` (
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `TARJAS_MEDICAMENTOS` (
     `ID_Tarja` INT AUTO_INCREMENT PRIMARY KEY,
-    `Tarja` VARCHAR(255) NOT NULL
+    `Tarja` VARCHAR(255) NOT NULL,
+    `Status` ENUM('Ativo', 'Inativo') DEFAULT 'Ativo'
 ) ENGINE = InnoDB;
 /* drop table TARJAS_MEDICAMENTOS; */
 /* select * from TARJAS_MEDICAMENTOS; */

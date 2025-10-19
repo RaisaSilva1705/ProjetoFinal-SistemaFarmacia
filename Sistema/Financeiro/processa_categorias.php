@@ -2,6 +2,7 @@
 session_start();
 include "../../dev/Exec/config.php"; 
 include DEV_PATH . 'Exec/conexao.php';
+include DEV_PATH . 'Exec/logs.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: categorias_despesa.php');

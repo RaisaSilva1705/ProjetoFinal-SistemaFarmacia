@@ -104,8 +104,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <?php include_once DEV_PATH . 'Views/footer.php'?>
         </div>
 
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-tools"></i> Construtor de Formulário de Serviço</h4>
+            <hr>
+            <p>Esta tela é uma das mais poderosas do sistema. Ela funciona como um <strong>construtor de formulários</strong>, permitindo que você defina não apenas as informações básicas de um novo serviço, mas também todos os campos que precisarão ser preenchidos pelo farmacêutico durante o atendimento.</p>
+
+            <h6><i class="bi bi-card-heading"></i> Passo 1: Informações Gerais</h6>
+            <p>Preencha os dados principais do serviço:</p>
+            <ul>
+                <li><strong>Nome do Serviço:</strong> O nome que aparecerá para o farmacêutico e na Declaração de Serviço (DSF). Ex: "Aferição de Pressão Arterial".</li>
+                <li><strong>Valor (R$):</strong> O preço que será cobrado pelo serviço.</li>
+                <li><strong>Descrição:</strong> Um texto opcional explicando o que é o serviço.</li>
+            </ul>
+
+            <h6><i class="bi bi-list-check"></i> Passo 2: Campos Personalizados</h6>
+            <p>Clique em <strong>"Adicionar Campo"</strong> para criar os campos de dados que serão coletados durante o atendimento. Para cada campo, você deve definir:</p>
+            <ul>
+                <li><strong>Título do Campo:</strong> O nome do dado a ser coletado (ex: "Pressão Sistólica", "Resultado do Teste", "Medicamento Aplicado").</li>
+                <li><strong>Tipo de Campo:</strong> Define o formato da resposta (Texto, Número, Sim/Não, Data, ou Código/EAN para vincular a um produto).</li>
+                <li><strong>Unidade de Medida:</strong> Opcional, usado para campos numéricos (ex: "mmHg" para pressão, "mg/dL" para glicemia).</li>
+            </ul>
+
+            <h6><i class="bi bi-rulers"></i> Passo 3: Valores de Referência (Opcional)</h6>
+            <p>Dentro de cada campo personalizado, você pode adicionar "Valores de Referência". Isso é útil para serviços que geram resultados com faixas de normalidade (como Glicemia). Essas informações aparecerão na DSF impressa para o paciente, ajudando-o a entender seus resultados.</p>
+            <ol>
+                <li>Clique em <strong>"Adicionar Linha de Referência"</strong>.</li>
+                <li>Preencha a <strong>Descrição</strong> (ex: "Normal", "Jejum", "Adulto").</li>
+                <li>Preencha os valores de referência para os sexos Feminino e Masculino, se aplicável.</li>
+            </ol>
+
+            <h6><i class="bi bi-save-fill"></i> Passo 4: Salvar</h6>
+            <p>Após definir todas as informações e campos, clique em <strong>"Salvar Definições do Serviço"</strong> para criar o novo serviço e seu formulário personalizado.</p>
+        </div>
+
         <?php include_once DEV_PATH . 'Views/toast.php'?>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {

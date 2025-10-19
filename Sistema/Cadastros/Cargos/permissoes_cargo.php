@@ -105,15 +105,40 @@ if (isset($_GET['cargo_id'])) {
                         </div>
                     </form>
                     <?php endif; ?>
-
                 </div>
+                <?php include_once DEV_PATH . 'Views/footer.php'; ?>
             </div>
+        </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-shield-check"></i> Permissões por Cargo (Controle de Acesso)</h4>
+            <hr>
+            <p>Esta é a central de segurança do seu sistema. Aqui você define, para cada cargo, quais telas e funcionalidades os funcionários poderão ver e acessar. Este método é conhecido como <strong>Controle de Acesso Baseado em Cargos (RBAC)</strong>.</p>
+            <p>O objetivo é garantir que cada funcionário tenha acesso apenas ao que é estritamente necessário para realizar seu trabalho, aumentando a segurança e a organização do sistema.</p>
+
+            <h6><i class="bi bi-person-check-fill"></i> Passo 1: Selecionar o Cargo</h6>
+            <ol>
+                <li>No menu suspenso, selecione o cargo cujas permissões você deseja visualizar ou editar.</li>
+                <li>Clique no botão <strong>"Carregar Permissões"</strong>.</li>
+                <li>Abaixo, o sistema exibirá a lista de todos os módulos, marcando aqueles que o cargo selecionado já possui acesso.</li>
+            </ol>
+
+            <h6><i class="bi bi-toggles"></i> Passo 2: Atribuir ou Remover Permissões</h6>
+            <ul>
+                <li><strong>Para conceder acesso:</strong> Marque a caixa de seleção ao lado do nome do módulo desejado.</li>
+                <li><strong>Para remover o acesso:</strong> Desmarque a caixa de seleção.</li>
+            </ul>
+            <p>Você pode marcar ou desmarcar quantos módulos forem necessários para ajustar o perfil de acesso do cargo.</p>
+
+            <h6><i class="bi bi-save-fill"></i> Passo 3: Salvar as Alterações</h6>
+            <p>Após definir todas as permissões para o cargo selecionado, clique no botão <strong>"Salvar Permissões"</strong> no final da página. As alterações serão aplicadas imediatamente a todos os funcionários que possuem aquele cargo.</p>
             
-            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
+            <p class="alert alert-info"><strong>Dica de Segurança:</strong> Siga o "Princípio do Privilégio Mínimo". Conceda a cada cargo apenas as permissões essenciais para suas funções. Por exemplo, um "Operador de Caixa" geralmente não precisa de acesso aos relatórios financeiros ou à configuração de promoções.</p>
         </div>
 
         <?php include_once DEV_PATH . 'Views/toast.php'; ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
             <?php if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) { echo "mostrarToast('".addslashes($_SESSION['msg']['texto'])."', '".$_SESSION['msg']['tipo']."');"; unset($_SESSION['msg']); } ?>

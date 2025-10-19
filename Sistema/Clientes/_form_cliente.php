@@ -1,6 +1,9 @@
 <?php
 $nome = htmlspecialchars($cliente['Nome'] ?? '');
 $tipo_pessoa = $cliente['Tipo'] ?? 'PF';
+$data_nascimento = $cliente['Data_Nascimento'] ?? '';
+$sexo = htmlspecialchars($cliente['Sexo'] ?? '');
+$genero = htmlspecialchars($cliente['Genero'] ?? '');
 $tel = htmlspecialchars($cliente['Tel'] ?? '');
 $email = htmlspecialchars($cliente['Email'] ?? '');
 $status = $cliente['Status'] ?? 'Ativo';
@@ -15,6 +18,19 @@ $documentos_json = json_encode($documentos_cliente ?? []);
     <div class="row">
         <div class="col-md-8 mb-3"><label for="nome" class="form-label">Nome Completo</label><input type="text" id="nome" name="nome" class="form-control" required value="<?= $nome ?>"></div>
         <div class="col-md-4 mb-3"><label for="tipo_pessoa" class="form-label">Tipo de Pessoa</label><select name="tipo_pessoa" id="tipo_pessoa" class="form-select" required><option value="PF" <?= $tipo_pessoa == 'PF' ? 'selected' : '' ?>>Pessoa Física (PF)</option><option value="PJ" <?= $tipo_pessoa == 'PJ' ? 'selected' : '' ?>>Pessoa Jurídica (PJ)</option></select></div>
+        <div class="col-md-4 mb-3"><label for="data_nascimento" class="form-label">Data de Nascimento</label><input type="date" id="data_nascimento" name="data_nascimento" class="form-control" required value="<?= $data_nascimento ?>"></div>
+        <div class="col-md-4 mb-3"><label for="sexo" class="form-label">Sexo Biológico</label><select name="sexo" id="sexo" class="form-select" required><option value="">Selecione...</option><option value="Feminino" <?= $sexo == 'Feminino' ? 'selected' : '' ?>>Feminino</option><option value="Masculino" <?= $sexo == 'Masculino' ? 'selected' : '' ?>>Masculino</option></select></div>
+        <div class="col-md-4 mb-3">
+            <label for="genero" class="form-label">Gênero</label>
+            <select name="genero" id="genero" class="form-select" required>
+                <option value="">Selecione...</option>
+                <option value="Mulher Cis" <?= $genero == 'Mulher Cis' ? 'selected' : '' ?>>Mulher Cis</option>
+                <option value="Homem Cis" <?= $genero == 'Homem Cis' ? 'selected' : '' ?>>Homem Cis</option>
+                <option value="Mulher Trans" <?= $genero == 'Mulher Trans' ? 'selected' : '' ?>>Mulher Trans</option>
+                <option value="Homem Trans" <?= $genero == 'Homem Trans' ? 'selected' : '' ?>>Homem Trans</option>
+                <option value="Não Binário" <?= $genero == 'Não Binário' ? 'selected' : '' ?>>Não Binário</option>
+            </select>
+        </div>
     </div>
 
     <hr>
@@ -23,15 +39,18 @@ $documentos_json = json_encode($documentos_cliente ?? []);
         <button type="button" id="btn-add-documento" class="btn btn-sm btn-success"><i class="bi bi-plus-circle"></i> Adicionar Documento</button>
     </div>
     <div id="documentos-container">
-        </div>
+    </div>
     <div id="documentos-excluidos-container">
-        </div>
+    </div>
 
+    <hr>
+    <h5>Contato</h5>
     <div class="row mt-3">
         <div class="col-md-6 mb-3"><label for="tel" class="form-label">Telefone</label><input type="text" id="tel" name="tel" class="form-control" required value="<?= $tel ?>"></div>
         <div class="col-md-6 mb-3"><label for="email" class="form-label">Email</label><input type="email" id="email" name="email" class="form-control" required value="<?= $email ?>"></div>
     </div>
     
+    <hr>
     <div class="row">
         <div class="col-md-9 mb-3"><label for="obs" class="form-label">Observações</label><textarea name="obs" id="obs" class="form-control" rows="1"><?= $obs ?></textarea></div>
         <div class="col-md-3 mb-3"><label for="status" class="form-label">Status</label><select name="status" id="status" class="form-select" required><option value="Ativo" <?= $status == 'Ativo' ? 'selected' : '' ?>>Ativo</option><option value="Inativo" <?= $status == 'Inativo' ? 'selected' : '' ?>>Inativo</option></select></div>

@@ -66,7 +66,6 @@ $stmt_itens->close();
                 <div class="container p-5">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2 class="m-0">
-                            <i class="bi bi-pencil-square text-info"></i>
                             Editar Promoção
                         </h2>
                         <a href="promocoes.php" class="btn btn-outline-secondary">
@@ -158,13 +157,37 @@ $stmt_itens->close();
                         </div>
                     </form>
                 </div>
+                <?php include_once DEV_PATH . 'Views/footer.php'; ?>
             </div>
-            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
+        </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-pencil-square"></i> Edição de Promoção</h4>
+            <hr>
+            <p>Utilize esta tela para ajustar ou corrigir as regras e informações de uma promoção já cadastrada. Você pode alterar desde a descrição até os produtos e descontos envolvidos.</p>
+
+            <h6><i class="bi bi-pencil-fill"></i> O que você pode alterar?</h6>
+            <ul>
+                <li><strong>Informações Gerais:</strong> Modifique a descrição, o tipo e as datas de vigência da promoção.</li>
+                <li><strong>Itens e Regras:</strong>
+                    <ul>
+                        <li>Adicione novos itens à regra clicando em <strong>"Adicionar Item"</strong>.</li>
+                        <li>Remova itens existentes clicando no ícone de lixeira <i class="bi bi-trash"></i>.</li>
+                        <li>Altere qualquer parâmetro de um item, como o produto, a quantidade, o tipo (Condição/Benefício) ou o valor do desconto/preço.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h6><i class="bi bi-save-fill"></i> Salvar</h6>
+            <p>Após realizar todas as modificações desejadas, clique em <strong>"Atualizar Promoção"</strong> para aplicar as novas regras.</p>
+
+            <p class="alert alert-info mt-3"><strong>Nota:</strong> As alterações feitas aqui substituem completamente as regras antigas. A nova lógica será aplicada a todas as novas vendas a partir do momento em que for salva.</p>
         </div>
 
         <?php include_once DEV_PATH . 'Views/toast.php'; ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?php echo DEV_URL ?>JS/toast.js"></script>
+        <script src="<?php echo DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
         document.addEventListener('DOMContentLoaded', function() {
             const tipoPromocaoSelect = document.getElementById('tipo_promocao');
@@ -240,6 +263,10 @@ $stmt_itens->close();
                         e.target.closest('.item-regra-promo').remove();
                 });
 
+                document.querySelectorAll('.busca-produto-promo').forEach(input => {
+                    inicializarBuscaProduto(input);
+                });
+
                 function controlarVisibilidadeCampos() {
                     const tipoSelecionado = tipoPromocaoSelect.value;
                     const todosItens = document.querySelectorAll('.item-regra-promo');
@@ -309,6 +336,8 @@ $stmt_itens->close();
                     });
                 }
             });
+
+            controlarVisibilidadeCampos();
 
             <?php
             if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {

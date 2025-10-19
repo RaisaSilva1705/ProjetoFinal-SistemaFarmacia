@@ -153,25 +153,45 @@ $config = $result->fetch_assoc();
                         </div>
                     </form>
                 </div>
-            </div>
-            <!-- Footer -->
-            <?php include_once DEV_PATH . 'Views/footer.php'?>
-        </div>
-
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
+                <!-- Footer -->
+                <?php include_once DEV_PATH . 'Views/footer.php'?>
             </div>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-gear-fill"></i> Configurações Gerais do Sistema</h4>
+            <hr>
+            <p>Esta é a tela de controle mestre da sua farmácia. As informações e regras definidas aqui afetam o comportamento de todo o sistema, desde a aparência de cupons e relatórios até as regras de negócio aplicadas no Ponto de Venda (PDV).</p>
+            <p class="alert alert-warning"><strong>Atenção:</strong> Altere os valores nesta tela com cuidado, pois eles têm um impacto global na operação.</p>
+
+            <h6 class="mt-4"><i class="bi bi-building-fill"></i> Identificação da Empresa</h6>
+            <p>Estes dados são usados para identificar sua empresa em todos os documentos gerados pelo sistema, como cupons de venda e Declarações de Serviço Farmacêutico (DSF).</p>
+            <ul>
+                <li><strong>Razão Social e Nome Fantasia:</strong> Os nomes legal e comercial da sua farmácia.</li>
+                <li><strong>CNPJ e CNES:</strong> Documentos de registro essenciais para a conformidade fiscal e sanitária.</li>
+            </ul>
+
+            <h6 class="mt-4"><i class="bi bi-geo-alt-fill"></i> Contato e Localização</h6>
+            <p>Define o endereço e o telefone principal da loja, que também aparecerão nos documentos impressos.</p>
+            <p class="alert alert-info"><strong>Dica de Agilidade:</strong> Ao preencher o <strong>CEP</strong>, o sistema buscará automaticamente e preencherá os campos de Endereço, Bairro, Cidade e Estado para você. Basta completar o Número.</p>
+
+            <h6 class="mt-4"><i class="bi bi-rulers"></i> Regras de Negócio do PDV</h6>
+            <p>Aqui você define as políticas comerciais que serão aplicadas no caixa:</p>
+            <ul>
+                <li><strong>Valor Mínimo para Parcelamento:</strong> O valor de compra a partir do qual a opção de parcelamento no cartão de crédito será oferecida.</li>
+                <li><strong>Quantidade Máxima de Parcelas:</strong> O número máximo de parcelas que o sistema permitirá para vendas no cartão de crédito.</li>
+                <li><strong>Margem de Lucro Padrão (%):</strong> Um valor percentual usado pelo sistema para sugerir um preço de venda quando você dá entrada em um novo lote de produto sem preço definido.</li>
+                <li><strong>Desconto Máximo por Item (%):</strong> Um limite de segurança. Descontos no PDV acima desta porcentagem exigirão uma senha de gerente, prevenindo descontos não autorizados.</li>
+            </ul>
+
+            <h6><i class="bi bi-save-fill"></i> Salvar Alterações</h6>
+            <p>Após ajustar qualquer configuração, clique no botão <strong>"Salvar Alterações"</strong> no final da página. As novas regras serão aplicadas em todo o sistema.</p>
+        </div>
+
+        <?php include_once DEV_PATH . 'Views/toast.php'?>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             <?php
             if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {

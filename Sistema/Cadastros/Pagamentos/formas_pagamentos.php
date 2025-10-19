@@ -10,7 +10,7 @@ define('MODULO_SOLICITADO', 'CONFIGURACOES_GERENCIAR');
 include DEV_PATH . "Exec/validar_acesso.php";
 
 $busca_texto = $_GET['busca_texto'] ?? '';
-$status = $_GET['status'] ?? '';
+$status = (isset($_GET['status']) && $_GET['status'] !== 'Todos') ? $_GET['status'] : '';
 
 $sql = "SELECT ID_Forma_Pag, Tipo, Status FROM FORMAS_PAGAMENTO";
 
@@ -72,7 +72,7 @@ $result = $stmt->get_result();
                         <form method="GET" action="formas_pagamentos.php">
                             <div class="row g-3 align-items-end">
                                 <div class="col-md-6"><label for="busca_texto" class="form-label">Buscar por Nome</label><input type="text" name="busca_texto" id="busca_texto" class="form-control" value="<?= htmlspecialchars($busca_texto) ?>"></div>
-                                <div class="col-md-4"><label for="status" class="form-label">Status</label><select name="status" id="status" class="form-select"><option value="">Todos</option><option value="Ativo" <?= $status == 'Ativo' ? 'selected' : '' ?>>Ativo</option><option value="Inativo" <?= $status == 'Inativo' ? 'selected' : '' ?>>Inativo</option></select></div>
+                                <div class="col-md-4"><label for="status" class="form-label">Status</label><select name="status" id="status" class="form-select"><option value="Todos">Todos</option><option value="Ativo" <?= $status == 'Ativo' ? 'selected' : '' ?>>Ativo</option><option value="Inativo" <?= $status == 'Inativo' ? 'selected' : '' ?>>Inativo</option></select></div>
                                 <div class="col-md-2"><button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel-fill"></i> Filtrar</button></div>
                             </div>
                         </form>
@@ -178,8 +178,39 @@ $result = $stmt->get_result();
             </div>
         </div>
 
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-credit-card-2-front-fill"></i> Gestão de Formas de Pagamento</h4>
+            <hr>
+            <p>Nesta tela, você gerencia todas as formas de pagamento que serão aceitas no Ponto de Venda (PDV). Manter esta lista atualizada é essencial para garantir um processo de finalização de compra ágil e completo para seus clientes.</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtros de Busca</h6>
+            <p>Utilize os campos no topo da página para localizar rapidamente uma forma de pagamento:</p>
+            <ul>
+                <li><strong>Buscar por Nome:</strong> Digite o nome da forma de pagamento (ex: "Dinheiro", "Cartão").</li>
+                <li><strong>Status:</strong> Filtre entre as formas de pagamento que estão <strong>Ativas</strong> (disponíveis no PDV) ou <strong>Inativas</strong> (escondidas do PDV).</li>
+            </ul>
+
+            <h6><i class="bi bi-plus-circle-fill"></i> Cadastrar uma Nova Forma de Pagamento</h6>
+            <ol>
+                <li>Clique no botão <strong>"Nova Forma de Pagamento"</strong>.</li>
+                <li>Na janela que se abre, informe o nome da forma de pagamento (ex: "Vale Alimentação", "Crediário Loja").</li>
+                <li>Clique em <strong>"Salvar"</strong>. A nova forma será criada como "Ativa" e já estará disponível para uso no caixa.</li>
+            </ol>
+
+            <h6><i class="bi bi-pencil-fill"></i> Ações na Lista</h6>
+            <p>Para cada item listado na tabela, você pode realizar as seguintes ações:</p>
+            <ul>
+                <li><i class="bi bi-pencil-fill text-warning"></i> <strong>Editar:</strong> Permite alterar o nome de uma forma de pagamento.</li>
+                <li><i class="bi bi-pause-circle-fill text-danger"></i> <strong>Inativar:</strong> Oculta a forma de pagamento das opções disponíveis no PDV.</li>
+                <li><i class="bi bi-play-circle-fill text-success"></i> <strong>Ativar:</strong> Reativa uma forma de pagamento que estava inativa, tornando-a disponível no PDV novamente.</li>
+            </ul>
+
+            <p class="alert alert-danger mt-3"><strong>Regra de Integridade:</strong> Para proteger seu histórico financeiro, o sistema não permitirá que você inactive uma forma de pagamento que <strong>já foi utilizada em alguma venda registrada</strong>. Esta trava garante que os relatórios de vendas passadas permaneçam consistentes e precisos.</p>
+        </div>
+
         <?php include_once DEV_PATH . 'Views/toast.php' ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
             const modalFormaPag = document.getElementById('modalFormasPagamento');

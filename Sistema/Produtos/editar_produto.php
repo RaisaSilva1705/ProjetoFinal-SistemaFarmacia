@@ -69,18 +69,36 @@ $is_edit = true;
                     <h3>Editar Produto</h3>
                 </div>
     
-                <!-- Formulário de Edição -->
                 <div class="container p-5">
                     <?php include '_form_produto.php'; ?>
                 </div>
-            </div>
 
-            <!-- Footer -->
-            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
+                <!-- Footer -->
+                <?php include_once DEV_PATH . 'Views/footer.php'; ?>
+            </div>
+        </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-pencil-square"></i> Edição de Produto</h4>
+            <hr>
+            <p>Utilize esta tela para atualizar ou corrigir qualquer informação de um produto já cadastrado. Manter os dados fiscais e de classificação corretos é fundamental para a operação da farmácia.</p>
+
+            <h6><i class="bi bi-pencil-fill"></i> O que você pode alterar?</h6>
+            <p>Todos os campos do cadastro do produto estão disponíveis para edição, incluindo:</p>
+            <ul>
+                <li><strong>Informações Gerais:</strong> Nome, fornecedor, marca, categoria, etc.</li>
+                <li><strong>Categoria e Medicamentos:</strong> Ao alterar a categoria de um produto para "Medicamento", os campos específicos aparecerão para preenchimento. Se alterar de "Medicamento" para outra categoria, os dados de medicamento associados serão removidos.</li>
+                <li><strong>Informações Fiscais:</strong> Todos os códigos e parâmetros fiscais podem ser ajustados.</li>
+                <li><strong>Foto:</strong> Você pode enviar uma nova imagem para substituir a atual.</li>
+            </ul>
+
+            <h6><i class="bi bi-save-fill"></i> Salvar</h6>
+            <p>Após realizar as modificações, clique em <strong>"Salvar Alterações"</strong> para atualizar o registro do produto no sistema.</p>
         </div>
 
         <?php include_once DEV_PATH . 'Views/toast.php'; ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
             document.addEventListener("DOMContentLoaded", function () {

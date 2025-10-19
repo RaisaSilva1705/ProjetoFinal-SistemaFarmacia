@@ -132,6 +132,35 @@ $nome_produto = $lotes[0]['Nome_Produto'];
             <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
         
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-list-ol"></i> Detalhes de Lotes do Produto</h4>
+            <hr>
+            <p>Esta tela oferece uma visão detalhada de todos os lotes, passados e presentes, de um produto específico. É uma ferramenta essencial para a rastreabilidade e para a gestão de validade.</p>
+
+            <h6><i class="bi bi-table"></i> Informações da Tabela</h6>
+            <ul>
+                <li><strong>Lote:</strong> O código de identificação do lote.</li>
+                <li><strong>Validade:</strong> A data de vencimento do lote.</li>
+                <li><strong>Qtd. em Estoque:</strong> A quantidade de unidades restantes daquele lote específico.</li>
+                <li><strong>Preço Custo / Venda:</strong> Os preços associados àquele lote no momento da entrada.</li>
+                <li><strong>Fornecedor:</strong> O fornecedor que entregou aquele lote.</li>
+            </ul>
+
+            <h6><i class="bi bi-exclamation-triangle-fill"></i> Alertas Visuais de Validade</h6>
+            <p>A tabela utiliza cores para alertar sobre a proximidade do vencimento:</p>
+            <ul>
+                <li><strong class="text-danger">Linha Vermelha:</strong> O lote já está <strong>vencido</strong>.</li>
+                <li><strong class="text-warning">Linha Amarela:</strong> O lote está <strong>próximo de vencer</strong> (menos de 60 dias), indicado pela badge "Vence em X dias!".</li>
+                <li><strong class="text-secondary">Linha Cinza:</strong> O lote não possui mais unidades em estoque.</li>
+            </ul>
+
+            <h6><i class="bi bi-tag-fill"></i> Ações Rápidas</h6>
+            <ul>
+                <li><strong>Criar Promoção:</strong> Para lotes que estão próximos do vencimento, o botão <button class="btn btn-success btn-sm"><i class="bi bi-tag-fill"></i> Criar Promoção</button> aparece como um atalho. Clicar nele te levará diretamente para a tela de criação de promoção, já com o produto pré-selecionado, facilitando a criação de ofertas para girar o estoque e evitar perdas.</li>
+            </ul>
+        </div>
+
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
     </body>
 </html>

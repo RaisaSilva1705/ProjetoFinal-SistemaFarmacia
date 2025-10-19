@@ -11,8 +11,8 @@ define('MODULO_SOLICITADO', 'CONFIGURACOES_GERENCIAR');
 include DEV_PATH . "Exec/validar_acesso.php";
 
 $busca_texto = $_GET['busca_texto'] ?? '';
-$status = $_GET['status'] ?? '';
-$statusCadastrado = $_GET['status_cadastrado'] ?? '';
+$status = (isset($_GET['status']) && $_GET['status'] !== "Todos") ? $_GET['status'] : '';
+$statusCadastrado = (isset($_GET['status_cadastrado']) && $_GET['status_cadastrado'] !== "Todos") ? $_GET['status_cadastrado'] : '';
 
 $sql = "SELECT ID_Caixa, Caixa, Status, StatusCadastrado FROM CAIXAS";
 
@@ -78,8 +78,8 @@ $result = $stmt->get_result();
                         <form method="GET" action="caixas.php">
                             <div class="row g-3 align-items-end">
                                 <div class="col-md-4"><label for="busca_texto" class="form-label">Buscar por Nome</label><input type="text" name="busca_texto" id="busca_texto" class="form-control" value="<?= htmlspecialchars($busca_texto) ?>"></div>
-                                <div class="col-md-3"><label for="status" class="form-label">Status Operacional</label><select name="status" id="status" class="form-select"><option value="">Todos</option><option value="Aberto" <?= $status == 'Aberto' ? 'selected' : '' ?>>Aberto</option><option value="Fechado" <?= $status == 'Fechado' ? 'selected' : '' ?>>Fechado</option></select></div>
-                                <div class="col-md-3"><label for="status_cadastrado" class="form-label">Status do Cadastro</label><select name="status_cadastrado" id="status_cadastrado" class="form-select"><option value="">Todos</option><option value="Ativo" <?= $statusCadastrado == 'Ativo' ? 'selected' : '' ?>>Ativo</option><option value="Inativo" <?= $statusCadastrado == 'Inativo' ? 'selected' : '' ?>>Inativo</option></select></div>
+                                <div class="col-md-3"><label for="status" class="form-label">Status Operacional</label><select name="status" id="status" class="form-select"><option value="Todos">Todos</option><option value="Aberto" <?= $status == 'Aberto' ? 'selected' : '' ?>>Aberto</option><option value="Fechado" <?= $status == 'Fechado' ? 'selected' : '' ?>>Fechado</option></select></div>
+                                <div class="col-md-3"><label for="status_cadastrado" class="form-label">Status do Cadastro</label><select name="status_cadastrado" id="status_cadastrado" class="form-select"><option value="Todos">Todos</option><option value="Ativo" <?= $statusCadastrado == 'Ativo' ? 'selected' : '' ?>>Ativo</option><option value="Inativo" <?= $statusCadastrado == 'Inativo' ? 'selected' : '' ?>>Inativo</option></select></div>
                                 <div class="col-md-2"><button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel-fill"></i> Filtrar</button></div>
                             </div>
                         </form>
@@ -134,7 +134,6 @@ $result = $stmt->get_result();
                     </div>
                 </div>
             </div>
-
             <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
         
@@ -188,8 +187,40 @@ $result = $stmt->get_result();
             </div>
         </div>
 
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-cash-register"></i> Gestão de Caixas</h4>
+            <hr>
+            <p>Esta tela é utilizada para configurar os pontos de venda (caixas) da sua farmácia. Aqui você pode cadastrar, editar e gerenciar todos os terminais que serão utilizados para registrar as vendas.</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtros de Busca</h6>
+            <p>Utilize os campos no topo da página para localizar caixas específicos:</p>
+            <ul>
+                <li><strong>Buscar por Nome:</strong> Digite o nome ou parte do nome do caixa (ex: "Caixa 01").</li>
+                <li><strong>Status Operacional:</strong> Filtra os caixas que estão atualmente <strong>Abertos</strong> (em uso por um operador) ou <strong>Fechados</strong>.</li>
+                <li><strong>Status do Cadastro:</strong> Filtra os caixas que estão <strong>Ativos</strong> (disponíveis para serem abertos no PDV) ou <strong>Inativos</strong> (desativados do sistema).</li>
+            </ul>
+            <p>Após definir seus filtros, clique em <strong>"Filtrar"</strong> para atualizar a lista.</p>
+
+            <h6><i class="bi bi-plus-circle-fill"></i> Cadastrar um Novo Caixa</h6>
+            <ol>
+                <li>Clique no botão <strong>"Novo Caixa"</strong> no canto superior direito.</li>
+                <li>Na janela que se abre, informe um nome claro e identificável para o novo caixa (ex: "Caixa 02", "PDV Perfumaria").</li>
+                <li>Clique em <strong>"Salvar"</strong>. O novo caixa será criado com o status "Ativo" por padrão e estará disponível para uso.</li>
+            </ol>
+
+            <h6><i class="bi bi-pencil-fill"></i> Ações na Lista</h6>
+            <p>Para cada caixa listado na tabela, você pode realizar as seguintes ações:</p>
+            <ul>
+                <li><i class="bi bi-pencil-fill text-warning"></i> <strong>Editar:</strong> Permite alterar o nome de um caixa já cadastrado.</li>
+                <li><i class="bi bi-pause-circle-fill text-danger"></i> <strong>Inativar:</strong> Se um caixa está "Ativo", esta opção o tornará "Inativo". Um caixa inativo não pode ser aberto por um operador no PDV, mas seu histórico de vendas é mantido.</li>
+                <li><i class="bi bi-play-circle-fill text-success"></i> <strong>Ativar:</strong> Se um caixa está "Inativo", esta opção o tornará "Ativo" novamente, permitindo que ele seja usado no PDV.</li>
+            </ul>
+            <p class="alert alert-info"><strong>Importante:</strong> A inativação de um caixa é uma ação administrativa e não afeta um caixa que já está em operação. O "Status Operacional" só muda para "Fechado" quando o próprio operador encerra o seu turno no PDV.</p>
+        </div>
+
         <?php include_once DEV_PATH . 'Views/toast.php'; ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
             const modalCaixa = document.getElementById('modalCaixa');

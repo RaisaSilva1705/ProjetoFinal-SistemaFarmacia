@@ -43,7 +43,7 @@ $is_edit = true;
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Edição de Cliente</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
     <body>
@@ -60,26 +60,33 @@ $is_edit = true;
                 <div class="container p-5">
                     <?php include '_form_cliente.php'; ?>
                 </div>
-            </div>
-        
-            <!-- Footer -->
-            <?php include_once DEV_PATH . 'Views/footer.php'?>
-        </div>
 
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
+                <!-- Footer -->
+                <?php include_once DEV_PATH . 'Views/footer.php'?>
             </div>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-person-lines-fill"></i> Edição de Cliente</h4>
+            <hr>
+            <p>Utilize esta tela para atualizar ou corrigir as informações de um cliente já cadastrado no sistema.</p>
+
+            <h6><i class="bi bi-pencil-square"></i> O que você pode alterar?</h6>
+            <ul>
+                <li><strong>Dados Pessoais:</strong> Altere o nome, tipo de pessoa, data de nascimento, sexo, gênero, telefone, email e observações.</li>
+                <li><strong>Documentos:</strong> Você pode adicionar novos documentos clicando em <strong>"Adicionar Documento"</strong>, remover documentos existentes clicando no ícone de lixeira <i class="bi bi-trash"></i>, ou corrigir o número de um documento já cadastrado.</li>
+                <li><strong>Status:</strong> Altere o status do cliente para <strong>Ativo</strong> ou <strong>Inativo</strong>. Um cliente inativo não poderá realizar novas compras.</li>
+                <li><strong>Senha:</strong> Para alterar a senha do cliente, basta digitar uma nova no campo "Senha". <strong>Deixe este campo em branco se não desejar alterar a senha atual.</strong></li>
+            </ul>
+
+            <h6><i class="bi bi-check-circle-fill"></i> Salvar</h6>
+            <p>Após realizar todas as alterações necessárias, clique em <strong>"Salvar Alterações"</strong> para que as novas informações sejam registradas no sistema.</p>
+        </div>
+
+        <?php include_once DEV_PATH . 'Views/toast.php'?>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             <?php
             if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {

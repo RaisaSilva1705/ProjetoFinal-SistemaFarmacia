@@ -158,10 +158,34 @@ $logs = $stmt_main->get_result()->fetch_all(MYSQLI_ASSOC);
                     </div>
                 </div>
             </div>
-            
             <?php include_once DEV_PATH . 'Views/footer.php'; ?>
+        </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-shield-shaded"></i> Relatório de Atividades (Logs)</h4>
+            <hr>
+            <p>Esta é a principal ferramenta de <strong>auditoria e segurança</strong> do sistema. Cada ação importante realizada por um usuário — como cadastros, alterações, exclusões e finalização de vendas — é registrada aqui. Este relatório permite rastrear "quem fez o quê e quando".</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtros de Auditoria</h6>
+            <p>Utilize os filtros para investigar eventos específicos:</p>
+            <ul>
+                <li><strong>Período (De/Até):</strong> Defina o intervalo de datas para a investigação.</li>
+                <li><strong>Usuário:</strong> Filtre para ver todas as ações realizadas por um funcionário específico.</li>
+                <li><strong>Ação contém:</strong> Permite buscar por palavras-chave na descrição da ação (ex: "cancelou", "editou", "venda #123"). É uma ferramenta poderosa para rastrear operações específicas.</li>
+            </ul>
+
+            <h6><i class="bi bi-body-text"></i> Registros de Atividade</h6>
+            <p>A tabela exibe uma linha do tempo de todas as ações, em ordem da mais recente para a mais antiga. Cada registro contém:</p>
+            <ul>
+                <li><strong>Data/Hora:</strong> O momento exato em que a ação ocorreu.</li>
+                <li><strong>Usuário:</strong> O funcionário que realizou a ação.</li>
+                <li><strong>Ação Realizada:</strong> Uma descrição detalhada do que foi feito.</li>
+            </ul>
+
+            <p class="alert alert-danger mt-3"><strong>Importância:</strong> Este relatório é fundamental para a segurança da informação, permitindo identificar operações indevidas, solucionar problemas e garantir a rastreabilidade de todas as ações críticas dentro do sistema.</p>
         </div>
         
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
     </body>
 </html>

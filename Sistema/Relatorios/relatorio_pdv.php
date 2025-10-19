@@ -141,18 +141,45 @@ $ticket_medio = ($numero_vendas > 0) ? $total_faturado / $numero_vendas : 0;
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php else: ?>
-                                        <tr><td colspan="8" class="text-center p-4">Nenhuma venda encontrada para os filtros selecionados.</td></tr>
+                                        <tr><td colspan="9" class="text-center p-4">Nenhuma venda encontrada para os filtros selecionados.</td></tr>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+                <?php include_once DEV_PATH . 'Views/footer.php'; ?>
             </div>
-            
-            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
+        </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-cart-check-fill"></i> Relatório de Vendas (PDV)</h4>
+            <hr>
+            <p>Este relatório oferece uma visão detalhada de todas as vendas realizadas no Ponto de Venda. É a ferramenta principal para auditar transações, entender o fluxo de vendas e analisar o desempenho por diferentes ângulos.</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtros de Busca</h6>
+            <p>Utilize a combinação de filtros para extrair informações precisas:</p>
+            <ul>
+                <li><strong>Período (De/Até):</strong> Defina o intervalo de datas que deseja analisar.</li>
+                <li><strong>Caixa:</strong> Filtre as vendas realizadas em um caixa específico.</li>
+                <li><strong>Funcionário:</strong> Veja o desempenho de vendas de um vendedor em particular.</li>
+                <li><strong>Cliente:</strong> Filtre para ver o histórico de compras de um cliente específico (esta funcionalidade está desabilitada no momento).</li>
+            </ul>
+
+            <h6><i class="bi bi-bar-chart-line-fill"></i> Indicadores de Desempenho</h6>
+            <p>Os cards no topo da página fornecem um resumo rápido do período filtrado:</p>
+            <ul>
+                <li><strong>Faturamento Total:</strong> A soma do valor de todas as vendas.</li>
+                <li><strong>Nº de Vendas:</strong> A quantidade total de transações realizadas.</li>
+                <li><strong>Ticket Médio:</strong> O valor médio de cada venda (Faturamento Total / Nº de Vendas). É um indicador chave da performance de vendas.</li>
+                <li><strong>Total de Descontos:</strong> A soma de todos os descontos concedidos, ajudando a medir o impacto das promoções.</li>
+            </ul>
+
+            <h6><i class="bi bi-list-ol"></i> Detalhes das Vendas</h6>
+            <p>A tabela principal lista cada venda individualmente, com detalhes como data, hora, cliente, vendedor, caixa, formas de pagamento utilizadas e valores. Você pode clicar no ícone de cupom <i class="bi bi-receipt text-success"></i> para visualizar e reimprimir o cupom não fiscal de qualquer venda.</p>
         </div>
         
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
     </body>
 </html>

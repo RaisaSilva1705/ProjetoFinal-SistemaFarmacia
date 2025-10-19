@@ -121,8 +121,28 @@ while ($campo = $resultCampos->fetch_assoc()) {
             <?php include_once DEV_PATH . 'Views/footer.php'?>
         </div>
 
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-pencil-square"></i> Edição de Serviço e Formulário</h4>
+            <hr>
+            <p>Esta tela permite alterar completamente um serviço já existente, desde suas informações básicas até a estrutura do seu formulário de atendimento.</p>
+
+            <h6><i class="bi bi-card-heading"></i> O que você pode fazer aqui?</h6>
+            <ul>
+                <li><strong>Alterar Dados Gerais:</strong> Modifique o nome, o valor, o status ou a descrição do serviço.</li>
+                <li><strong>Adicionar Novos Campos:</strong> Clique em <strong>"Adicionar Campo"</strong> para incluir novos dados a serem coletados no formulário do serviço.</li>
+                <li><strong>Remover Campos:</strong> Clique no ícone de fechar <i class="bi bi-x-lg"></i> no canto de um campo personalizado para removê-lo.</li>
+                <li><strong>Adicionar/Remover Valores de Referência:</strong> Dentro de cada campo, você pode adicionar ou remover linhas da tabela de referências para manter as informações atualizadas.</li>
+            </ul>
+            
+            <h6><i class="bi bi-save-fill"></i> Salvar Alterações</h6>
+            <p>Após realizar todas as modificações desejadas, clique em <strong>"Salvar Alterações"</strong> para aplicá-las.</p>
+
+            <p class="alert alert-info mt-3"><strong>Nota sobre Edições:</strong> As alterações feitas na estrutura do formulário (adição ou remoção de campos) serão refletidas apenas em <strong>novos registros</strong> de serviço. Os registros de atendimentos já realizados manterão os campos que existiam no momento em que foram salvos, garantindo a integridade do seu histórico.</p>
+        </div>
+
         <?php include_once DEV_PATH . 'Views/toast.php' ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
             const camposExistentes = <?= json_encode($campos_servicos) ?>;

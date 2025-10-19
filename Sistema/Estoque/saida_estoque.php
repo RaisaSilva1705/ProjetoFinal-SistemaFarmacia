@@ -85,20 +85,37 @@ include DEV_PATH . "Exec/validar_acesso.php";
             <?php include_once DEV_PATH . 'Views/footer.php'?>
         </div>
 
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
-            </div>
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-box-arrow-up"></i> Registrar Saída de Estoque Manual</h4>
+            <hr>
+            <p>Esta tela é usada para dar baixa em produtos do seu inventário por motivos que <strong>não são vendas</strong>. O uso correto desta ferramenta é crucial para manter a precisão do seu estoque e para a apuração de perdas.</p>
+
+            <h6><i class="bi bi-123"></i> Passo a Passo para Registrar uma Saída</h6>
+            <ol>
+                <li><strong>Buscar Produto:</strong> Comece digitando o nome ou o código de barras do produto que deseja retirar do estoque.</li>
+                <li><strong>Selecionar o Lote:</strong> Após selecionar o produto, o sistema carregará todos os lotes disponíveis com estoque. Selecione o lote específico do qual a unidade será retirada.</li>
+                <li><strong>Quantidade a Retirar:</strong> Informe quantas unidades deste lote serão retiradas. O sistema não permitirá retirar uma quantidade maior do que a disponível no lote selecionado.</li>
+                <li><strong>Motivo da Saída:</strong> Selecione o motivo que melhor descreve a razão da baixa. Esta informação é fundamental para os seus relatórios de perdas.
+                    <ul>
+                        <li><strong>Perda / Avaria:</strong> Produto danificado.</li>
+                        <li><strong>Vencimento:</strong> Produto expirado.</li>
+                        <li><strong>Furto:</strong> Produto subtraído.</li>
+                        <li><strong>Ajuste de Inventário:</strong> Para corrigir discrepâncias encontradas na contagem física.</li>
+                        <li><strong>Uso Interno:</strong> Produto consumido pela própria farmácia.</li>
+                    </ul>
+                </li>
+                <li><strong>Observações (Opcional):</strong> Detalhe o motivo da saída, se necessário.</li>
+                <li><strong>Foto da Ocorrência (Opcional):</strong> Em casos de avaria, é uma boa prática anexar uma foto como evidência.</li>
+            </ol>
+            
+            <h6><i class="bi bi-check-circle-fill"></i> Finalizar</h6>
+            <p>Após preencher todos os campos obrigatórios, clique em <strong>"Registrar Saída"</strong>. O sistema dará baixa no estoque e registrará a movimentação para fins de auditoria.</p>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <?php include_once DEV_PATH . 'Views/toast.php'?>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const campoBusca = document.getElementById('busca_produto');

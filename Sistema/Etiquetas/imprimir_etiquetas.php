@@ -89,7 +89,7 @@ foreach ($etiquetas_selecionadas as $id_produto => $dados) {
 
                     <div class="etiqueta-corpo">
                         <div class="etiqueta-nome"><?= htmlspecialchars($etiqueta['nome']) ?></div>
-                        <span class="preco-texto-promo"><?= htmlspecialchars($info_preco['texto_promocao']) ?></span>
+                        <span class="preco-texto-promo"><?= ($info_preco['texto_promocao']) ? htmlspecialchars($info_preco['texto_promocao']) : '' ?></span>
 
                         <div class="etiqueta-preco">
                             <?php if ($info_preco['tipo_promocao'] == 'LEVE_X_PAGUE_Y'): ?>

@@ -15,7 +15,7 @@ $usuario_login = htmlspecialchars($usuario['Usuario'] ?? '');
     <?php if ($is_edit): ?>
         <input type="hidden" name="id_funcionario" value="<?= $id_funcionario ?>">
     <?php endif; ?>
-    <h5 class="mt-4">Dados Pessoais e Contrato</h5>
+    <h5>Dados Pessoais e Contrato</h5>
     <div class="row">
         <div class="col-md-8 mb-3">
             <label for="nome" class="form-label">Nome Completo</label>
@@ -92,7 +92,7 @@ $usuario_login = htmlspecialchars($usuario['Usuario'] ?? '');
         </div>
     </div>
 
-    <div class="mt-4">
+    <div class="mt-4 text-end">
         <button type="submit" class="btn btn-primary"><?= $is_edit ? 'Salvar Alterações' : 'Cadastrar Funcionário' ?></button>
         <a href="funcionarios.php" class="btn btn-secondary">Cancelar</a>
     </div>

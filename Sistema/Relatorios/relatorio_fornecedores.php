@@ -133,11 +133,35 @@ if (count($fornecedores_ranking) > 0) {
                         </div>
                     </div>
                 </div>
+                <?php include_once DEV_PATH . 'Views/footer.php'; ?>
             </div>
-            
-            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
+        </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-truck"></i> Relatório de Análise de Fornecedores</h4>
+            <hr>
+            <p>Este relatório estratégico mede o desempenho dos seus fornecedores com base no sucesso de vendas dos produtos que eles fornecem. Use esta análise para entender quais parcerias comerciais são mais rentáveis para a sua farmácia e para negociar melhores condições de compra.</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtros de Análise</h6>
+            <ul>
+                <li><strong>Período (De/Até):</strong> Defina o intervalo de datas para a análise de vendas.</li>
+                <li><strong>Buscar Fornecedor:</strong> Filtre o relatório para ver o desempenho de um único fornecedor.</li>
+            </ul>
+
+            <h6><i class="bi bi-bar-chart-steps"></i> Indicadores de Desempenho</h6>
+            <p>Os cards no topo da página fornecem um resumo do impacto dos seus fornecedores no período filtrado:</p>
+            <ul>
+                <li><strong>Faturamento Total (Fornec.):</strong> A soma de todo o faturamento gerado pela venda de produtos associados a fornecedores.</li>
+                <li><strong>Fornecedor Destaque:</strong> O parceiro cujos produtos geraram o maior faturamento total.</li>
+                <li><strong>Produtos Únicos Vendidos:</strong> A quantidade de diferentes tipos de produtos (associados a fornecedores) que foram vendidos.</li>
+                <li><strong>Unidades Totais Vendidas:</strong> A soma de todas as unidades vendidas de produtos associados a fornecedores.</li>
+            </ul>
+
+            <h6><i class="bi bi-award-fill"></i> Ranking de Fornecedores</h6>
+            <p>A tabela principal classifica os fornecedores com base no <strong>faturamento total gerado</strong> pelos produtos que eles fornecem. Analise este ranking para identificar seus parceiros mais estratégicos e quais linhas de produto têm maior impacto no seu resultado financeiro.</p>
         </div>
         
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
     </body>
 </html>

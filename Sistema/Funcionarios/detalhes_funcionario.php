@@ -140,7 +140,7 @@ $atividades = $stmtAtividades->get_result();
                     </div>
 
                     <div class="col-lg-12 mb-2">
-                        <div class="card shadow-sm mb-4">
+                        <div class="card shadow-sm">
                             <div class="card-header">
                                 <h5 class="m-0">Resumo de Avaliações de Clientes</h5>
                             </div>
@@ -181,13 +181,29 @@ $atividades = $stmtAtividades->get_result();
                     </div>
                 </div>
             </div>
+            <?php include_once DEV_PATH . 'Views/footer.php';?>
         </div>
-        <?php include_once DEV_PATH . 'Views/footer.php';?>
+    </div>
+
+    <div id="manual-content-container" style="display: none;">
+        <h4><i class="bi bi-eye-fill"></i> Detalhes do Funcionário</h4>
+        <hr>
+        <p>Esta tela oferece um perfil completo do funcionário, consolidando suas informações de cadastro, atividades recentes no sistema e o feedback recebido dos clientes.</p>
+
+        <h6><i class="bi bi-person-circle"></i> Painel de Informações</h6>
+        <p>O primeiro card resume os dados principais do funcionário, como cargo, informações de contato e o nome de usuário para acesso ao sistema. O botão de editar <i class="bi bi-pencil-fill text-warning"></i> serve como um atalho rápido para a tela de edição.</p>
+
+        <h6><i class="bi bi-graph-up-arrow"></i> Atividades Recentes</h6>
+        <p>Este painel exibe uma linha do tempo das últimas operações significativas realizadas pelo funcionário no sistema, como vendas e movimentações de caixa (sangrias e suprimentos). É uma ferramenta útil para auditoria e acompanhamento.</p>
+        
+        <h6><i class="bi bi-star-half"></i> Resumo de Avaliações de Clientes</h6>
+        <p>Este é o painel de feedback de performance. Ele apresenta a <strong>média geral</strong> das notas que o funcionário recebeu dos clientes após as vendas e um detalhamento visual da distribuição dessas notas (de "Péssimo" a "Excelente"). Use esta ferramenta para identificar pontos fortes e oportunidades de treinamento para a equipe.</p>
     </div>
 
     <?php include_once DEV_PATH . 'Views/toast.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script src="<?= DEV_URL ?>JS/toast.js"></script>
+    <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
     <script>
         <?php
         if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {

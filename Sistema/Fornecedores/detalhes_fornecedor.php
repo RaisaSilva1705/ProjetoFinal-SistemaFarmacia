@@ -150,6 +150,26 @@ $total_produtos_distintos = $produtos_fornecidos->num_rows;
             <!-- Footer -->
             <?php include_once DEV_PATH . 'Views/footer.php'?>
         </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-eye-fill"></i> Detalhes do Fornecedor</h4>
+            <hr>
+            <p>Esta tela apresenta uma visão consolidada de um fornecedor específico, mostrando suas informações de cadastro e, mais importante, o catálogo de produtos que ele fornece para a sua farmácia.</p>
+
+            <h6><i class="bi bi-building-fill"></i> Informações de Cadastro e Contato</h6>
+            <p>Os cards no topo da página resumem os dados principais do fornecedor, como Razão Social, CNPJ, endereço e informações de contato direto.</p>
+            
+            <h6><i class="bi bi-boxes"></i> Produtos Fornecidos</h6>
+            <p>A tabela principal desta página é uma ferramenta poderosa de análise. Ela lista <strong>todos os produtos do seu sistema que estão vinculados a este fornecedor</strong>.</p>
+            <p>Utilize esta lista para:</p>
+            <ul>
+                <li>Ver rapidamente o portfólio de produtos de um fornecedor.</li>
+                <li>Analisar o estoque atual dos itens que ele fornece.</li>
+                <li>Consultar o preço de venda praticado para esses produtos.</li>
+            </ul>
+            <p>Esta visão ajuda a entender a importância de cada fornecedor para o seu mix de produtos e a tomar decisões estratégicas de compra.</p>
+        </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
     </body>
 </html>

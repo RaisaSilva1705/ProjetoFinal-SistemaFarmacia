@@ -43,6 +43,8 @@ $obs = htmlspecialchars($fornecedor['OBS'] ?? '');
         </div>
     </div>
 
+    <hr>
+
     <h5 class="mt-4">Endereço</h5>
     <div class="row">
         <div class="col-md-2 mb-3">
@@ -74,6 +76,8 @@ $obs = htmlspecialchars($fornecedor['OBS'] ?? '');
             <input type="text" id="estado" name="estado" class="form-control" required maxlength="2" value="<?= $estado ?>">
         </div>
     </div>
+
+    <hr>
 
     <h5 class="mt-4">Informações Adicionais</h5>
     <div class="row">

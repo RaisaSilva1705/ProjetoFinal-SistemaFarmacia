@@ -77,6 +77,9 @@ if (isset($_SESSION['Cargo']) && ($_SESSION['Cargo'] == 'Gerente' || $_SESSION['
                                     <a href="editar_cliente.php?id=<?= $cliente['ID_Cliente'] ?>" class="btn btn-warning btn-sm" title="Editar"><i class="bi bi-pencil-fill"></i></a>
                                 </div>
                                 <div class="card-body">
+                                    <p><strong><i class="bi bi-person-vcard-fill me-2"></i>Gênero:</strong> <?= htmlspecialchars($cliente['Genero'] ?? 'Não informado') ?></p>
+                                    <p><strong><i class="bi bi-calendar-heart-fill me-2"></i>Nascimento:</strong> <?= $cliente['Data_Nascimento'] ? date('d/m/Y', strtotime($cliente['Data_Nascimento'])) : 'Não informado' ?></p>
+                                    <hr>
                                     <p><strong><i class="bi bi-telephone-fill me-2"></i>Contato:</strong> <?= htmlspecialchars($cliente['Tel']) ?></p>
                                     <p><strong><i class="bi bi-envelope-fill me-2"></i>Email:</strong> <?= htmlspecialchars($cliente['Email']) ?></p>
                                     <p><strong>Status:</strong> <span class="badge <?= $cliente['Status'] == 'Ativo' ? 'bg-success' : 'bg-danger' ?>"><?= htmlspecialchars($cliente['Status']) ?></span></p>
@@ -107,8 +110,30 @@ if (isset($_SESSION['Cargo']) && ($_SESSION['Cargo'] == 'Gerente' || $_SESSION['
                                 <div class="card-body">
                                     <?php if ($enderecos->num_rows > 0): ?>
                                         <?php while($end = $enderecos->fetch_assoc()): ?>
-                                            <p class="mb-1"><strong><?= htmlspecialchars("{$end['Endereco']}, {$end['End_Numero']} - {$end['Bairro']}") ?></strong></p>
-                                            <p class="text-muted small"><?= htmlspecialchars("{$end['Cidade']}/{$end['Estado']} - CEP: {$end['CEP']}") ?></p>
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <p class="mb-1"><strong><?= htmlspecialchars("{$end['Endereco']}, {$end['End_Numero']} - {$end['Bairro']}") ?></strong></p>
+                                                    <p class="text-muted small"><?= htmlspecialchars("{$end['Cidade']}/{$end['Estado']} - CEP: {$end['CEP']}") ?></p>
+                                                </div>
+                                                <div class="ms-3 d-flex gap-2">
+                                                    <button type="button" class="btn btn-warning btn-sm" title="Editar Endereço"
+                                                            onclick="abrirModalEdicaoEndereco(this)"
+                                                            data-id="<?= $end['ID_Endereco_Cli'] ?>"
+                                                            data-cep="<?= htmlspecialchars($end['CEP']) ?>"
+                                                            data-endereco="<?= htmlspecialchars($end['Endereco']) ?>"
+                                                            data-numero="<?= htmlspecialchars($end['End_Numero']) ?>"
+                                                            data-complemento="<?= htmlspecialchars($end['Complemento']) ?>"
+                                                            data-bairro="<?= htmlspecialchars($end['Bairro']) ?>"
+                                                            data-cidade="<?= htmlspecialchars($end['Cidade']) ?>"
+                                                            data-estado="<?= htmlspecialchars($end['Estado']) ?>"
+                                                            data-obs="<?= htmlspecialchars($end['OBS']) ?>">
+                                                        <i class="bi bi-pencil-fill"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-danger btn-sm" title="Remover Endereço" onclick="abrirModalRemocao(<?= $end['ID_Endereco_Cli'] ?>)">
+                                                        <i class="bi bi-trash-fill"></i>
+                                                    </button>
+                                                </div>
+                                                </div>
                                             <hr>
                                         <?php endwhile; ?>
                                     <?php else: ?>
@@ -204,15 +229,70 @@ if (isset($_SESSION['Cargo']) && ($_SESSION['Cargo'] == 'Gerente' || $_SESSION['
             </div>
         </div>
 
+        <div class="modal fade" id="modalConfirmarRemocao" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">Confirmar Remoção</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Tem certeza que deseja remover este endereço? Esta ação não pode ser desfeita.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <form id="formRemoverEndereco" method="POST">
+                            <input type="hidden" name="action" value="remover">
+                            <input type="hidden" name="id_cliente" value="<?= $cliente['ID_Cliente'] ?>">
+                            <input type="hidden" name="id_endereco_cli" id="id_endereco_remover">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-danger">Sim, Remover</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-eye-fill"></i> Detalhes do Cliente</h4>
+            <hr>
+            <p>Esta tela oferece uma visão completa de 360° do cliente, reunindo todas as suas informações cadastrais, de contato e seu histórico com a farmácia.</p>
+
+            <h6><i class="bi bi-person-circle"></i> Painel de Informações</h6>
+            <p>O primeiro card à esquerda resume os dados principais do cliente, como contato, status e o saldo de <strong>Crédito em Loja</strong> disponível. Você pode clicar no botão de editar <i class="bi bi-pencil-fill text-warning"></i> para ir diretamente à tela de edição.</p>
+
+            <h6><i class="bi bi-file-earmark-text-fill"></i> Documentos</h6>
+            <p>Lista todos os documentos cadastrados para este cliente.</p>
+            
+            <h6><i class="bi bi-house-fill"></i> Endereços</h6>
+            <p>Exibe todos os endereços de entrega cadastrados. Para adicionar um novo endereço:</p>
+            <ol>
+                <li>Clique em <strong>"Novo Endereço"</strong>.</li>
+                <li>Na janela que se abre, comece digitando o <strong>CEP</strong>. O sistema buscará automaticamente o restante do endereço.</li>
+                <li>Complete com o <strong>Número</strong> e o <strong>Complemento</strong>, se houver.</li>
+                <li>Clique em <strong>"Salvar Endereço"</strong>.</li>
+            </ol>
+
+            <h6><i class="bi bi-receipt"></i> Histórico de Compras Recentes</h6>
+            <p>Este painel (visível apenas para Gerentes e Administradores) exibe um resumo das últimas compras realizadas pelo cliente, permitindo um atendimento mais personalizado e a identificação de seus produtos de interesse.</p>
+        </div>
+
         <?php include_once DEV_PATH . 'Views/toast.php';?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const modalEndereco = new bootstrap.Modal(document.getElementById('modalEndereco'));
+                const modalConfirmarRemocao = new bootstrap.Modal(document.getElementById('modalConfirmarRemocao'));
                 const formEndereco = document.getElementById('formEndereco');
                 const btnSalvar = document.getElementById('btnSalvarEndereco');
                 const campoCep = document.getElementById('cep');
+
+                document.getElementById('modalEndereco').addEventListener('hidden.bs.modal', function () {
+                    formEndereco.reset(); 
+                    document.getElementById('id_endereco_cli').value = ''; 
+                    document.getElementById('modalEnderecoLabel').textContent = 'Adicionar Endereço'; 
+                });
 
                 campoCep.addEventListener('input', function() {
                     let cepValue = this.value.replace(/\D/g, '');
@@ -250,6 +330,46 @@ if (isset($_SESSION['Cargo']) && ($_SESSION['Cargo'] == 'Gerente' || $_SESSION['
                     .catch(error => {
                         console.error('Erro no fetch:', error);
                         mostrarToast('Ocorreu um erro de comunicação. Tente novamente.', 'danger');
+                    });
+                });
+
+                window.abrirModalEdicaoEndereco = function(button) {
+                    const data = button.dataset;
+                    document.getElementById('modalEnderecoLabel').textContent = 'Editar Endereço';
+
+                    document.getElementById('id_endereco_cli').value = data.id;
+                    document.getElementById('cep').value = data.cep;
+                    document.getElementById('endereco').value = data.endereco;
+                    document.getElementById('numero').value = data.numero;
+                    document.getElementById('complemento').value = data.complemento;
+                    document.getElementById('bairro').value = data.bairro;
+                    document.getElementById('cidade').value = data.cidade;
+                    document.getElementById('estado').value = data.estado;
+                    document.getElementById('obs').value = data.obs;
+
+                    modalEndereco.show();
+                }
+
+                window.abrirModalRemocao = function(idEndereco) {
+                    document.getElementById('id_endereco_remover').value = idEndereco;
+                    modalConfirmarRemocao.show();
+                }
+
+                document.getElementById('formRemoverEndereco').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    fetch('gerenciar_endereco.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.sucesso){
+                            location.reload();
+                            mostrarToast('Endereço removido com sucesso!', 'success');
+                        }
+                        else 
+                            mostrarToast('Erro: ' + (data.erro || 'Não foi possível remover o endereço.'), 'danger');
                     });
                 });
             });

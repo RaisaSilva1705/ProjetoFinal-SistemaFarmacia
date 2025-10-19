@@ -18,6 +18,7 @@ include DEV_PATH . "Exec/validar_acesso.php";
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Serviços Farmacêuticos</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
     <body>
@@ -122,9 +123,38 @@ include DEV_PATH . "Exec/validar_acesso.php";
             <?php include_once DEV_PATH . 'Views/footer.php'?>
         </div>
 
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-journal-plus"></i> Registrar Novo Atendimento de Serviço</h4>
+            <hr>
+            <p>Esta é a tela de registro clínico, onde você documenta a prestação de um serviço farmacêutico a um paciente. O preenchimento correto de todas as informações é fundamental para a segurança do paciente e para a validade legal do registro.</p>
+
+            <h6><i class="bi bi-person-fill"></i> Passo 1: Identificação do Paciente</h6>
+            <ul>
+                <li><strong>Buscar Cliente por CPF/CNPJ:</strong> Se o paciente já for cadastrado no sistema, digite seu documento para que os dados (nome, data de nascimento, etc.) sejam preenchidos automaticamente.</li>
+                <li><strong>Paciente não cadastrado:</strong> Se for um paciente avulso, você pode preencher o nome e os outros dados manualmente.</li>
+                <li><strong>Responsável Legal:</strong> O sistema verifica a idade do paciente. Se ele for menor de 18 anos, campos para identificação de um responsável legal aparecerão e serão obrigatórios.</li>
+            </ul>
+
+            <h6><i class="bi bi-clipboard2-pulse-fill"></i> Passo 2: Selecionar o Serviço</h6>
+            <p>No campo <strong>"Selecionar o Serviço"</strong>, escolha o atendimento que está sendo realizado. Esta é a etapa mais importante, pois o sistema carregará abaixo um <strong>formulário dinâmico</strong> com os campos exatos que precisam ser preenchidos para aquele serviço específico.</p>
+
+            <h6><i class="bi bi-list-check"></i> Passo 3: Preencher os Dados do Atendimento</h6>
+            <p>Preencha os campos que apareceram na tela. Eles variam conforme o serviço e podem incluir medições (pressão, glicemia), informações sobre medicamentos aplicados, etc.</p>
+
+            <h6><i class="bi bi-file-earmark-text"></i> Passo 4: Finalização e Observações</h6>
+            <ul>
+                <li>Responda às perguntas sobre a <strong>autorização do uso de dados</strong> e se o <strong>paciente foi encaminhado ao médico</strong>.</li>
+                <li>Utilize o campo de <strong>Observações</strong> para registrar qualquer informação adicional relevante sobre o atendimento.</li>
+            </ul>
+
+            <h6><i class="bi bi-save-fill"></i> Passo 5: Salvar Registro</h6>
+            <p>Ao clicar em <strong>"Salvar Registro"</strong>, o sistema validará as informações e criará um registro permanente no histórico de serviços. A Declaração de Serviço Farmacêutico (DSF) será gerada para impressão.</p>
+        </div>
+
         <?php include_once DEV_PATH . 'Views/toast.php'?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const campoBuscaCliente = document.getElementById('busca_cliente_cpf');

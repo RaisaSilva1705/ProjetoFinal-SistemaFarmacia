@@ -70,7 +70,7 @@ $margem_lucro_bruta = ($total_faturamento > 0) ? ($total_lucro_bruto / $total_fa
     <head>
         <meta charset="UTF-8">
         <title>Relatório de Desempenho de Produtos</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
@@ -142,11 +142,38 @@ $margem_lucro_bruta = ($total_faturamento > 0) ? ($total_lucro_bruto / $total_fa
                         </div>
                     </div>
                 </div>
+                <?php include_once DEV_PATH . 'Views/footer.php'; ?>
             </div>
-            
-            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
+        </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-graph-up"></i> Relatório de Desempenho de Produtos</h4>
+            <hr>
+            <p>Este relatório é uma ferramenta estratégica essencial para entender quais produtos são os campeões de venda e quais geram mais lucro para o seu negócio. Use esta análise para otimizar seu mix de produtos, planejar compras e criar promoções mais eficazes.</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtro por Período</h6>
+            <p>Utilize os campos de data no topo para definir o período que você deseja analisar e descobrir o desempenho dos produtos em diferentes épocas.</p>
+
+            <h6><i class="bi bi-trophy-fill"></i> Indicadores de Destaque</h6>
+            <p>Os cards no topo da página destacam os produtos com melhor performance no período selecionado:</p>
+            <ul>
+                <li><strong>Produto Mais Vendido (Qtd):</strong> Mostra o item que teve o maior número de unidades vendidas, independentemente do preço. Ideal para identificar produtos populares.</li>
+                <li><strong>Produto Mais Rentável (R$):</strong> Mostra o item que gerou o maior faturamento total (preço x quantidade). É o seu "carro-chefe" em termos de receita.</li>
+                <li><strong>Total de Unidades Vendidas:</strong> A soma de todas as unidades de todos os produtos vendidos no período.</li>
+                <li><strong>Margem de Lucro Bruta:</strong> A porcentagem média de lucro obtida sobre o custo dos produtos vendidos. Um indicador chave da saúde financeira das suas vendas.</li>
+            </ul>
+
+            <h6><i class="bi bi-table"></i> Desempenho por Produto</h6>
+            <p>A tabela principal ranqueia todos os produtos vendidos no período, ordenados pelo maior faturamento. Ela detalha para cada item:</p>
+            <ul>
+                <li><strong>Qtd. Vendida:</strong> Total de unidades vendidas.</li>
+                <li><strong>Faturamento Total:</strong> A receita gerada por aquele produto.</li>
+                <li><strong>Custo Estimado:</strong> Uma estimativa do custo total das unidades vendidas.</li>
+                <li><strong>Lucro Bruto Estimado:</strong> A diferença entre o faturamento e o custo, mostrando o lucro gerado pelo produto antes das despesas operacionais.</li>
+            </ul>
         </div>
         
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
     </body>
 </html>

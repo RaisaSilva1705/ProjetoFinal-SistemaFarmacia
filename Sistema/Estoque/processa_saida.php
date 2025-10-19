@@ -57,7 +57,7 @@ try {
         "INSERT INTO MOVIMENTACAO_ESTOQUE (ID_Estoque, ID_Produto, ID_Funcionario, Tipo, Motivo, Quantidade, OBS, Foto_Ocorrencia) 
          VALUES (?, ?, ?, 'Saída', ?, ?, ?, ?)"
     );
-    $stmtMov->bind_param("iiisisss", $id_estoque, $id_produto, $id_funcionario, $motivo, $quantidade, $obs, $nome_arquivo_foto);
+    $stmtMov->bind_param("iiisiss", $id_estoque, $id_produto, $id_funcionario, $motivo, $quantidade, $obs, $nome_arquivo_foto);
     $stmtMov->execute();
     
     $conn->commit();

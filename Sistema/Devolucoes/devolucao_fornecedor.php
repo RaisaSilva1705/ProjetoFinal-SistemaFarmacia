@@ -83,20 +83,35 @@ $fornecedores = $conn->query("SELECT ID_Fornecedor, Nome_Fantasia FROM FORNECEDO
             <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
 
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
-            </div>
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-box-arrow-left"></i> Registrar Devolução para Fornecedor</h4>
+            <hr>
+            <p>Utilize esta tela para registrar a devolução de produtos ao seu fornecedor, seja por avaria, vencimento próximo, recall ou acordo comercial. Este processo dá baixa nos itens do seu estoque e cria um registro para controle financeiro (crédito ou reembolso).</p>
+
+            <h6><i class="bi bi-truck"></i> Passo 1: Selecionar o Fornecedor</h6>
+            <p>No menu suspenso, selecione o <strong>Fornecedor</strong> para o qual você está devolvendo os produtos. Assim que selecionado, o sistema carregará abaixo todos os lotes de produtos em seu estoque que foram fornecidos por ele.</p>
+            <p>Você pode adicionar um <strong>Motivo Geral</strong> para a devolução, que servirá como uma observação no registro.</p>
+
+            <h6><i class="bi bi-list-check"></i> Passo 2: Selecionar Itens para Devolver</h6>
+            <p>Na tabela, você verá uma lista de todos os <strong>lotes de produtos</strong> deste fornecedor que possuem estoque. Para cada lote que deseja devolver:</p>
+            <ol>
+                <li><strong>Marque a caixa "Devolver?"</strong> para o lote correspondente.</li>
+                <li><strong>Qtd. a Devolver:</strong> Informe a quantidade exata de unidades daquele lote que estão sendo devolvidas. Você não pode devolver mais do que a quantidade disponível em estoque para aquele lote específico.</li>
+            </ol>
+
+            <h6><i class="bi bi-check-circle-fill"></i> Passo 3: Confirmar</h6>
+            <p>Após selecionar todos os itens e quantidades, clique em <strong>"Confirmar Devolução"</strong>. O sistema irá:</p>
+            <ul>
+                <li>Criar um registro de devolução para fins de auditoria.</li>
+                <li>Dar baixa na quantidade correspondente do estoque de cada lote selecionado.</li>
+                <li>Registrar o valor total de custo da devolução para seu controle financeiro junto ao fornecedor.</li>
+            </ul>
         </div>
 
+        <?php include_once DEV_PATH . 'Views/toast.php'; ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const selectFornecedor = document.getElementById('id_fornecedor');

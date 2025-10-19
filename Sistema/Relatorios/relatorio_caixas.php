@@ -152,11 +152,40 @@ $caixas_lista = $conn->query("SELECT ID_Caixa, Caixa FROM CAIXAS WHERE StatusCad
                         </div>
                     </div>
                 </div>
+                <?php include_once DEV_PATH . 'Views/footer.php'; ?>
             </div>
-            
-            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
         
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-archive-fill"></i> Relatório de Caixas Fechados</h4>
+            <hr>
+            <p>Este relatório é uma ferramenta de auditoria essencial que fornece o histórico de todos os fechamentos de caixa realizados. Use-o para conferir valores, analisar o desempenho por operador e garantir a conformidade financeira das operações do PDV.</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtros de Busca</h6>
+            <ul>
+                <li><strong>Período (De/Até):</strong> Filtre os fechamentos que ocorreram dentro de um intervalo de datas específico.</li>
+                <li><strong>Caixa:</strong> Analise o histórico de um ponto de venda (caixa) em particular.</li>
+            </ul>
+
+            <h6><i class="bi bi-calculator"></i> Indicadores Gerais</h6>
+            <p>Os cards no topo da página oferecem uma visão geral dos resultados do período filtrado:</p>
+            <ul>
+                <li><strong>Faturamento no Período:</strong> A soma de todo o valor vendido em todos os fechamentos listados.</li>
+                <li><strong>Nº de Fechamentos:</strong> A quantidade de turnos de caixa que foram encerrados.</li>
+                <li><strong>Valor Médio por Fechamento:</strong> O faturamento médio de cada turno de caixa.</li>
+                <li><strong>Caixa Destaque:</strong> O ponto de venda que gerou o maior faturamento acumulado no período.</li>
+            </ul>
+
+            <h6><i class="bi bi-list-ol"></i> Histórico de Fechamentos</h6>
+            <p>A tabela principal detalha cada fechamento de caixa, fornecendo informações cruciais para auditoria:</p>
+            <ul>
+                <li><strong>Caixa e Operador:</strong> Quem operou e onde.</li>
+                <li><strong>Abertura e Fechamento:</strong> O período exato do turno.</li>
+                <li><strong>Saldos:</strong> Os valores de Saldo Inicial, Valor Vendido e Saldo Final (calculado pelo sistema), permitindo a conferência de qualquer divergência.</li>
+            </ul>
+        </div>
+
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
     </body>
 </html>

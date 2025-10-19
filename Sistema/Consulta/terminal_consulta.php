@@ -62,15 +62,16 @@ include "../../Dev/Exec/config.php";
                 const response = await fetch(`../../Dev/Exec/busca_produto_consulta.php?ean=${ean}`);
                 const data = await response.json();
 
-                if (data.sucesso) {
+                if (data.sucesso) 
                     exibirResultado(data.produto);
-                } else {
+                else 
                     exibirErro('Produto não encontrado. Tente novamente ou peça ajuda a um colaborador.');
-                }
-            } catch (error) {
+            } 
+            catch (error) {
                 console.error('Erro na busca:', error);
                 exibirErro('Ocorreu um erro na comunicação. Tente novamente.');
-            } finally {
+            } 
+            finally {
                 this.value = ''; // Limpa o campo para a próxima consulta
             }
         });
@@ -85,9 +86,9 @@ include "../../Dev/Exec/config.php";
             if (produto.Promocao_Descricao) {
                 document.getElementById('promocao-desc').textContent = produto.Promocao_Descricao;
                 promoBox.style.display = 'block';
-            } else {
+            } 
+            else 
                 promoBox.style.display = 'none';
-            }
 
             // Aciona a transição
             telaInicial.classList.remove('active');

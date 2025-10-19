@@ -174,11 +174,36 @@ if (count($registros) > 0) {
                         </div>
                     </div>
                 </div>
+                <?php include_once DEV_PATH . 'Views/footer.php'; ?>
             </div>
-            
-            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-file-earmark-lock2-fill"></i> Relatório de Dispensação de Controlados</h4>
+            <hr>
+            <p>Este relatório é uma ferramenta de <strong>conformidade regulatória e auditoria</strong>, essencial para o controle de medicamentos de uso restrito. Ele fornece um registro detalhado de todas as vendas de medicamentos controlados que foram vinculadas a uma prescrição (receita).</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtros de Busca</h6>
+            <ul>
+                <li><strong>Período (De/Até):</strong> Defina o intervalo de datas para a análise.</li>
+                <li><strong>Medicamento:</strong> Filtre para ver todas as dispensações de um medicamento controlado específico.</li>
+                <li><strong>Prescritor:</strong> Filtre para rastrear todas as receitas de um médico ou profissional em particular.</li>
+            </ul>
+
+            <h6><i class="bi bi-bar-chart-fill"></i> Indicadores de Dispensação</h6>
+            <p>Os cards no topo da página fornecem um resumo rápido do período:</p>
+            <ul>
+                <li><strong>Total de Dispensações:</strong> O número de receitas únicas atendidas.</li>
+                <li><strong>Total de Unidades:</strong> A quantidade total de caixas/frascos de medicamentos controlados vendidos.</li>
+                <li><strong>Medicamento Mais Dispensado:</strong> Identifica o controlado com maior saída.</li>
+                <li><strong>Prescritor Destaque:</strong> O profissional de saúde cujas receitas foram mais atendidas na sua farmácia.</li>
+            </ul>
+
+            <h6><i class="bi bi-list-check"></i> Registros Detalhados</h6>
+            <p>A tabela principal é o seu livro de registro. Ela detalha cada venda de controlado, informando a data, o medicamento, a quantidade, o paciente e, crucialmente, o profissional prescritor e seu respectivo conselho (CRM, CRO, etc.). Utilize esta tabela para auditorias internas e para a geração de relatórios para órgãos fiscalizadores.</p>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
     </body>
 </html>

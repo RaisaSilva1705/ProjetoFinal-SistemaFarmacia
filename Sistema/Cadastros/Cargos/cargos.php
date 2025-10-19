@@ -10,7 +10,7 @@ define('MODULO_SOLICITADO', 'CONFIGURACOES_GERENCIAR');
 include DEV_PATH . "Exec/validar_acesso.php";
 
 $busca_texto = $_GET['busca_texto'] ?? '';
-$status = $_GET['status'] ?? '';
+$status = (isset($_GET['status']) && $_GET['status'] !== 'Todos') ? $_GET['status'] : '';
 
 $sql = "SELECT ID_Cargo, Cargo, Descricao, Status FROM CARGOS";
 
@@ -71,7 +71,7 @@ $result = $stmt->get_result();
                         <form method="GET" action="cargos.php">
                             <div class="row g-3 align-items-end">
                                 <div class="col-md-6"><label for="busca_texto" class="form-label">Buscar por Nome</label><input type="text" name="busca_texto" id="busca_texto" class="form-control" value="<?= htmlspecialchars($busca_texto) ?>"></div>
-                                <div class="col-md-4"><label for="status" class="form-label">Status</label><select name="status" id="status" class="form-select"><option value="">Todos</option><option value="Ativo" <?= $status == 'Ativo' ? 'selected' : '' ?>>Ativo</option><option value="Inativo" <?= $status == 'Inativo' ? 'selected' : '' ?>>Inativo</option></select></div>
+                                <div class="col-md-4"><label for="status" class="form-label">Status</label><select name="status" id="status" class="form-select"><option value="Todos">Todos</option><option value="Ativo" <?= $status == 'Ativo' ? 'selected' : '' ?>>Ativo</option><option value="Inativo" <?= $status == 'Inativo' ? 'selected' : '' ?>>Inativo</option></select></div>
                                 <div class="col-md-2"><button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel-fill"></i> Filtrar</button></div>
                             </div>
                         </form>
@@ -187,9 +187,40 @@ $result = $stmt->get_result();
             </div>
         </div>
 
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-person-badge-fill"></i> Gestão de Cargos</h4>
+            <hr>
+            <p>Esta tela é fundamental para a estrutura de segurança e organização da sua equipe. Aqui você define os diferentes cargos que existem na farmácia (ex: Farmacêutico, Balconista, Gerente, Estoquista), que servirão de base para o controle de acesso ao sistema.</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtros de Busca</h6>
+            <p>Utilize os filtros para encontrar cargos específicos de forma rápida:</p>
+            <ul>
+                <li><strong>Buscar por Nome:</strong> Digite o nome do cargo que deseja localizar.</li>
+                <li><strong>Status:</strong> Filtre entre cargos <strong>Ativos</strong> (em uso) e <strong>Inativos</strong> (desativados).</li>
+            </ul>
+
+            <h6><i class="bi bi-plus-circle-fill"></i> Cadastrar um Novo Cargo</h6>
+            <ol>
+                <li>Clique no botão <strong>"Novo Cargo"</strong>.</li>
+                <li>Na janela que se abre, informe o <strong>Nome do Cargo</strong> (ex: "Operador de Caixa").</li>
+                <li>No campo <strong>Descrição</strong>, detalhe as principais responsabilidades do cargo.</li>
+                <li>Clique em <strong>"Salvar"</strong>. O novo cargo será criado e estará pronto para ter suas permissões configuradas.</li>
+            </ol>
+
+            <h6><i class="bi bi-pencil-fill"></i> Ações na Lista</h6>
+            <p>Para cada cargo listado, as seguintes ações estão disponíveis:</p>
+            <ul>
+                <li><i class="bi bi-shield-check text-secondary"></i> <strong>Gerenciar Permissões:</strong> Esta é a ação mais importante. Clicar aqui te levará para a tela de permissões, onde você definirá exatamente a quais módulos do sistema este cargo terá acesso.</li>
+                <li><i class="bi bi-pencil-fill text-warning"></i> <strong>Editar Cargo:</strong> Permite alterar o nome e a descrição de um cargo.</li>
+                <li><i class="bi bi-pause-circle-fill text-danger"></i> <strong>Inativar:</strong> Torna um cargo "Inativo", impedindo que ele seja associado a novos funcionários.</li>
+                <li><i class="bi bi-play-circle-fill text-success"></i> <strong>Ativar:</strong> Reativa um cargo que estava "Inativo".</li>
+            </ul>
+            <p class="alert alert-warning"><strong>Atenção:</strong> O sistema protege a integridade dos dados. Você não poderá inativar um cargo se houver funcionários ativos associados a ele. É necessário primeiro alterar o cargo desses funcionários para depois inativar o cargo desejado.</p>
+        </div>
+
         <?php include_once DEV_PATH . 'Views/toast.php'; ?>
-        
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
             const modalCargo = document.getElementById('modalCargo');

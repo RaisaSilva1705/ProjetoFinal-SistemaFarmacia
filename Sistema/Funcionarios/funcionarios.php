@@ -11,7 +11,7 @@ define('MODULO_SOLICITADO', 'FUNCIONARIOS_GERENCIAR');
 include DEV_PATH . "Exec/validar_acesso.php";
 
 $busca_nome = $_GET['busca_nome'] ?? '';
-$status = $_GET['status'] ?? '';
+$status = (isset($_GET['status']) && $_GET['status'] !== 'Todos') ? $_GET['status'] : '';
 
 $sql = "SELECT 
             F.ID_Funcionario, 
@@ -90,7 +90,7 @@ $result = $stmt->get_result()
                                 <div class="col-md-4">
                                     <label for="status" class="form-label">Status</label>
                                     <select name="status" id="status" class="form-select">
-                                        <option value="">Todos</option>
+                                        <option value="Todos">Todos</option>
                                         <option value="Ativo" <?= $status == 'Ativo' ? 'selected' : '' ?>>Ativo</option>
                                         <option value="Inativo" <?= $status == 'Inativo' ? 'selected' : '' ?>>Inativo</option>
                                     </select>
@@ -125,7 +125,7 @@ $result = $stmt->get_result()
                                             </td>
                                             <td class="text-center">
                                                 <div class="d-flex justify-content-center gap-2">
-                                                    <a href="detalhes_funcionario.php?id=<?= $row['ID_Funcionario'] ?>" class="btn btn-success btn-sm" title="Ver Detalhes"><i class="bi bi-eye-fill"></i></a>
+                                                    <a href="detalhes_funcionario.php?id=<?= $row['ID_Funcionario'] ?>" class="btn btn-info btn-sm" title="Ver Detalhes"><i class="bi bi-eye-fill"></i></a>
                                                     <a href="editar_funcionario.php?id=<?= $row['ID_Funcionario'] ?>" class="btn btn-warning btn-sm" title="Editar"><i class="bi bi-pencil-fill"></i></a>
                                                     <button type="button" class="btn btn-sm <?= $row['Status'] == 'Ativo' ? 'btn-danger' : 'btn-success' ?>"
                                                             title="<?= $row['Status'] == 'Ativo' ? 'Inativar' : 'Ativar' ?>"
@@ -175,8 +175,37 @@ $result = $stmt->get_result()
             </div>
         </div>
 
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-person-vcard-fill"></i> Gestão de Funcionários</h4>
+            <hr>
+            <p>Esta tela é a sua central de gerenciamento de pessoal. Nela, você pode visualizar todos os funcionários cadastrados, buscar por informações específicas e gerenciar o status e os detalhes de cada um.</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtros de Busca</h6>
+            <p>Utilize os filtros para encontrar um funcionário rapidamente:</p>
+            <ul>
+                <li><strong>Buscar por Nome:</strong> Digite o nome do funcionário que deseja localizar.</li>
+                <li><strong>Status:</strong> Filtre entre funcionários <strong>Ativos</strong> e <strong>Inativos</strong>.</li>
+            </ul>
+
+            <h6><i class="bi bi-plus-circle-fill"></i> Novo Funcionário e Relatório</h6>
+            <ul>
+                <li><strong>Novo Funcionário:</strong> Leva à tela de cadastro para adicionar um novo membro à equipe e criar seu acesso ao sistema.</li>
+                <li><strong>Ver Relatório:</strong> Acessa o relatório de desempenho de funcionários, com métricas de vendas e avaliações de clientes.</li>
+            </ul>
+
+            <h6><i class="bi bi-pencil-fill"></i> Ações na Lista</h6>
+            <p>Para cada funcionário listado, as seguintes ações estão disponíveis:</p>
+            <ul>
+                <li><i class="bi bi-eye-fill text-success"></i> <strong>Ver Detalhes:</strong> Abre uma tela com o perfil completo do funcionário, incluindo suas atividades recentes no sistema e o resumo de suas avaliações.</li>
+                <li><i class="bi bi-pencil-fill text-warning"></i> <strong>Editar:</strong> Permite alterar os dados cadastrais, contratuais e de acesso do funcionário.</li>
+                <li><i class="bi bi-pause-circle-fill text-danger"></i> / <i class="bi bi-play-circle-fill text-success"></i> <strong>Inativar/Ativar:</strong> Altera o status do funcionário e do seu usuário de acesso. Um funcionário inativo não pode mais fazer login no sistema.</li>
+            </ul>
+            <p class="alert alert-danger mt-3"><strong>Regra de Segurança:</strong> Por proteção, o sistema não permite que um usuário inative seu próprio cadastro.</p>
+        </div>
+
         <?php include_once DEV_PATH . 'Views/toast.php'?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
             const modalConfirmStatus = document.getElementById('modalConfirmStatus');

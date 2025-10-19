@@ -60,7 +60,7 @@ $servicos = $conn->query("SELECT ID_Servico, Nome_Servico, Valor FROM SERVICOS_F
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Gerar Pré-Venda</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/prevenda.css">
@@ -187,9 +187,43 @@ $servicos = $conn->query("SELECT ID_Servico, Nome_Servico, Valor FROM SERVICOS_F
             </div>
         </div>
 
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-cart-plus-fill"></i> Gerador de Pré-Venda</h4>
+            <hr>
+            <p>Esta tela é projetada para montar vendas complexas ou que exigem mais tempo, longe do caixa principal. O objetivo é preparar o carrinho, aplicar descontos, identificar o cliente e, ao final, gerar um código único que será finalizado de forma rápida no PDV.</p>
+            <p>É o fluxo ideal para atendimentos demorados, dispensação de controlados ou venda de serviços farmacêuticos.</p>
+
+            <h6><i class="bi bi-123"></i> Passo a Passo para Criar uma Pré-Venda</h6>
+            <ol>
+                <li>
+                    <strong>Adicionar Itens:</strong>
+                    <ul>
+                        <li><strong>Buscar Produto:</strong> Comece a digitar o nome ou EAN do produto. O sistema exibirá uma lista de resultados, incluindo o produto exato e sugestões de genéricos e similares, se houver. Clique em "Adicionar" para incluir no carrinho.</li>
+                        <li><strong>Adicionar Serviço:</strong> Use o menu suspenso para adicionar um serviço farmacêutico à pré-venda.</li>
+                    </ul>
+                </li>
+                <li>
+                    <strong>Identificar Cliente (Opcional):</strong> Se a venda for para um cliente cadastrado, digite o CPF no campo de busca para vincular a compra ao histórico dele.
+                </li>
+                <li>
+                    <strong>Revisar e Ajustar:</strong> Clique no botão <strong>"Ver Pré-Venda"</strong> para abrir o carrinho. Dentro do modal, você pode:
+                    <ul>
+                        <li>Verificar todos os itens e o total.</li>
+                        <li>Remover um item clicando no ícone de lixeira <i class="bi bi-trash text-danger"></i>.</li>
+                        <li>Aplicar um <strong>desconto manual</strong> em um item clicando no ícone de porcentagem <i class="bi bi-percent text-warning"></i> (esta ação exige senha de gerente).</li>
+                    </ul>
+                </li>
+                <li>
+                    <strong>Gerar Código:</strong> Quando o carrinho estiver pronto, clique em <strong>"Gerar Código da Pré-Venda"</strong>. Uma nova aba será aberta com o cupom e um código de barras para ser impresso e entregue ao cliente.
+                </li>
+            </ol>
+            <p class="alert alert-info">O cliente então leva este cupom ao caixa, onde o operador simplesmente escaneia o código para carregar todos os itens e finalizar o pagamento de forma instantânea.</p>
+        </div>
+
         <?php include_once DEV_PATH . 'Views/toast.php' ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 let cart = <?= $itens_iniciais_json ?>;

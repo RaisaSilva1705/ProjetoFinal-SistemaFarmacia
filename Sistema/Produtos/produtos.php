@@ -161,6 +161,7 @@ $result = $stmt->get_result();
                                             <td class="text-end">R$ <?= number_format($row['Preco_Atual'] ?? 0, 2, ',', '.') ?></td>
                                             <td class="text-center">
                                                 <div class="d-flex justify-content-center gap-2">
+                                                    <a href="detalhes_produto.php?codigo=<?= $row['ID_Produto'] ?>" class="btn btn-info btn-sm" title="Ver Detalhes"><i class="bi bi-eye-fill"></i></a>
                                                     <a href="editar_produto.php?codigo=<?= $row['ID_Produto'] ?>" class="btn btn-warning btn-sm" title="Editar"><i class="bi bi-pencil-fill"></i></a>
                                                     <button type="button" class="btn btn-sm <?= $row['Status'] == 'Ativo' ? 'btn-danger' : 'btn-success' ?>"
                                                             title="<?= $row['Status'] == 'Ativo' ? 'Inativar' : 'Ativar' ?>"
@@ -210,8 +211,40 @@ $result = $stmt->get_result();
             </div>
         </div>
 
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-boxes"></i> Gestão de Produtos</h4>
+            <hr>
+            <p>Esta é a sua tela central para o gerenciamento de todo o catálogo de produtos da farmácia. Aqui você pode visualizar, filtrar e acessar as ações para cada item do seu inventário.</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtros de Busca</h6>
+            <p>Utilize os filtros para encontrar produtos de forma rápida e precisa:</p>
+            <ul>
+                <li><strong>Nome ou Cód. de Barras:</strong> Digite o nome do produto ou seu código EAN para uma busca direta.</li>
+                <li><strong>Categoria:</strong> Filtre a lista para exibir apenas produtos de uma categoria específica (ex: Medicamentos, Cosméticos).</li>
+                <li><strong>Status:</strong> Filtre entre produtos <strong>Ativos</strong> (disponíveis para venda) e <strong>Inativos</strong> (arquivados).</li>
+            </ul>
+
+            <h6><i class="bi bi-plus-circle-fill"></i> Novo Produto e Relatório</h6>
+            <ul>
+                <li><strong>Novo Produto:</strong> Leva ao formulário de cadastro completo para adicionar um novo item ao seu catálogo.</li>
+                <li><strong>Ver Relatório:</strong> Acessa a área de relatórios focada em produtos, com análises de vendas, margem e giro de estoque.</li>
+            </ul>
+
+            <h6><i class="bi bi-exclamation-triangle-fill text-danger"></i> Alerta de Estoque Baixo</h6>
+            <p>As linhas destacadas em <strong>vermelho</strong> na tabela indicam produtos cujo estoque total está abaixo da quantidade mínima que você definiu no cadastro. Isso serve como um alerta visual para a necessidade de reposição.</p>
+
+            <h6><i class="bi bi-pencil-fill"></i> Ações na Lista</h6>
+            <p>Para cada produto listado, as seguintes ações estão disponíveis:</p>
+            <ul>
+                <li><i class="bi bi-pencil-fill text-warning"></i> <strong>Editar:</strong> Permite alterar todas as informações do produto, incluindo dados gerais, fiscais e de medicamentos.</li>
+                <li><i class="bi bi-pause-circle-fill text-danger"></i> / <i class="bi bi-play-circle-fill text-success"></i> <strong>Inativar/Ativar:</strong> Altera o status do produto.</li>
+            </ul>
+            <p class="alert alert-danger mt-3"><strong>Regra de Negócio:</strong> Por segurança de inventário, o sistema não permitirá inativar um produto que ainda possui unidades em estoque. É necessário primeiro zerar o estoque (seja por venda, perda ou devolução) para poder inativá-lo.</p>
+        </div>
+
         <?php include_once DEV_PATH . 'Views/toast.php'; ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
             const modalConfirmStatus = document.getElementById('modalConfirmStatus');

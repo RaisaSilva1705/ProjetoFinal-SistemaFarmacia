@@ -11,10 +11,10 @@ define('MODULO_SOLICITADO', 'CLIENTES_GERENCIAR');
 include DEV_PATH . "Exec/validar_acesso.php";
 
 $busca_texto = $_GET['busca_texto'] ?? '';
-$status = $_GET['status'] ?? '';
+$status = (isset($_GET['status']) && $_GET['status'] !== 'Todos') ? $_GET['status'] : '';
 
 $sql = "SELECT 
-            C.ID_Cliente, C.Nome, C.Tel, C.Email, C.Status,
+            C.ID_Cliente, C.Nome, C.Genero, C.Tel, C.Email, C.Status,
             (SELECT CD.Numero FROM CLIENTES_DOCUMENTOS CD WHERE CD.ID_Cliente = C.ID_Cliente AND (CD.Tipo = 'CPF' OR CD.Tipo = 'CNPJ') LIMIT 1) AS DocumentoPrincipal
         FROM CLIENTES C";
 
@@ -77,7 +77,7 @@ $result = $stmt->get_result();
                         <form method="GET" action="clientes.php">
                             <div class="row g-3 align-items-end">
                                 <div class="col-md-6"><label for="busca_texto">Buscar por Nome ou Documento</label><input type="text" name="busca_texto" id="busca_texto" class="form-control" value="<?= htmlspecialchars($busca_texto) ?>"></div>
-                                <div class="col-md-4"><label for="status">Status</label><select name="status" id="status" class="form-select"><option value="">Todos</option><option value="Ativo" <?= $status == 'Ativo' ? 'selected' : '' ?>>Ativo</option><option value="Inativo" <?= $status == 'Inativo' ? 'selected' : '' ?>>Inativo</option></select></div>
+                                <div class="col-md-4"><label for="status">Status</label><select name="status" id="status" class="form-select"><option value="Todos">Todos</option><option value="Ativo" <?= $status == 'Ativo' ? 'selected' : '' ?>>Ativo</option><option value="Inativo" <?= $status == 'Inativo' ? 'selected' : '' ?>>Inativo</option></select></div>
                                 <div class="col-md-2"><button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel-fill"></i> Filtrar</button></div>
                             </div>
                         </form>
@@ -88,6 +88,7 @@ $result = $stmt->get_result();
                             <thead class="table-dark">
                                 <tr>
                                     <th>Nome</th>
+                                    <th>Gênero</th>
                                     <th>Documento Principal</th>
                                     <th>Telefone</th>
                                     <th class="text-center">Status</th>
@@ -99,8 +100,9 @@ $result = $stmt->get_result();
                                     <?php while($row = $result->fetch_assoc()): ?>
                                         <tr>
                                             <td><?= htmlspecialchars($row['Nome']) ?></td>
+                                            <td><?= htmlspecialchars($row['Genero']) ?></td>
                                             <td><?= htmlspecialchars($row['DocumentoPrincipal'] ?? 'N/A') ?></td>
-                                            <td><?= htmlspecialchars($row['Tel']) ?></td>
+                                            <td><?= htmlspecialchars($row['Tel'] ?? 'N/A') ?></td>
                                             <td class="text-center">
                                                 <span class="badge <?= $row['Status'] == 'Ativo' ? 'bg-success' : 'bg-danger' ?>"><?= $row['Status'] ?></span>
                                             </td>
@@ -108,6 +110,14 @@ $result = $stmt->get_result();
                                                 <div class="d-flex justify-content-center gap-2">
                                                     <a href="detalhes_cliente.php?id=<?= $row['ID_Cliente'] ?>" class="btn btn-info btn-sm" title="Ver Detalhes"><i class="bi bi-eye-fill"></i></a>
                                                     <a href="editar_cliente.php?id=<?= $row['ID_Cliente'] ?>" class="btn btn-warning btn-sm" title="Editar"><i class="bi bi-pencil-fill"></i></a>
+                                                    <button type="button" class="btn btn-sm <?= $row['Status'] == 'Ativo' ? 'btn-danger' : 'btn-success' ?>"
+                                                            title="<?= $row['Status'] == 'Ativo' ? 'Inativar' : 'Ativar' ?>"
+                                                            data-bs-toggle="modal" data-bs-target="#modalConfirmStatus"
+                                                            data-id="<?= $row['ID_Cliente'] ?>"
+                                                            data-nome="<?= htmlspecialchars($row['Nome']) ?>"
+                                                            data-status-atual="<?= $row['Status'] ?>">
+                                                        <i class="bi <?= $row['Status'] == 'Ativo' ? 'bi-pause-circle-fill' : 'bi-play-circle-fill' ?>"></i>
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -122,11 +132,87 @@ $result = $stmt->get_result();
             </div>
             <?php include_once DEV_PATH . 'Views/footer.php';?>
         </div>
+
+        <div class="modal fade" id="modalConfirmStatus" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header"><h5 class="modal-title">Confirmar Alteração de Status</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body"><p id="confirmText"></p></div>
+                    <div class="modal-footer">
+                        <form action="processa_cliente.php" method="POST">
+                            <input type="hidden" name="action" value="change_status">
+                            <input type="hidden" name="id_cliente" id="id_status_change">
+                            <input type="hidden" name="novo_status" id="novo_status">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary" id="btnConfirmStatus">Confirmar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-people-fill"></i> Gestão de Clientes</h4>
+            <hr>
+            <p>Esta é a sua central de gerenciamento de clientes. Nela, você pode visualizar todos os clientes cadastrados, buscar por informações específicas e acessar rapidamente suas informações detalhadas ou o modo de edição.</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtros de Busca</h6>
+            <p>Utilize os campos no topo da página para localizar clientes de forma eficiente:</p>
+            <ul>
+                <li><strong>Buscar por Nome ou Documento:</strong> Digite o nome, CPF ou CNPJ do cliente que deseja encontrar.</li>
+                <li><strong>Status:</strong> Filtre entre clientes <strong>Ativos</strong> (que podem realizar compras e acumular crédito) e <strong>Inativos</strong> (cujo cadastro está desativado).</li>
+            </ul>
+
+            <h6><i class="bi bi-plus-circle-fill"></i> Novo Cliente</h6>
+            <p>Clique no botão <strong>"Novo Cliente"</strong> para ser direcionado à tela de cadastro, onde poderá inserir um novo cliente na sua base de dados.</p>
+            
+            <h6><i class="bi bi-bar-chart-line-fill"></i> Ver Relatório</h6>
+            <p>O botão <strong>"Ver Relatório"</strong> leva a uma análise detalhada sobre seus clientes, como histórico de compras, frequência e outras métricas importantes para o negócio.</p>
+
+            <h6><i class="bi bi-pencil-fill"></i> Ações na Lista</h6>
+            <p>Para cada cliente listado na tabela, as seguintes ações estão disponíveis:</p>
+            <ul>
+                <li><i class="bi bi-eye-fill text-info"></i> <strong>Ver Detalhes:</strong> Abre uma tela com todas as informações do cliente, incluindo documentos, endereços e histórico de compras recentes.</li>
+                <li><i class="bi bi-pencil-fill text-warning"></i> <strong>Editar:</strong> Abre o formulário de cadastro preenchido com os dados do cliente, permitindo que você faça alterações nas suas informações.</li>
+            </ul>
+        </div>
         
         <?php include_once DEV_PATH . 'Views/toast.php'; ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
+            const modalConfirmStatus = document.getElementById('modalConfirmStatus');
+            if (modalConfirmStatus) {
+                modalConfirmStatus.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget; 
+                    const id = button.getAttribute('data-id');
+                    const nome = button.getAttribute('data-nome');
+                    const statusAtual = button.getAttribute('data-status-atual');
+                    const confirmText = modalConfirmStatus.querySelector('#confirmText');
+                    const idInput = modalConfirmStatus.querySelector('#id_status_change');
+                    const novoStatusInput = modalConfirmStatus.querySelector('#novo_status');
+                    const btnConfirm = modalConfirmStatus.querySelector('#btnConfirmStatus');
+
+                    idInput.value = id;
+
+                    if (statusAtual === 'Ativo') {
+                        confirmText.textContent = `Você tem certeza que deseja INATIVAR o cliente "${nome}"?`;
+                        novoStatusInput.value = 'Inativo';
+                        btnConfirm.className = 'btn btn-danger';
+                        btnConfirm.textContent = 'Sim, Inativar';
+                    } 
+                    else {
+                        confirmText.textContent = `Você tem certeza que deseja ATIVAR o cliente "${nome}"?`;
+                        novoStatusInput.value = 'Ativo';
+                        btnConfirm.className = 'btn btn-success';
+                        btnConfirm.textContent = 'Sim, Ativar';
+                    }
+                });
+            }
+
             <?php
             if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {
                 $texto = addslashes($_SESSION['msg']['texto']);

@@ -97,24 +97,36 @@ $stmt->close();
                     </div>
                 </div>
             </div>
-            
             <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
 
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
-            </div>
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-journal-plus"></i> Cadastrar Nova Despesa</h4>
+            <hr>
+            <p>Utilize este formulário para registrar qualquer conta a pagar ou despesa já paga pela farmácia. Manter os lançamentos em dia é crucial para a precisão do seu Relatório Financeiro (DRE).</p>
+
+            <h6><i class="bi bi-card-list"></i> Preenchendo os Dados</h6>
+            <ol>
+                <li><strong>Descrição:</strong> Dê um nome claro para a despesa (ex: "Conta de Energia - Setembro/2025", "Salário - Funcionário X").</li>
+                <li><strong>Categoria:</strong> Classifique a despesa em uma das categorias pré-cadastradas. Uma boa categorização é fundamental para analisar onde seu dinheiro está sendo gasto.</li>
+                <li><strong>Valor (R$):</strong> Informe o valor total da despesa.</li>
+                <li><strong>Data de Vencimento:</strong> A data limite para o pagamento da conta.</li>
+                <li><strong>Status:</strong>
+                    <ul>
+                        <li><strong>Pendente:</strong> Marque esta opção para contas que ainda não foram pagas.</li>
+                        <li><strong>Paga:</strong> Marque se você já efetuou o pagamento. Ao selecionar "Paga", um novo campo aparecerá para que você informe a <strong>Data de Pagamento</strong>.</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h6><i class="bi bi-save-fill"></i> Salvar</h6>
+            <p>Após preencher os dados, clique em <strong>"Salvar Despesa"</strong> para registrar o lançamento no sistema.</p>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <?php include_once DEV_PATH . 'Views/toast.php'; ?>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?php echo DEV_URL ?>JS/toast.js"></script>
+        <script src="<?php echo DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const statusRadios = document.querySelectorAll('input[name="status"]');

@@ -164,10 +164,36 @@ if ($total_atendimentos > 0) {
                         </div>
                     </div>
                 </div>
+                <?php include_once DEV_PATH . 'Views/footer.php'; ?>
             </div>
-            
-            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-heart-pulse"></i> Relatório de Serviços Farmacêuticos</h4>
+            <hr>
+            <p>Este relatório analisa o desempenho e o faturamento gerado pelos serviços clínicos oferecidos pela farmácia. É uma ferramenta fundamental para medir o impacto da atenção farmacêutica no seu negócio.</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtros de Análise</h6>
+            <ul>
+                <li><strong>Período (De/Até):</strong> Defina o intervalo de datas para a análise dos serviços prestados.</li>
+                <li><strong>Serviço:</strong> Filtre para ver o desempenho de um serviço específico (ex: Aferição de Pressão).</li>
+                <li><strong>Funcionário:</strong> Analise os atendimentos realizados por um profissional em particular.</li>
+            </ul>
+
+            <h6><i class="bi bi-clipboard2-data-fill"></i> Indicadores de Desempenho</h6>
+            <p>Os cards no topo da página fornecem um resumo rápido da performance dos seus serviços:</p>
+            <ul>
+                <li><strong>Total de Atendimentos:</strong> O número de serviços realizados no período.</li>
+                <li><strong>Faturamento com Serviços:</strong> A receita total gerada exclusivamente pelos serviços.</li>
+                <li><strong>Serviço Mais Realizado:</strong> Identifica qual serviço é o mais procurado pelos seus clientes.</li>
+                <li><strong>Funcionário Destaque:</strong> O profissional que realizou o maior número de atendimentos.</li>
+            </ul>
+
+            <h6><i class="bi bi-list-task"></i> Registros Detalhados</h6>
+            <p>A tabela principal lista cada atendimento individualmente. Ela permite auditar quem foi o paciente, qual serviço foi prestado, quem foi o profissional responsável e o valor cobrado. Clique no ícone de impressora <i class="bi bi-printer-fill text-primary"></i> para visualizar e reimprimir a <strong>Declaração de Serviço Farmacêutico (DSF)</strong> de qualquer atendimento.</p>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
     </body>
 </html>

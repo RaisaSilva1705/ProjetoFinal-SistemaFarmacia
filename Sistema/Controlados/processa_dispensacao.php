@@ -5,7 +5,6 @@ header('Content-Type: application/json');
 include "../../Dev/Exec/config.php";
 include DEV_PATH . 'Exec/conexao.php';
 include DEV_PATH . 'Exec/logs.php';
-include DEV_PATH . "Exec/validar_sessao.php";
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['sucesso' => false, 'mensagem' => 'Método não permitido.']);
@@ -19,6 +18,17 @@ $conselho = $_POST['conselho'] ?? '';
 $num_conselho = $_POST['num_conselho'] ?? '';
 $uf_conselho = $_POST['uf_conselho'] ?? '';
 $data_receita = $_POST['data_receita'] ?? '';
+$comprador_eh_paciente = isset($_POST['comprador_eh_paciente']);
+
+if ($comprador_eh_paciente) {
+    $comprador_nome = $_POST['nome_paciente'] ?? '';
+    $comprador_doc = $_POST['busca_cliente_cpf'] ?? ''; // Pega o CPF do campo do paciente
+    $comprador_tel = $_POST['tel_paciente'] ?? '';
+} else {
+    $comprador_nome = $_POST['nome_comprador'] ?? '';
+    $comprador_doc = $_POST['busca_comprador_cpf'] ?? ''; // Pega o CPF do campo do comprador
+    $comprador_tel = $_POST['tel_comprador'] ?? '';
+}
 
 $dados_adicionais = [
     'paciente_na_receita' => $_POST['paciente_nome_receita'] ?? '',
@@ -28,10 +38,10 @@ $dados_adicionais = [
     'tipo_receita' => $_POST['tipo_receita'] ?? '',
     'receita_digital' => isset($_POST['receita_digital_check']),
     'dispensador_digital' => $_POST['dispensador_digital'] ?? '',
-    'comprador_eh_paciente' => isset($_POST['comprador_eh_paciente']),
-    'comprador_nome' => $_POST['nome_comprador'] ?? '',
-    'comprador_doc' => $_POST['doc_comprador'] ?? '',
-    'comprador_tel' => $_POST['tel_comprador'] ?? ''
+    'comprador_eh_paciente' => $comprador_eh_paciente,
+    'comprador_nome' => $comprador_nome,
+    'comprador_doc' => $comprador_doc,
+    'comprador_tel' => $comprador_tel
 ];
 
 $itens_json = $_POST['itens_dispensacao'] ?? '[]';
@@ -76,8 +86,8 @@ try {
 
     $conn->commit();
     
-    $redirect_url = BASE_URL . 'Sistema/PreVendas/nova_prevenda.php?id_prevenda=' . $id_pre_venda_nova;
-    echo json_encode(['sucesso' => true, 'redirectUrl' => $redirect_url]);
+    $redirect_url = BASE_URL . 'Sistema/PreVendas/prevendas.php?id_prevenda=' . $id_pre_venda_nova;
+    echo json_encode(['sucesso' => true, 'redirectUrl' => $redirect_url, 'id_prescricao' => $id_prescricao_nova]);
     exit;
 } 
 catch (Exception $e) {

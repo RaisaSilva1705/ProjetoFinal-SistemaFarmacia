@@ -20,7 +20,8 @@ $margem_lucro = $result_margem->fetch_assoc()['Margem_Lucro_Padrao'];
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Entrada de Produtos</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
     <body>
@@ -132,7 +133,7 @@ $margem_lucro = $result_margem->fetch_assoc()['Margem_Lucro_Padrao'];
                                     </tr>
                                 </thead>
                                 <tbody id="tabela_itens">
-                                    </tbody>
+                                </tbody>
                             </table>
                         </div>
 
@@ -141,25 +142,45 @@ $margem_lucro = $result_margem->fetch_assoc()['Margem_Lucro_Padrao'];
                         </div>
                     </form>
                 </div>
-            </div>
-            <!-- Footer -->
-            <?php include_once DEV_PATH . 'Views/footer.php'?>
-        </div>
-
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
+                <?php include_once DEV_PATH . 'Views/footer.php'?>
             </div>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-box-arrow-in-down"></i> Registrar Entrada de Estoque</h4>
+            <hr>
+            <p>Esta tela é utilizada para registrar a entrada de novos produtos no seu inventário, seja por compra de fornecedores ou outros motivos. O sistema oferece duas maneiras de realizar a entrada: uma automática (via XML) e uma manual.</p>
+
+            <h6 class="mt-4"><i class="bi bi-filetype-xml"></i> Opção 1: Importar via XML da Nota Fiscal (Recomendado)</h6>
+            <p>Esta é a forma mais rápida e segura de dar entrada em uma compra. O sistema lê o arquivo XML da Nota Fiscal Eletrônica (NFe) fornecida pelo seu distribuidor e preenche os dados dos produtos automaticamente.</p>
+            <ol>
+                <li>Clique em <strong>"Escolher arquivo"</strong> e selecione o arquivo .xml da sua nota fiscal.</li>
+                <li>Clique em <strong>"Processar XML"</strong>.</li>
+                <li>Você será levado a uma tela de revisão para confirmar os itens, preencher informações de lote e validade, e ajustar os preços de venda antes de salvar.</li>
+            </ol>
+
+            <h6 class="mt-4"><i class="bi bi-keyboard-fill"></i> Opção 2: Lançamento Manual</h6>
+            <p>Use esta opção para entradas que não possuem um arquivo XML ou para ajustes manuais.</p>
+            <ol>
+                <li><strong>Dados da Nota:</strong> Selecione o <strong>Fornecedor</strong> e preencha o <strong>Número da Nota Fiscal</strong> e a data de emissão.</li>
+                <li><strong>Adicionar Produto:</strong>
+                    <ul>
+                        <li>Busque o produto pelo nome ou código de barras.</li>
+                        <li>Preencha as informações do <strong>Lote</strong>, <strong>Validade</strong> e a <strong>Quantidade</strong> que está entrando.</li>
+                        <li>Informe o <strong>Preço de Custo</strong> unitário (conforme a nota de compra).</li>
+                        <li>O sistema irá sugerir um <strong>Preço de Venda</strong> com base na sua margem de lucro padrão, mas você pode ajustá-lo. A <strong>Margem (%)</strong> será recalculada automaticamente.</li>
+                        <li>Clique em <strong>"Add"</strong> para incluir o item na lista da nota.</li>
+                    </ul>
+                </li>
+                <li>Repita o processo para todos os itens da nota.</li>
+                <li>Após adicionar todos os itens, clique em <strong>"Salvar Entrada no Estoque"</strong> para finalizar.</li>
+            </ol>
+        </div>
+
+        <?php include_once DEV_PATH . 'Views/toast.php'?>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             const margemLucroPadrao = <?= $margem_lucro ?? 100 ?>;
 

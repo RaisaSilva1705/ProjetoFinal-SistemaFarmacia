@@ -80,9 +80,8 @@
         </div>
     </div>
 
-    <hr>
-
     <div class="row" id="campos_medicamento" style="display: none;">
+        <hr>
         <!-- CAMPOS DE MEDICAMENTOS -->
         <h5 class="mt-4">Informações do Medicamento</h5>
         <div class="row">

@@ -33,7 +33,7 @@ $result = $stmt->get_result();
 $produto = $result->fetch_assoc();
 
 if ($produto) {
-    $produto['Foto'] = DEV_URL . 'Imagens/imgProdutos/' . ($produto['Foto'] ?? 'sem-imagem.jpg');
+    $produto['Foto'] = $produto['Foto'] ? DEV_URL . 'Imagens/imgProdutos/' . htmlspecialchars($produto['Foto']) : DEV_URL . 'Imagens/ImgSistema/sem-imagem.jpg';
     echo json_encode(['sucesso' => true, 'produto' => $produto]);
 } 
 else 

@@ -79,6 +79,7 @@ $historico = $stmt->get_result();
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Serviços Farmacêuticos</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
     <body>
@@ -166,20 +167,37 @@ $historico = $stmt->get_result();
             <?php include_once DEV_PATH . 'Views/footer.php'?>
         </div>
 
-        <!-- Toast -->
-        <div class="toast-container position-fixed top-0 end-0 p-3">
-            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                <strong class="me-auto" id="toastTitulo">Notificação</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body" id="toastCorpo">
-                </div>
-            </div>
-        </div>
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-heart-pulse-fill"></i> Histórico de Serviços Prestados</h4>
+            <hr>
+            <p>Esta tela funciona como o prontuário de todos os serviços clínicos realizados na farmácia. É uma ferramenta essencial para auditoria, acompanhamento de pacientes e consulta ao histórico de atendimentos.</p>
 
+            <h6><i class="bi bi-funnel-fill"></i> Filtros de Busca</h6>
+            <p>Utilize os filtros para localizar um registro de atendimento específico:</p>
+            <ul>
+                <li><strong>Buscar por Serviço:</strong> Digite o nome do serviço para ver todos os registros daquele tipo (ex: "Aferição de Pressão").</li>
+                <li><strong>Data Início / Data Fim:</strong> Defina um período para a busca.</li>
+                <li><strong>Buscar por Farmacêutico:</strong> Filtre para ver todos os atendimentos realizados por um profissional específico.</li>
+            </ul>
+
+            <h6><i class="bi bi-plus-circle-fill"></i> Ações Principais</h6>
+            <ul>
+                <li><strong>Registrar Atendimento:</strong> Leva à tela de registro de um novo serviço, onde você poderá preencher o formulário específico para o atendimento.</li>
+                <li><strong>Ver Relatório:</strong> Acessa a área de relatórios para uma análise gerencial do desempenho e faturamento dos serviços.</li>
+            </ul>
+
+            <h6><i class="bi bi-list-ol"></i> Entendendo a Tabela</h6>
+            <p>Cada linha representa um serviço único prestado a um paciente:</p>
+            <ul>
+                <li><strong>Resultado:</strong> Exibe um resumo dos principais dados coletados durante o atendimento (ex: "Pressão Sistólica 120", "Glicemia Capilar 95").</li>
+                <li><strong>Ações:</strong> O botão <strong>"Gerar DSF"</strong> <i class="bi bi-info-circle text-info"></i> permite visualizar e reimprimir a Declaração de Serviço Farmacêutico, que é o documento oficial do atendimento entregue ao paciente.</li>
+            </ul>
+        </div>
+        
+        <?php include_once DEV_PATH . 'Views/toast.php'?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             <?php
             if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {

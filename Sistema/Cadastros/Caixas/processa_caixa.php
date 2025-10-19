@@ -26,7 +26,7 @@ if ($action === 'change_status') {
         }
     }
 
-    $stmt = $conn->prepare("UPDATE CAIXAS SET StatusCadastro = ? WHERE ID_Caixa = ?");
+    $stmt = $conn->prepare("UPDATE CAIXAS SET StatusCadastrado = ? WHERE ID_Caixa = ?");
     $stmt->bind_param("si", $novo_status, $id_caixa);
     
     if ($stmt->execute()) {
@@ -49,7 +49,7 @@ else {
         $msg_sucesso = "Caixa atualizado com sucesso!";
     } 
     else { 
-        $sql = "INSERT INTO CAIXAS (Caixa, Status, StatusCadastro) VALUES (?, 'Fechado', 'Ativo')";
+        $sql = "INSERT INTO CAIXAS (Caixa, Status, StatusCadastrado) VALUES (?, 'Fechado', 'Ativo')";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("s", $caixa_nome);
         $acao_log = "Cadastrou o novo caixa '{$caixa_nome}'";

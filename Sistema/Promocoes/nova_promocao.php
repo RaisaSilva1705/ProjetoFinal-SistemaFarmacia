@@ -91,14 +91,43 @@ if (isset($_GET['id_produto']) && isset($_GET['nome_produto'])) {
                     </form>
 
                 </div>
+                <?php include_once DEV_PATH . 'Views/footer.php'; ?>
             </div>
+        </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-tools"></i> Construtor de Promoções</h4>
+            <hr>
+            <p>Esta tela é um construtor de regras flexível que permite criar diferentes tipos de ofertas para seus clientes. O processo é dividido em duas partes: as informações gerais e a definição das regras.</p>
+
+            <h6><i class="bi bi-card-heading"></i> Passo 1: Informações Gerais</h6>
+            <ul>
+                <li><strong>Descrição:</strong> Dê um nome claro e objetivo para a promoção (ex: "Leve 3 Pague 2 - Dipirona 500mg").</li>
+                <li><strong>Tipo de Promoção:</strong> Selecione o tipo de regra que você quer criar. Esta escolha mudará os campos disponíveis no passo 2.</li>
+                <li><strong>Datas de Vigência:</strong> Defina a data de início e, opcionalmente, uma data de término para a promoção.</li>
+            </ul>
+
+            <h6><i class="bi bi-list-check"></i> Passo 2: Itens e Regras da Promoção</h6>
+            <p>Clique em <strong>"Adicionar Item à Regra"</strong> para definir os produtos e as condições da sua oferta. Cada item da regra tem dois papéis possíveis:</p>
+            <ul>
+                <li><strong>Condição:</strong> É o "SE" da regra. Representa o que o cliente precisa ter no carrinho para a promoção ser ativada. Ex: "SE o cliente levar 3 unidades do Produto A".</li>
+                <li><strong>Benefício:</strong> É o "ENTÃO" da regra. Representa o que o cliente ganha. Ex: "ENTÃO ele recebe 100% de desconto em 1 unidade do Produto A".</li>
+            </ul>
             
-            <?php include_once DEV_PATH . 'Views/footer.php'; ?>
+            <p><strong>Exemplo prático de "Leve 3, Pague 2":</strong></p>
+            <ol>
+                <li>Adicione um item para o produto desejado. Defina o "Tipo do Item" como <strong>Condição</strong> e a "Quantidade" como <strong>3</strong>.</li>
+                <li>Adicione um segundo item para o mesmo produto. Defina o "Tipo do Item" como <strong>Benefício</strong>, a "Quantidade" como <strong>1</strong> e o "Desconto" como <strong>100%</strong>.</li>
+            </ol>
+
+            <h6><i class="bi bi-save-fill"></i> Passo 3: Salvar</h6>
+            <p>Após definir todas as regras, clique em <strong>"Salvar Promoção"</strong>. Se o status for "Ativo" e a data for vigente, ela começará a ser aplicada no PDV e na Pré-Venda imediatamente.</p>
         </div>
 
         <?php include_once DEV_PATH . 'Views/toast.php'; ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="<?php echo DEV_URL ?>JS/toast.js"></script>
+        <script src="<?php echo DEV_URL ?>JS/manual_usuario.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const tipoPromocaoSelect = document.getElementById('tipo_promocao');

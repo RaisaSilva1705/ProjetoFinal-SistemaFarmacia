@@ -11,7 +11,7 @@ define('MODULO_SOLICITADO', 'SERVICOS_GERENCIAR');
 include DEV_PATH . "Exec/validar_acesso.php";
 
 $busca_nome = $_GET['busca_nome'] ?? '';
-$status = $_GET['status'] ?? '';
+$status = (isset($_GET['status']) && $_GET['status'] !== 'Todos') ? $_GET['status'] : '';
 
 $sql = "SELECT ID_Servico, Nome_Servico, Valor, Status FROM SERVICOS_FARMACEUTICOS";
 
@@ -69,7 +69,7 @@ $result = $stmt->get_result();
                         <form method="GET" action="servicos.php">
                             <div class="row g-3 align-items-end">
                                 <div class="col-md-6"><label for="busca_nome" class="form-label">Buscar por Nome</label><input type="text" name="busca_nome" id="busca_nome" class="form-control" value="<?= htmlspecialchars($busca_nome) ?>"></div>
-                                <div class="col-md-4"><label for="status" class="form-label">Status</label><select name="status" id="status" class="form-select"><option value="">Todos</option><option value="Ativo" <?= $status == 'Ativo' ? 'selected' : '' ?>>Ativo</option><option value="Inativo" <?= $status == 'Inativo' ? 'selected' : '' ?>>Inativo</option></select></div>
+                                <div class="col-md-4"><label for="status" class="form-label">Status</label><select name="status" id="status" class="form-select"><option value="Todos">Todos</option><option value="Ativo" <?= $status == 'Ativo' ? 'selected' : '' ?>>Ativo</option><option value="Inativo" <?= $status == 'Inativo' ? 'selected' : '' ?>>Inativo</option></select></div>
                                 <div class="col-md-2"><button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel-fill"></i> Filtrar</button></div>
                             </div>
                         </form>
@@ -124,7 +124,9 @@ $result = $stmt->get_result();
         <div class="modal fade" id="modalConfirmStatus" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
-                    <div class="modal-header"><h5 class="modal-title">Confirmar Alteração de Status</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-header"><h5 class="modal-title">Confirmar Alteração de Status</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
                     <div class="modal-body"><p id="confirmText"></p></div>
                     <div class="modal-footer">
                         <form action="processa_servico.php" method="POST">
@@ -138,11 +140,66 @@ $result = $stmt->get_result();
                 </div>
             </div>
         </div>
+
+        <div id="manual-content-container" style="display: none;">
+            <h4><i class="bi bi-heart-pulse-fill"></i> Gestão de Serviços Farmacêuticos</h4>
+            <hr>
+            <p>Esta tela permite gerenciar o catálogo de todos os serviços clínicos que sua farmácia oferece, como aferição de pressão, teste de glicemia, aplicação de injetáveis, etc.</p>
+
+            <h6><i class="bi bi-funnel-fill"></i> Filtros de Busca</h6>
+            <p>Utilize os filtros para encontrar um serviço específico de forma rápida:</p>
+            <ul>
+                <li><strong>Buscar por Nome:</strong> Digite o nome do serviço que deseja localizar.</li>
+                <li><strong>Status:</strong> Filtre entre serviços <strong>Ativos</strong> (disponíveis para registro) e <strong>Inativos</strong> (arquivados).</li>
+            </ul>
+
+            <h6><i class="bi bi-plus-circle-fill"></i> Novo Serviço</h6>
+            <p>Ao clicar no botão <strong>"Novo Serviço"</strong>, você será direcionado para o construtor de formulários, onde poderá definir todos os detalhes de um novo serviço, incluindo os campos que serão preenchidos durante o atendimento ao paciente.</p>
+
+            <h6><i class="bi bi-pencil-fill"></i> Ações na Lista</h6>
+            <p>Para cada serviço listado na tabela, as seguintes ações estão disponíveis:</p>
+            <ul>
+                <li><i class="bi bi-pencil-fill text-warning"></i> <strong>Editar Definições:</strong> Permite alterar todas as configurações de um serviço existente, incluindo seu nome, valor e, o mais importante, os campos personalizados do seu formulário de atendimento.</li>
+                <li><i class="bi bi-pause-circle-fill text-danger"></i> <strong>Inativar:</strong> Torna um serviço "Inativo", impedindo que novos registros dele sejam criados.</li>
+                <li><i class="bi bi-play-circle-fill text-success"></i> <strong>Ativar:</strong> Reativa um serviço que estava "Inativo", tornando-o disponível novamente.</li>
+            </ul>
+            <p class="alert alert-warning"><strong>Atenção:</strong> Por segurança e para manter a integridade do histórico, o sistema não permitirá inativar um serviço que já foi registrado para algum paciente.</p>
+        </div>
         
         <?php include_once DEV_PATH . 'Views/toast.php'; ?>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= DEV_URL ?>JS/manual_usuario.js"></script>
         <script src="<?= DEV_URL ?>JS/toast.js"></script>
         <script>
+            const modalConfirmStatus = document.getElementById('modalConfirmStatus');
+            if (modalConfirmStatus) {
+                modalConfirmStatus.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget; 
+                    const id = button.getAttribute('data-id');
+                    const nome = button.getAttribute('data-nome');
+                    const statusAtual = button.getAttribute('data-status-atual');
+                    const confirmText = modalConfirmStatus.querySelector('#confirmText');
+                    const idInput = modalConfirmStatus.querySelector('#id_status_change');
+                    const novoStatusInput = modalConfirmStatus.querySelector('#novo_status');
+                    const btnConfirm = modalConfirmStatus.querySelector('#btnConfirmStatus');
+
+                    idInput.value = id;
+
+                    if (statusAtual === 'Ativo') {
+                        confirmText.textContent = `Você tem certeza que deseja INATIVAR o serviço "${nome}"?`;
+                        novoStatusInput.value = 'Inativo';
+                        btnConfirm.className = 'btn btn-danger';
+                        btnConfirm.textContent = 'Sim, Inativar';
+                    } 
+                    else {
+                        confirmText.textContent = `Você tem certeza que deseja ATIVAR o serviço "${nome}"?`;
+                        novoStatusInput.value = 'Ativo';
+                        btnConfirm.className = 'btn btn-success';
+                        btnConfirm.textContent = 'Sim, Ativar';
+                    }
+                });
+            }
+
             <?php
             if (isset($_SESSION['msg']) && is_array($_SESSION['msg'])) {
                 $texto = addslashes($_SESSION['msg']['texto']);
