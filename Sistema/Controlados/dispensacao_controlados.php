@@ -35,7 +35,7 @@ include DEV_PATH . "Exec/validar_acesso.php";
                             <div class="d-flex justify-content-between align-items-center">
                             <h5>1. Paciente e Comprador</h5>
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="comprador_eh_paciente" checked>
+                                <input class="form-check-input" type="checkbox" id="comprador_eh_paciente" name="comprador_eh_paciente" checked>
                                 <label class="form-check-label" for="comprador_eh_paciente">Paciente é o Comprador</label>
                             </div>
                             </div>
@@ -133,7 +133,7 @@ include DEV_PATH . "Exec/validar_acesso.php";
                             <div class="row">
                                 <div class="col-md-8 mb-3">
                                     <label for="paciente_nome_receita" class="form-label">Nome do Paciente</label>
-                                    <input type="text" id="paciente_nome_receita" name="paciente_nome_receita" class="form-control" disabled>
+                                    <input type="text" id="paciente_nome_receita" name="paciente_nome_receita" class="form-control" readonly tabindex="-1">
                                 </div>
                                 <div class="col-md-2 mb-3">
                                     <label for="paciente_dn_receita" class="form-label">Data de Nasc.</label>
@@ -196,7 +196,7 @@ include DEV_PATH . "Exec/validar_acesso.php";
                                 </div>
                                 <div class="col-md-3 mb-3">
                                     <label for="dispensador" class="form-label">Dispensador</label>
-                                    <input type="text" id="dispensador" name="dispensador" class="form-control" disabled>
+                                    <input type="text" id="dispensador" name="dispensador" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
@@ -429,10 +429,10 @@ include DEV_PATH . "Exec/validar_acesso.php";
                                         document.getElementById('paciente_sexo_receita').value = data.sexo;
                                     }
                                     
-                                    mostrarToast(`${prefixo} ${data.nome_cliente} encontrado(a)!`, 'success');
+                                    mostrarToast(`Cliente ${data.nome_cliente} encontrado(a)!`, 'success');
                                 } 
                                 else 
-                                    mostrarToast(`${prefixo} não encontrado(a).`, 'warning');
+                                    mostrarToast(`Cliente não encontrado(a). Preencha as informações manualmente.`, 'info');
                             });
                     });
                 }

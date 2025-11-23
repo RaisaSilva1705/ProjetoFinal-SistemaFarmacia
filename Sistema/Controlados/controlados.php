@@ -24,7 +24,7 @@ $sql = "SELECT
             IV.Quantidade,
             COALESCE(C.Nome, 'Paciente não cadastrado') AS Nome_Paciente,
             PR.Nome_Profissional,
-            CONCAT(PR.Conselho, ' ', PR.Num_Conselho, '/', PR.UF_Conselho) AS Conselho_Profissional,
+            CONCAT(PR.Conselho, '/', PR.UF_Conselho, ' ', PR.Num_Conselho) AS Conselho_Profissional,
             PR.ID_Prescricao,
             V.ID_Venda
         FROM ITENS_VENDA IV
@@ -83,7 +83,7 @@ $registros = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                         <h2 class="m-0">Dispensação de Controlados</h2>
                         <div>
                             <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalSNGPC">
-                                <i class="bi bi-file-earmark-zip-fill"></i> Gerar Arquivo SNGPC
+                                <i class="bi bi-file-earmark-zip-fill"></i> Gerar XML SNGPC
                             </button>
                             <a href="dispensacao_controlados.php" class="btn btn-primary"><i class="bi bi-shield-lock-fill"></i> Dispensar Medicamento</a>
                         </div>

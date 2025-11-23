@@ -19,7 +19,7 @@ if (empty($codigo_prevenda)) {
 }
 
 $sql = "SELECT 
-            PVI.ID_Produto, PVI.ID_Servico, PVI.Quantidade, PVI.Valor_Unitario, PVI.Desconto,
+            PVI.ID_Produto, PVI.ID_Servico, PVI.Quantidade, PVI.Valor_Unitario, PVI.Desconto, PVI.ID_Lote,
             P.Nome AS Nome_Produto, P.EAN_GTIN,
             SF.Nome_Servico,
             C.ID_Cliente, C.Nome AS Nome_Cliente, CD.Numero AS Documento_Cliente
@@ -63,6 +63,7 @@ foreach ($itens_da_prevenda as $item_prevenda) {
             'id_produto' => $id_unico_item, 
             'tipo' => $tipo_item,
             'origem' => 'prevenda',
+            'id_lote' => $item_prevenda['ID_Lote'] ?? null,
             'quantidade_verificada' => 0,
             'desconto' => $desconto_item
         ];
@@ -83,23 +84,8 @@ foreach ($itens_da_prevenda as $item_prevenda) {
         ];
     }
 
-    if (!empty($novo_item)) {
+    if (!empty($novo_item)) 
         $_SESSION['carrinho'][] = $novo_item;
-        /*$item_encontrado_no_carrinho = false;
-        foreach ($_SESSION['carrinho'] as $index => &$item_carrinho) {
-            if ( (isset($item_carrinho['id_produto']) && $item_carrinho['id_produto'] == $id_unico_item && $tipo_item == 'produto') ||
-                 (isset($item_carrinho['id_servico']) && $item_carrinho['id_servico'] == $id_unico_item && $tipo_item == 'servico') ) 
-            {
-                $item_carrinho['quantidade'] += $novo_item['quantidade'];
-                $item_encontrado_no_carrinho = true;
-                break;
-            }
-        }
-        unset($item_carrinho); 
-
-        if (!$item_encontrado_no_carrinho) 
-            $_SESSION['carrinho'][] = $novo_item;*/
-    }
 }
 
 $_SESSION['codigo_prevenda_ativa'] = $codigo_prevenda;

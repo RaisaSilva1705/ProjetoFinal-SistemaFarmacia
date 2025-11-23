@@ -34,9 +34,10 @@ $prescricao = $stmt_presc->get_result()->fetch_assoc();
 $dados_adicionais = json_decode($prescricao['Dados_Adicionais'], true);
 
 // 3. Busca os medicamentos dispensados, que estão nos itens da pré-venda associada
-$sql_itens = "SELECT P.Nome AS Nome_Produto, PVI.Quantidade
+$sql_itens = "SELECT P.Nome AS Nome_Produto, PVI.Quantidade, L.Nome_Lote
               FROM PRE_VENDAS_ITENS PVI
               JOIN PRODUTOS P ON PVI.ID_Produto = P.ID_Produto
+              JOIN LOTES L ON PVI.ID_Lote = L.ID_Lote
               JOIN PRE_VENDAS PV ON PVI.ID_PreVenda = PV.ID_PreVenda
               WHERE PV.ID_Prescricao = ?";
 $stmt_itens = $conn->prepare($sql_itens);
@@ -44,13 +45,11 @@ $stmt_itens->bind_param("i", $id_prescricao);
 $stmt_itens->execute();
 $itens_dispensados = $stmt_itens->get_result()->fetch_all(MYSQLI_ASSOC);
 
-// Determina o nome do comprador (se não for o paciente)
-$nome_comprador = $dados_adicionais['comprador_eh_paciente'] 
-    ? ($dados_adicionais['paciente_na_receita'] ?? '') 
-    : ($dados_adicionais['comprador_nome'] ?? '');
-$doc_comprador = $dados_adicionais['comprador_eh_paciente']
-    ? ($prescricao['doc_paciente'] ?? '') // Supondo que você salve o doc do paciente
-    : ($dados_adicionais['comprador_doc'] ?? '');
+$nome_comprador = $dados_adicionais['comprador_nome'] ?? 'NÃO INFORMADO';
+$doc_comprador  = $dados_adicionais['comprador_doc'] ?? 'NÃO INFORMADO';
+
+if ($dados_adicionais['comprador_eh_paciente'] && empty($doc_comprador)) 
+    $doc_comprador = "_______________"; 
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -85,31 +84,33 @@ $doc_comprador = $dados_adicionais['comprador_eh_paciente']
                             <h4>TERMO DE CIÊNCIA E DISPENSAÇÃO DE MEDICAMENTO CONTROLADO</h4>
                         </div>
                         
-                        <p>Eu, <strong><?= strtoupper(htmlspecialchars($nome_comprador)) ?></strong>, portador(a) do documento de identidade nº <strong><?= htmlspecialchars($doc_comprador) ?></strong>, declaro para os devidos fins que recebi da <?= htmlspecialchars($nome_fantasia_farmacia) ?> (<?= htmlspecialchars($razao_social_farmacia) ?>), o(s) seguinte(s) medicamento(s), mediante apresentação da prescrição do(a) profissional <strong><?= htmlspecialchars($prescricao['Nome_Profissional']) ?></strong> (<?= htmlspecialchars($prescricao['Conselho'] . ' ' . $prescricao['Num_Conselho']) ?>), emitida em <?= date('d/m/Y', strtotime($prescricao['Data_Receita'])) ?>.</p>
+                        <p style="text-align: justify;">Eu, <strong><?= strtoupper(htmlspecialchars($nome_comprador)) ?></strong>, portador(a) do documento de identidade nº <strong><?= htmlspecialchars($doc_comprador) ?></strong>, declaro para os devidos fins que recebi da <?= htmlspecialchars($nome_fantasia_farmacia) ?> (<?= htmlspecialchars($razao_social_farmacia) ?>), o(s) seguinte(s) medicamento(s), mediante apresentação da prescrição do(a) profissional <strong><?= htmlspecialchars($prescricao['Nome_Profissional']) ?></strong> (<?= htmlspecialchars($prescricao['Conselho'] . '/' . $prescricao['UF_Conselho']  . ' ' . $prescricao['Num_Conselho']) ?>), emitida em <?= date('d/m/Y', strtotime($prescricao['Data_Receita'])) ?>.</p>
 
                         <h5 class="mt-4 text-center">Medicamentos Dispensados</h5>
                         <table class="table table-bordered table-sm mt-3">
                             <thead class="table-light">
                                 <tr>
                                     <th>Medicamento</th>
+                                    <th class="text-center">Lote</th>
                                     <th class="text-center">Quantidade</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach($itens_dispensados as $item): ?>
                                 <tr>
-                                    <td><?= htmlspecialchars($item['Nome_Produto']) ?></td>
-                                    <td class="text-center"><?= $item['Quantidade'] ?></td>
-                                </tr>
+                                <td><?= htmlspecialchars($item['Nome_Produto']) ?></td>
+                                <td class="text-center"><?= htmlspecialchars($item['Nome_Lote']) ?></td>
+                                <td class="text-center"><?= $item['Quantidade'] ?></td>
+                            </tr>
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
 
-                        <p class="mt-4">Declaro ainda ter recebido todas as orientações necessárias sobre o uso correto, os potenciais efeitos adversos e as condições de armazenamento do(s) medicamento(s) acima listado(s).</p>
+                        <p class="mt-4" style="text-align: justify;">Declaro ainda ter recebido todas as orientações necessárias sobre o uso correto, os potenciais efeitos adversos e as condições de armazenamento do(s) medicamento(s) acima listado(s).</p>
                         
                         <div class="assinatura">
                             <p class="mb-0"><?= strtoupper(htmlspecialchars($nome_comprador)) ?></p>
-                            <small>(Assinatura do Comprador/Responsável)</small>
+                            <small>(Assinatura do Comprador)</small>
                         </div>
                         <div class="assinatura">
                             <p class="mb-0"><?= strtoupper(htmlspecialchars($prescricao['Nome_Funcionario'])) ?></p>

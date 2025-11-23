@@ -12,7 +12,6 @@ include DEV_PATH . "Exec/validar_acesso.php";
 
 $data_inicio = $_GET['data_inicio'] ?? date('Y-m-01');
 $data_fim = $_GET['data_fim'] ?? date('Y-m-t'); 
-
 $data_fim_query = $data_fim . ' 23:59:59';
 
 // --------------------------------------------------------------------------
@@ -28,11 +27,19 @@ $stmt_receita->execute();
 $receita_bruta = $stmt_receita->get_result()->fetch_assoc()['total_vendas'] ?? 0;
 $stmt_receita->close();
 
+$stmt_dev = $conn->prepare("SELECT SUM(Valor_Total_Devolvido) AS total_devolvido FROM DEVOLUCOES_CLIENTES WHERE Data_Devolucao BETWEEN ? AND ?");
+$stmt_dev->bind_param("ss", $data_inicio, $data_fim_query);
+$stmt_dev->execute();
+$total_devolucoes = $stmt_dev->get_result()->fetch_assoc()['total_devolvido'] ?? 0;
+$stmt_dev->close();
+
+$receita_liquida = $receita_bruta - $total_devolucoes;
+
 // --------------------------------------------------------------------------
 // 2. CALCULAR DESPESAS OPERACIONAIS
 // --------------------------------------------------------------------------
 $stmt_despesas = $conn->prepare(
-    "SELECT DC.Nome_Categoria, SUM(D.Valor) as valor_total_categoria
+    "SELECT DC.Nome_Categoria, SUM(D.Valor) AS valor_total_categoria
      FROM DESPESAS D
      JOIN DESPESAS_CATEGORIAS DC ON D.ID_Categoria_Despesa = DC.ID_Categoria_Despesa
      WHERE D.Status = 'Paga' 
@@ -45,7 +52,6 @@ $stmt_despesas->bind_param("ss", $data_inicio, $data_fim);
 $stmt_despesas->execute();
 $lista_despesas_detalhada = $stmt_despesas->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt_despesas->close();
-
 $despesas_operacionais = array_sum(array_column($lista_despesas_detalhada, 'valor_total_categoria'));
 
 // --------------------------------------------------------------------------
@@ -67,7 +73,6 @@ $stmt_perdas->bind_param("ss", $data_inicio, $data_fim_query);
 $stmt_perdas->execute();
 $custo_perdas_estoque = $stmt_perdas->get_result()->fetch_assoc()['custo_total_perdas'] ?? 0;
 $stmt_perdas->close();
-
 $despesas_operacionais += $custo_perdas_estoque;
 
 // --------------------------------------------------------------------------
@@ -92,14 +97,9 @@ $stmt_cmv->close();
 // --------------------------------------------------------------------------
 // 5. CALCULAR OS RESULTADOS FINAIS
 // --------------------------------------------------------------------------
-$lucro_bruto = $receita_bruta - $cmv;
+$lucro_bruto = $receita_liquida - $cmv;
 $lucro_liquido = $lucro_bruto - $despesas_operacionais;
-
-if ($receita_bruta > 0) 
-    $margem_liquida = ($lucro_liquido / $receita_bruta) * 100;
-else 
-    $margem_liquida = 0;
-
+$margem_liquida = ($receita_liquida > 0) ? ($lucro_liquido / $receita_liquida) * 100 : 0;
 ?>
 
 <!DOCTYPE html>
@@ -112,7 +112,6 @@ else
         <link rel="stylesheet" href="<?php echo DEV_URL ?>CSS/global.css">
     </head>
     <body class="bg-light">
-
         <?php include_once DEV_PATH . 'Views/sidebar.php'; ?>
 
         <div class="content d-flex flex-column min-vh-100">
@@ -122,14 +121,14 @@ else
                 </div>
                 
                 <div class="container p-5">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
                         <h2 class="m-0">Relatório Financeiro (DRE)</h2>
                         <button onclick="window.print()" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-printer"></i> Imprimir Relatório
                         </button>
                     </div>
 
-                    <div class="card card-body mb-4">
+                    <div class="card card-body mb-4 no-print">
                         <form method="GET" action="relatorio_financeiro.php">
                             <div class="row align-items-end">
                                 <div class="col-md-5">
@@ -152,17 +151,25 @@ else
                     <div class="row g-4 mb-5">
                         <div class="col-lg-3 col-md-6">
                             <div class="card text-center h-100 shadow-sm">
-                                <div class="card-header">Receita Bruta Total</div>
+                                <div class="card-header">Receita Líquida</div>
                                 <div class="card-body">
-                                    <h4 class="card-title fw-bold text-success">R$ <?php echo number_format($receita_bruta, 2, ',', '.'); ?></h4>
+                                    <h4 class="card-title fw-bold text-success">R$ <?= number_format($receita_liquida, 2, ',', '.'); ?></h4>
                                 </div>
                             </div>
                         </div>
                         <div class="col-lg-3 col-md-6">
                             <div class="card text-center h-100 shadow-sm">
-                                <div class="card-header">Custos + Despesas</div>
+                                <div class="card-header">CMV (Custo)</div>
                                 <div class="card-body">
-                                    <h4 class="card-title fw-bold text-danger">R$ <?php echo number_format($cmv + $despesas_operacionais, 2, ',', '.'); ?></h4>
+                                    <h4 class="card-title fw-bold text-danger">R$ <?= number_format($cmv, 2, ',', '.'); ?></h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="card text-center h-100 shadow-sm">
+                                <div class="card-header">Perdas + Despesas</div>
+                                <div class="card-body">
+                                    <h4 class="card-title fw-bold text-danger">R$ <?= number_format($despesas_operacionais, 2, ',', '.'); ?></h4>
                                 </div>
                             </div>
                         </div>
@@ -170,15 +177,9 @@ else
                             <div class="card text-center h-100 shadow-sm">
                                 <div class="card-header">Lucro Líquido</div>
                                 <div class="card-body">
-                                    <h4 class="card-title fw-bold text-primary">R$ <?php echo number_format($lucro_liquido, 2, ',', '.'); ?></h4>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6">
-                            <div class="card text-center h-100 shadow-sm">
-                                <div class="card-header">Margem Líquida</div>
-                                <div class="card-body">
-                                    <h4 class="card-title fw-bold text-info"><?php echo number_format($margem_liquida, 2, ',', '.'); ?>%</h4>
+                                    <h4 class="card-title fw-bold <?= $lucro_liquido >= 0 ? 'text-primary' : 'text-danger' ?>">
+                                        R$ <?= number_format($lucro_liquido, 2, ',', '.'); ?>
+                                    </h4>
                                 </div>
                             </div>
                         </div>
@@ -192,20 +193,27 @@ else
                             <table class="table table-striped mb-0">
                                 <tbody>
                                     <tr class="table-light">
-                                        <td class="fw-bold fs-5">(+) Receita Bruta Total</td>
-                                        <td class="text-end fw-bold fs-5">R$ <?php echo number_format($receita_bruta, 2, ',', '.'); ?></td>
+                                        <td class="fw-bold fs-5">(+) Receita Bruta de Vendas</td>
+                                        <td class="text-end fw-bold fs-5">R$ <?= number_format($receita_bruta, 2, ',', '.'); ?></td>
                                     </tr>
                                     <tr>
-                                        <td>(-) Custo da Mercadoria Vendida (CMV)</td>
-                                        <td class="text-end text-danger">(R$ <?php echo number_format($cmv, 2, ',', '.'); ?>)</td>
+                                        <td>(-) Devoluções e Abatimentos</td>
+                                        <td class="text-end text-danger">(R$ <?= number_format($total_devolucoes, 2, ',', '.'); ?>)</td>
+                                    </tr>
+                                    <tr class="table-light">
+                                        <td class="fw-bold fs-5">(=) Receita Líquida</td>
+                                        <td class="text-end fw-bold fs-5">R$ <?= number_format($receita_liquida, 2, ',', '.'); ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">(-) Custo da Mercadoria Vendida (CMV)</td>
+                                        <td class="text-end text-danger">(R$ <?= number_format($cmv, 2, ',', '.') ?>)</td>
                                     </tr>
                                     <tr class="table-light">
                                         <td class="fw-bold fs-5">(=) Lucro Bruto</td>
-                                        <td class="text-end fw-bold fs-5">R$ <?php echo number_format($lucro_bruto, 2, ',', '.'); ?></td>
+                                        <td class="text-end fw-bold fs-5">R$ <?= number_format($lucro_bruto, 2, ',', '.'); ?></td>
                                     </tr>
                                     <tr>
                                         <td class="fw-bold">(-) Despesas Operacionais</td>
-                                        <td class="text-end"></td>
                                     </tr>
                                     <?php if (empty($lista_despesas_detalhada)): ?>
                                         <tr>
@@ -216,25 +224,25 @@ else
                                         <?php foreach ($lista_despesas_detalhada as $despesa): ?>
                                             <tr>
                                                 <td class="ps-4"><em>└ <?php echo htmlspecialchars($despesa['Nome_Categoria']); ?></em></td>
-                                                <td class="text-end text-danger">(R$ <?php echo number_format($despesa['valor_total_categoria'], 2, ',', '.'); ?>)</td>
+                                                <td class="text-end text-danger">(R$ <?= number_format($despesa['valor_total_categoria'], 2, ',', '.'); ?>)</td>
                                             </tr>
                                         <?php endforeach; ?>
                                         <?php if ($custo_perdas_estoque > 0): ?>
                                             <tr>
-                                                <td class="ps-4"><em>└ Perdas de Estoque (Avarias, Vencidos, etc.)</em></td>
-                                                <td class="text-end text-danger">(R$ <?php echo number_format($custo_perdas_estoque, 2, ',', '.'); ?>)</td>
+                                                <td class="ps-4 text-danger"><em>└ Perdas de Estoque (Avarias/Devoluções)</em></td>
+                                                <td class="text-end text-danger">(R$ <?= number_format($custo_perdas_estoque, 2, ',', '.'); ?>)</td>
                                             </tr>
                                         <?php endif; ?>
                                     <?php endif; ?>
                                     <tr class="table-light border-top">
                                         <td class="fw-bold">Total Despesas Operacionais</td>
-                                        <td class="text-end fw-bold text-danger">(R$ <?php echo number_format($despesas_operacionais, 2, ',', '.'); ?>)</td>
+                                        <td class="text-end fw-bold text-danger">(R$ <?= number_format($despesas_operacionais, 2, ',', '.'); ?>)</td>
                                     </tr>
 
                                     <tr class="table-dark">
-                                        <td class="fw-bold fs-5">(=) Lucro Líquido</td>
-                                        <td class="text-end fw-bold fs-5 <?php echo $lucro_liquido >= 0 ? 'text-success' : 'text-danger'; ?>">
-                                            R$ <?php echo number_format($lucro_liquido, 2, ',', '.'); ?>
+                                        <td class="fw-bold fs-5">(=) Resultado Líquido do Exercício</td>
+                                        <td class="text-end fw-bold fs-5 <?= $lucro_liquido >= 0 ? 'text-success' : 'text-danger'; ?>">
+                                            R$ <?= number_format($lucro_liquido, 2, ',', '.'); ?>
                                         </td>
                                     </tr>
                                 </tbody>

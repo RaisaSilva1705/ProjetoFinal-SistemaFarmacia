@@ -68,30 +68,28 @@ if (!$dadosVenda) {
 
 // Itens da venda
 $sqlTabelaItens = "
-    -- Seleciona os PRODUTOS da venda
     (SELECT 
         'produto' AS TipoItem,
         COALESCE(P.Nome, '[PRODUTO REMOVIDO]') AS Nome,
         COALESCE(P.EAN_GTIN, 'N/A') AS Codigo,
         IV.Quantidade AS Quantidade,
-        (IV.Valor_Total / IV.Quantidade) AS Valor_Unitario_Final, -- << MUDANÇA AQUI
-        IV.Valor_Total AS Valor_Total_Final, -- << MUDANÇA AQUI
-        IV.Desconto AS Desconto_Item -- << MUDANÇA AQUI
+        (IV.Valor_Total / IV.Quantidade) AS Valor_Unitario_Final, 
+        IV.Valor_Total AS Valor_Total_Final, 
+        IV.Desconto AS Desconto_Item 
     FROM ITENS_VENDA IV
     LEFT JOIN PRODUTOS P ON IV.ID_Produto = P.ID_Produto
     WHERE IV.ID_Venda = ?)
 
     UNION ALL
 
-    -- Seleciona os SERVIÇOS da venda (via Pré-Venda)
     (SELECT 
         'servico' AS TipoItem,
         COALESCE(SF.Nome_Servico, '[SERVIÇO REMOVIDO]') AS Nome,
         CONCAT('SERV', PVI.ID_Servico) AS Codigo,
         PVI.Quantidade AS Quantidade,
-        PVI.Valor_Unitario AS Valor_Unitario_Final, -- << MUDANÇA AQUI
-        (PVI.Valor_Unitario * PVI.Quantidade) AS Valor_Total_Final, -- << MUDANÇA AQUI
-        PVI.Desconto AS Desconto_Item -- << MUDANÇA AQUI
+        PVI.Valor_Unitario AS Valor_Unitario_Final, 
+        (PVI.Valor_Unitario * PVI.Quantidade) AS Valor_Total_Final, 
+        PVI.Desconto AS Desconto_Item 
     FROM PRE_VENDAS PV
     JOIN PRE_VENDAS_ITENS PVI ON PV.ID_PreVenda = PVI.ID_PreVenda
     LEFT JOIN SERVICOS_FARMACEUTICOS SF ON PVI.ID_Servico = SF.ID_Servico
@@ -142,7 +140,7 @@ $dataHora = date('d/m/Y H:i:s', strtotime($dadosVenda['DataHora_Venda']));
             <hr>
             <?php
                 $cont = 1;
-                $total_descontos_itens = 0; // Vamos somar os descontos para mostrar no final
+                $total_descontos_itens = 0; 
                 foreach($tabItens as $item):
                     $desconto_item = $item['Desconto_Item'] ?? 0;
                     $total_descontos_itens += $desconto_item;

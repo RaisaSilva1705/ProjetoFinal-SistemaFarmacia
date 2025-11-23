@@ -36,8 +36,8 @@ $dados_adicionais = [
     'paciente_sexo_receita' => $_POST['paciente_sexo_receita'] ?? '',
     'numero_receita' => $_POST['num_receita'] ?? '',
     'tipo_receita' => $_POST['tipo_receita'] ?? '',
-    'receita_digital' => isset($_POST['receita_digital_check']),
-    'dispensador_digital' => $_POST['dispensador_digital'] ?? '',
+    'receita_digital' => isset($_POST['receita_digital']),
+    'dispensador_digital' => $_POST['dispensador'] ?? '',
     'comprador_eh_paciente' => $comprador_eh_paciente,
     'comprador_nome' => $comprador_nome,
     'comprador_doc' => $comprador_doc,
@@ -66,7 +66,8 @@ try {
     $stmt_prescricao->execute();
     $id_prescricao_nova = $conn->insert_id;
 
-    if ($id_prescricao_nova == 0) throw new Exception("Falha ao salvar a prescrição.");
+    if ($id_prescricao_nova == 0)
+        throw new Exception("Falha ao salvar a prescrição.");
 
     // 2. GERA O CÓDIGO E CRIA A PRÉ-VENDA, JÁ COM O LINK PARA A PRESCRIÇÃO
     $codigo_gerado = '99' . substr(time(), -5). mt_rand(1000, 9999);
@@ -78,9 +79,12 @@ try {
     if ($id_pre_venda_nova == 0) throw new Exception("Falha ao criar a pré-venda.");
 
     // 3. INSERE OS ITENS NA PRÉ-VENDA
-    $stmt_itens = $conn->prepare("INSERT INTO PRE_VENDAS_ITENS (ID_PreVenda, ID_Produto, Quantidade, Valor_Unitario) VALUES (?, ?, ?, ?)");
+    $stmt_itens = $conn->prepare("INSERT INTO PRE_VENDAS_ITENS (ID_PreVenda, ID_Produto, ID_Lote, Quantidade, Valor_Unitario) VALUES (?, ?, ?, ?, ?)");
     foreach ($itens as $item) {
-        $stmt_itens->bind_param("iiid", $id_pre_venda_nova, $item['id_produto'], $item['quantidade'], $item['preco']);
+        if(empty($item['id_lote']))
+            throw new Exception("Lote não identificado para o produto " . $item['nome']);
+        
+        $stmt_itens->bind_param("iiiid", $id_pre_venda_nova, $item['id_produto'], $item['id_lote'], $item['quantidade'], $item['preco']);
         $stmt_itens->execute();
     }
 

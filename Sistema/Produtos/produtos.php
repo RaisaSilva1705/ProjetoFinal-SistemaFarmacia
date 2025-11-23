@@ -90,7 +90,7 @@ $result = $stmt->get_result();
     
                 <div class="container mt-3 p-5">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2>Lista de Produto</h2>
+                        <h2>Lista de Produtos</h2>
                         <div>
                             <a href="cadastrar_produto.php" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Novo Produto</a>
                             <a href="../Relatorios/relatorio_produtos.php" class="btn btn-outline-secondary"><i class="bi bi-bar-chart-line-fill"></i> Ver Relatório</a>

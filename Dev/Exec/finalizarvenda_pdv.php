@@ -34,11 +34,6 @@ try {
     $idVenda = $stmtVenda->insert_id;
     if ($idVenda == 0) throw new Exception("Falha ao criar a venda.");
 
-    /*$stmtMovCaixa = $conn->prepare("INSERT INTO MOVIMENTACOES_CAIXA (ID_Caixa, ID_Funcionario, Tipo, Valor, Descricao) VALUES (?, ?, 'Entrada', ?, ?)");
-    $descricaoMov = "Venda #$idVenda";
-    $stmtMovCaixa->bind_param("iids", $id_caixa, $id_funcionario, $valor_total, $descricaoMov);
-    $stmtMovCaixa->execute();*/
-
     $stmtPag = $conn->prepare("INSERT INTO VENDA_PAGAMENTOS (ID_Venda, ID_Forma_Pag, Valor, Troco, Quant_Vezes) VALUES (?, ?, ?, ?, ?)");
     $trocoCalculado = max(0, $total_pago - $valor_total);
     $primeiroPagamento = true;
@@ -55,35 +50,76 @@ try {
     }
 
     $stmtItem = $conn->prepare("INSERT INTO ITENS_VENDA (ID_Venda, ID_Produto, Quantidade, Valor_Total, Desconto) VALUES (?, ?, ?, ?, ?)");
-    $stmtLotes = $conn->prepare("SELECT E.ID_Estoque FROM ESTOQUE E JOIN LOTES L ON E.ID_Lote = L.ID_Lote WHERE L.ID_Produto = ? AND E.Quantidade > 0 ORDER BY L.Data_Validade ASC");
-    $stmtUpdateEstoque = $conn->prepare("UPDATE ESTOQUE SET Quantidade = Quantidade - 1 WHERE ID_Estoque = ?");
-    $stmtMovEstoque = $conn->prepare("INSERT INTO MOVIMENTACAO_ESTOQUE (ID_Estoque, ID_Produto, ID_Funcionario, Tipo, Motivo, Quantidade, ID_Venda, OBS) VALUES (?, ?, ?, 'Saída', 'Venda', 1, ?, ?)");
+
+    // QUERY 1: Busca lote específico (Para CONTROLADOS)
+    $stmtLoteEspecifico = $conn->prepare("SELECT ID_Estoque, Quantidade FROM ESTOQUE WHERE ID_Lote = ?");
+    // QUERY 2: Busca FIFO - Mais antigo com saldo (Para COMUNS)
+    $stmtLotesFIFO = $conn->prepare("SELECT E.ID_Estoque, E.Quantidade, L.Nome_Lote FROM ESTOQUE E JOIN LOTES L ON E.ID_Lote = L.ID_Lote WHERE L.ID_Produto = ? AND E.Quantidade > 0 ORDER BY L.Data_Validade ASC");
+    
+    $stmtUpdateEstoque = $conn->prepare("UPDATE ESTOQUE SET Quantidade = Quantidade - ? WHERE ID_Estoque = ?");
+    $stmtMovEstoque = $conn->prepare("INSERT INTO MOVIMENTACAO_ESTOQUE (ID_Estoque, ID_Produto, ID_Funcionario, Tipo, Motivo, Quantidade, ID_Venda, OBS) VALUES (?, ?, ?, 'Saída', 'Venda', ?, ?, ?)");
     
     foreach ($_SESSION['carrinho'] as $item) {
         $id_produto = $item['id_produto']; 
         $quantidade = $item['quantidade'];
         $desconto_item = $item['desconto'] ?? 0.00;
         $valor_total_item = $item['preco'] * $quantidade;
+        $id_lote_especifico = $item['id_lote'] ?? null;
 
         $stmtItem->bind_param("iiidd", $idVenda, $id_produto, $quantidade, $valor_total_item, $desconto_item);
         $stmtItem->execute();
 
-        for ($i = 0; $i < $quantidade; $i++) {
-            $stmtLotes->bind_param("i", $id_produto);
-            $stmtLotes->execute();
-            $lotes_disponiveis = $stmtLotes->get_result()->fetch_all(MYSQLI_ASSOC);
-            
-            if (empty($lotes_disponiveis)) 
-                throw new Exception("Estoque insuficiente para o produto: " . $item['nome']);
-            
-            $id_estoque_a_retirar = $lotes_disponiveis[0]['ID_Estoque'];
-            
-            $stmtUpdateEstoque->bind_param("i", $id_estoque_a_retirar);
+        $qtd_restante_para_baixar = $quantidade;
+
+        // CENÁRIO A: Medicamento Controlado (Lote Específico Obrigatório)
+        if ($id_lote_especifico) {
+            $stmtLoteEspecifico->bind_param("i", $id_lote_especifico);
+            $stmtLoteEspecifico->execute();
+            $resultadoLote = $stmtLoteEspecifico->get_result()->fetch_assoc();
+
+            if (!$resultadoLote || $resultadoLote['Quantidade'] < $qtd_restante_para_baixar) 
+                throw new Exception("Estoque insuficiente no Lote selecionado para o produto: " . $item['nome']);
+
+            $stmtUpdateEstoque->bind_param("ii", $qtd_restante_para_baixar, $resultadoLote['ID_Estoque']);
             $stmtUpdateEstoque->execute();
 
-            $obs_mov = 'Venda PDV #' . $idVenda;
-            $stmtMovEstoque->bind_param("iiiis", $id_estoque_a_retirar, $id_produto, $id_funcionario, $idVenda, $obs_mov);
+            $obs_mov = 'Venda Controlado PDV #' . $idVenda;
+            $stmtMovEstoque->bind_param("iiiiis", $resultadoLote['ID_Estoque'], $id_produto, $id_funcionario, $qtd_restante_para_baixar, $idVenda, $obs_mov);
             $stmtMovEstoque->execute();
+        
+        } 
+        // CENÁRIO B: Produto Comum 
+        else {
+            $stmtLotesFIFO->bind_param("i", $id_produto);
+            $stmtLotesFIFO->execute();
+            $lotes_disponiveis = $stmtLotesFIFO->get_result()->fetch_all(MYSQLI_ASSOC);
+
+            if (empty($lotes_disponiveis)) 
+                throw new Exception("Estoque insuficiente para o produto: " . $item['nome']);
+
+            foreach ($lotes_disponiveis as $lote) {
+                if ($qtd_restante_para_baixar <= 0) break;
+
+                $qtd_no_lote = $lote['Quantidade'];
+                $qtd_a_retirar_deste_lote = 0;
+
+                if ($qtd_no_lote >= $qtd_restante_para_baixar) 
+                    $qtd_a_retirar_deste_lote = $qtd_restante_para_baixar;
+                else 
+                    $qtd_a_retirar_deste_lote = $qtd_no_lote;
+
+                $stmtUpdateEstoque->bind_param("ii", $qtd_a_retirar_deste_lote, $lote['ID_Estoque']);
+                $stmtUpdateEstoque->execute();
+
+                $obs_mov = 'Venda PDV #' . $idVenda . ' (Lote: ' . $lote['Nome_Lote'] . ')';
+                $stmtMovEstoque->bind_param("iiiiis", $lote['ID_Estoque'], $id_produto, $id_funcionario, $qtd_a_retirar_deste_lote, $idVenda, $obs_mov);
+                $stmtMovEstoque->execute();
+
+                $qtd_restante_para_baixar -= $qtd_a_retirar_deste_lote;
+            }
+
+            if ($qtd_restante_para_baixar > 0) 
+                 throw new Exception("Estoque total insuficiente para o produto: " . $item['nome']);
         }
     }
 

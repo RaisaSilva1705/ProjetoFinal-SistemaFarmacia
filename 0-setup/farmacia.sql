@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `CLIENTES` (
 /* select * from CLIENTES; */
 
 -- -----------------------------------------------------
--- Table `CLIENTES_DOCUMENTOS`         
+-- Table `CLI_DOCUMENTOS`         
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `CLIENTES_DOCUMENTOS` (
   `ID_Documento` INT AUTO_INCREMENT PRIMARY KEY,
@@ -502,8 +502,8 @@ CREATE TABLE IF NOT EXISTS `ITENS_VENDA` (
 CREATE TABLE IF NOT EXISTS `LOGS` (
   `ID_Log` INT AUTO_INCREMENT PRIMARY KEY,
   `ID_Usuario` INT NOT NULL,
-  `Acao` TEXT NOT NULL,
-  `Timestamp` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `Acao` VARCHAR(255) NOT NULL,
+  `DataHora_Acao` DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (`ID_Usuario`) REFERENCES `USUARIOS` (`ID_Usuario`)
 ) ENGINE = InnoDB;
 /* drop table LOGS; */
@@ -551,10 +551,10 @@ CREATE TABLE IF NOT EXISTS `SERVICO_CAMPOS` (
   `ID_Campo` INT AUTO_INCREMENT PRIMARY KEY,
   `ID_Servico` INT NOT NULL,
   `Ordem` INT DEFAULT 0,
-  `Label_Campo` VARCHAR(255) NOT NULL, -- "Pressão Sistólica"
+  `Label_Campo` VARCHAR(100) NOT NULL, -- "Pressão Sistólica"
   `Name_Campo` VARCHAR(100) NOT NULL, -- "pressao_sistolica"
   `Tipo_Campo` ENUM('number', 'text', 'boolean', 'date', 'ean') NOT NULL, -- Tipo do input
-  `Unidade_Medida` VARCHAR(20) NULL, -- "mmHg", "BPM", etc.
+  `Unidade_Medida` VARCHAR(10) NULL, -- "mmHg", "BPM", etc.
   FOREIGN KEY (`ID_Servico`) REFERENCES `SERVICOS_FARMACEUTICOS`(`ID_Servico`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 /* drop table SERVICO_CAMPOS; */
@@ -566,7 +566,7 @@ CREATE TABLE IF NOT EXISTS `SERVICO_CAMPOS` (
 CREATE TABLE IF NOT EXISTS `SERVICO_CAMPOS_REFERENCIAS` (
   `ID_Referencia` INT AUTO_INCREMENT PRIMARY KEY,
   `ID_Campo` INT NOT NULL,
-  `Descricao_Referencia` VARCHAR(255) NOT NULL, -- Ex: "Criança (0-12 anos)"
+  `Descricao_Referencia` VARCHAR(100) NOT NULL, -- Ex: "Criança (0-12 anos)"
   `Valor_Feminino` VARCHAR(100) NULL,
   `Valor_Masculino` VARCHAR(100) NULL,
   FOREIGN KEY (`ID_Campo`) REFERENCES `SERVICO_CAMPOS`(`ID_Campo`) ON DELETE CASCADE
@@ -602,12 +602,14 @@ CREATE TABLE IF NOT EXISTS `PRE_VENDAS_ITENS` (
   `ID_Item_PreVenda` INT AUTO_INCREMENT PRIMARY KEY,
   `ID_PreVenda` INT NOT NULL,
   `ID_Produto` INT NULL,
+  `ID_Lote` INT NULL,
   `ID_Servico` INT NULL,
   `Quantidade` INT NOT NULL DEFAULT 1,
   `Valor_Unitario` DECIMAL(10,2) NOT NULL,
   `Desconto` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   FOREIGN KEY (`ID_PreVenda`) REFERENCES `PRE_VENDAS` (`ID_PreVenda`) ON DELETE CASCADE,
   FOREIGN KEY (`ID_Produto`) REFERENCES `PRODUTOS` (`ID_Produto`),
+  FOREIGN KEY (`ID_Lote`) REFERENCES `LOTES` (`ID_Lote`),
   FOREIGN KEY (`ID_Servico`) REFERENCES `SERVICOS_FARMACEUTICOS` (`ID_Servico`),
   -- Garante que cada linha seja ou um produto ou um serviço, mas não ambos
   CONSTRAINT chk_item_type CHECK (`ID_Produto` IS NOT NULL OR `ID_Servico` IS NOT NULL)
@@ -715,13 +717,13 @@ CREATE TABLE IF NOT EXISTS `DEVOLUCOES_FORNECEDORES_ITENS` (
 CREATE TABLE IF NOT EXISTS `DEVOLUCOES_CLIENTES` (
   `ID_Devolucao_Cliente` INT AUTO_INCREMENT PRIMARY KEY,
   `ID_Cliente` INT NULL,
-  `ID_Venda_Original` INT NOT NULL,
+  `ID_Venda` INT NOT NULL,
   `ID_Funcionario` INT NOT NULL,
   `Data_Devolucao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `Tipo_Resolucao` ENUM('Reembolso', 'Credito_Loja') NOT NULL,
   `Valor_Total_Devolvido` DECIMAL(10,2) NOT NULL,
   FOREIGN KEY (`ID_Cliente`) REFERENCES `CLIENTES`(`ID_Cliente`),
-  FOREIGN KEY (`ID_Venda_Original`) REFERENCES `VENDAS`(`ID_Venda`),
+  FOREIGN KEY (`ID_Venda`) REFERENCES `VENDAS`(`ID_Venda`),
   FOREIGN KEY (`ID_Funcionario`) REFERENCES `FUNCIONARIOS`(`ID_Funcionario`)
 ) ENGINE = InnoDB;
 /* drop table DEVOLUCOES_CLIENTES; */
@@ -735,7 +737,7 @@ CREATE TABLE IF NOT EXISTS `DEVOLUCOES_CLIENTES_ITENS` (
   `ID_Devolucao_Cliente` INT NOT NULL,
   `ID_Produto` INT NOT NULL,
   `Quantidade` INT NOT NULL,
-  `Valor_Unitario_Devolvido` DECIMAL(10,2) NOT NULL,
+  `Valor_Unitario` DECIMAL(10,2) NOT NULL,
   `Motivo` VARCHAR(255) NULL,
   FOREIGN KEY (`ID_Devolucao_Cliente`) REFERENCES `DEVOLUCOES_CLIENTES`(`ID_Devolucao_Cliente`) ON DELETE CASCADE,
   FOREIGN KEY (`ID_Produto`) REFERENCES `PRODUTOS`(`ID_Produto`)
@@ -752,3 +754,16 @@ DO
   WHERE `Status` = 'Ativo'
     AND `Data_Fim` IS NOT NULL
     AND `Data_Fim` < CURDATE();
+
+CREATE EVENT ativa_promocoes
+ON SCHEDULE EVERY 1 DAY
+STARTS CURRENT_TIMESTAMP + INTERVAL 1 DAY_HOUR
+DO
+  UPDATE `PROMOCOES`
+  SET `Status` = 'Ativo'
+  WHERE `Status` = 'Inativo'
+    AND `Data_Inicio` <= CURDATE()
+    AND (
+        `Data_Fim` >= CURDATE() 
+        OR `Data_Fim` IS NULL
+    );

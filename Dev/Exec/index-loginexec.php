@@ -60,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         else {
             registrar_log($conn, $dados['ID_Usuario'], "Usuário inativo '{$dados['Nome']}' tentou logar no sistema.");
-            $_SESSION["msg"] = ['texto' => 'Usuário não está ativo', 'tipo' => 'danger'];
+            $_SESSION["msg"] = ['texto' => 'Usuário inativo. Contate o administrador.', 'tipo' => 'danger'];
             mysqli_close($conn);
             header('Location:' . SISTEMA_URL .'index.php');
             exit();

@@ -1,10 +1,9 @@
 body {
     background-color: #f0f2f5;
-    font-family: Arial, Helvetica, sans-serif; /* Fonte mais moderna */
+    font-family: Arial, Helvetica, sans-serif; 
 }
 
 .dsf-document {
-    /* A imagem de fundo agora é uma marca d'água sutil */
     background-image: url('../../Dev/Imagens/imgSistema/mascaraDSF.jpg');
     background-size: auto;
     background-repeat: repeat-y;

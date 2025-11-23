@@ -14,7 +14,7 @@ if($_SESSION['Nome'] != null){
         exit;
     }
 }
-else{
+else {
     header('Location:' . SISTEMA_URL . 'index.php');
     exit;
 }

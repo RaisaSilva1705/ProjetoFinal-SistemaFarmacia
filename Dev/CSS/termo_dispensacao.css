@@ -1,5 +1,9 @@
 /* Estilos para a página do Termo de Dispensação */
 .termo-document {
+    background-image: url('../../Dev/Imagens/imgSistema/mascaraTermoDisp.png');
+    background-size: auto;
+    background-repeat: repeat-y;
+    background-position: center;
     position: relative;
     max-width: 21cm;
     min-height: 29.7cm;
@@ -10,7 +14,7 @@
     font-size: 11pt;
     line-height: 1.6;
     color: #333;
-    font-family: 'Times New Roman', Times, serif; /* Fonte mais formal para documentos */
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 .termo-header {

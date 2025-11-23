@@ -23,7 +23,7 @@ $itens_selecionados = array_filter($itens_para_devolver, function($item) {
 });
 
 if ($tipo_resolucao === 'Credito_Loja' && is_null($id_cliente)) {
-    $_SESSION['msg'] = ['texto' => 'Não é possível dar crédito em loja para um "Consumidor Final". O cliente precisa ser identificado na venda original.', 'tipo' => 'danger'];
+    $_SESSION['msg'] = ['texto' => 'Não é possível dar crédito em loja para um "Consumidor Final". O cliente precisa ser identificado na venda original.', 'tipo' => 'warning'];
     header('Location: devolucao_cliente.php');
     exit;
 }
@@ -48,39 +48,49 @@ try {
         $valor_total_devolvido += (float)$item['valor_unitario'] * (int)$item['quantidade'];
     }
 
-    $stmt_devolucao = $conn->prepare("INSERT INTO DEVOLUCOES_CLIENTES (ID_Venda_Original, ID_Cliente, ID_Funcionario, Tipo_Resolucao, Valor_Total_Devolvido, Data_Devolucao) VALUES (?, ?, ?, ?, ?, NOW())");
+    $stmt_devolucao = $conn->prepare("INSERT INTO DEVOLUCOES_CLIENTES (ID_Venda, ID_Cliente, ID_Funcionario, Tipo_Resolucao, Valor_Total_Devolvido, Data_Devolucao) VALUES (?, ?, ?, ?, ?, NOW())");
     $stmt_devolucao->bind_param("iiisd", $id_venda_original, $id_cliente, $id_funcionario, $tipo_resolucao, $valor_total_devolvido);
     $stmt_devolucao->execute();
     $id_devolucao = $conn->insert_id;
-    if ($id_devolucao == 0) throw new Exception("Falha ao criar o registro principal da devolução.");
 
-    $stmt_item = $conn->prepare("INSERT INTO DEVOLUCOES_CLIENTES_ITENS (ID_Devolucao_Cliente, ID_Produto, Quantidade, Valor_Unitario_Devolvido, Motivo) VALUES (?, ?, ?, ?, ?)");
+    $stmt_item = $conn->prepare("INSERT INTO DEVOLUCOES_CLIENTES_ITENS (ID_Devolucao_Cliente, ID_Produto, Quantidade, Valor_Unitario, Motivo) VALUES (?, ?, ?, ?, ?)");
     $stmt_update_estoque = $conn->prepare("UPDATE ESTOQUE SET Quantidade = Quantidade + ? WHERE ID_Lote = ?");
-    $stmt_mov_estoque = $conn->prepare("INSERT INTO MOVIMENTACAO_ESTOQUE (ID_Estoque, ID_Produto, ID_Funcionario, Tipo, Motivo, Quantidade, OBS) VALUES (?, ?, ?, 'Entrada', 'Devolução de Cliente', ?, ?)");
+    $stmt_busca_lote = $conn->prepare("SELECT L.ID_Lote, E.ID_Estoque FROM LOTES L JOIN ESTOQUE E ON L.ID_Lote = E.ID_Lote WHERE L.ID_Produto = ? ORDER BY L.Data_Validade DESC LIMIT 1");
+    $stmt_mov_estoque = $conn->prepare("INSERT INTO MOVIMENTACAO_ESTOQUE (ID_Estoque, ID_Produto, ID_Funcionario, Tipo, Motivo, Quantidade, OBS) VALUES (?, ?, ?, ?, ?, ?, ?)");
 
     foreach ($itens_selecionados as $id_produto => $item) {
         $quantidade = (int)$item['quantidade'];
         $valor_unitario = (float)$item['valor_unitario'];
-        $motivo = $item['motivo'];
-        $obs_mov = "Ref. Devolução Cliente #{$id_devolucao}";
+        $motivo_cliente = $item['motivo'];
 
-        $stmt_item->bind_param("iiids", $id_devolucao, $id_produto, $quantidade, $valor_unitario, $motivo);
+        $stmt_item->bind_param("iiids", $id_devolucao, $id_produto, $quantidade, $valor_unitario, $motivo_cliente);
         $stmt_item->execute();
         
-        if (isset($item['retornar_estoque']) && $item['retornar_estoque'] == '1') {
-            $stmt_lote = $conn->prepare("SELECT L.ID_Lote, E.ID_Estoque FROM LOTES L JOIN ESTOQUE E ON L.ID_Lote = E.ID_Lote WHERE L.ID_Produto = ? ORDER BY L.Data_Validade DESC LIMIT 1");
-            $stmt_lote->bind_param("i", $id_produto);
-            $stmt_lote->execute();
-            $lote_para_retorno = $stmt_lote->get_result()->fetch_assoc();
+        $stmt_busca_lote->bind_param("i", $id_produto);
+        $stmt_busca_lote->execute();
+        $lote_encontrado = $stmt_busca_lote->get_result()->fetch_assoc();
 
-            if ($lote_para_retorno) {
-                $id_lote_retorno = $lote_para_retorno['ID_Lote'];
-                $id_estoque_retorno = $lote_para_retorno['ID_Estoque'];
-                
-                $stmt_update_estoque->bind_param("ii", $quantidade, $id_lote_retorno);
+        if ($lote_encontrado) {
+            $id_lote = $lote_encontrado['ID_Lote'];
+            $id_estoque = $lote_encontrado['ID_Estoque'];
+
+            if (isset($item['retornar_estoque']) && $item['retornar_estoque'] == '1') {
+                $stmt_update_estoque->bind_param("ii", $quantidade, $id_lote);
                 $stmt_update_estoque->execute();
 
-                $stmt_mov_estoque->bind_param("iiiis", $id_estoque_retorno, $id_produto, $id_funcionario, $quantidade, $obs_mov);
+                $tipo_mov = 'Entrada';
+                $motivo_mov = 'Devolução de Cliente';
+                $obs_mov = "Retorno ao estoque. Devolução #{$id_devolucao}";
+
+                $stmt_mov_estoque->bind_param("iiiisss", $id_estoque, $id_produto, $id_funcionario, $tipo_mov, $motivo_mov, $quantidade, $obs_mov);
+                $stmt_mov_estoque->execute();
+            }
+            else {
+                $tipo_mov = 'Saída';
+                $motivo_mov = 'Perda por Devolução';
+                $obs_mov = "Descarte imediato (Avaria/Vencido). Devolução #{$id_devolucao}";
+
+                $stmt_mov_estoque->bind_param("iiiisss", $id_estoque, $id_produto, $id_funcionario, $tipo_mov, $motivo_mov, $quantidade, $obs_mov);
                 $stmt_mov_estoque->execute();
             }
         }
@@ -102,7 +112,6 @@ try {
     
     registrar_log($conn, $_SESSION['ID_Usuario'], "Registrou devolução de cliente #{$id_devolucao} (Venda Original: #{$id_venda_original}), valor R$ {$valor_total_devolvido}.");
     $_SESSION['msg'] = ['texto' => "Devolução #{$id_devolucao} registrada com sucesso!", 'tipo' => 'success'];
-
 } 
 catch (Exception $e) {
     $conn->rollback();
