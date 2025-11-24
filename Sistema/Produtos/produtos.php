@@ -140,6 +140,7 @@ $result = $stmt->get_result();
                                 <tr>
                                     <th>Produto</th>
                                     <th>Cód. Barras</th>
+                                    <th>Categoria</th>
                                     <th class="text-center">Estoque</th>
                                     <th class="text-center">Status</th>
                                     <th class="text-end">Preço</th>
@@ -156,6 +157,7 @@ $result = $stmt->get_result();
                                         <tr class="<?= $classe_alerta ?>">
                                             <td><?= htmlspecialchars($row["Nome"]) ?></td>
                                             <td><?= htmlspecialchars($row["EAN_GTIN"]) ?></td>
+                                            <td><?= htmlspecialchars($row["Categoria"]) ?></td>
                                             <td class="text-center fw-bold"><?= intval($estoque_total) ?></td>
                                             <td class="text-center"><span class="badge <?= $row['Status'] == 'Ativo' ? 'bg-success' : 'bg-danger' ?>"><?= $row['Status'] ?></span></td>
                                             <td class="text-end">R$ <?= number_format($row['Preco_Atual'] ?? 0, 2, ',', '.') ?></td>

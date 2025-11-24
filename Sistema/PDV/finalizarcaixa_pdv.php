@@ -278,7 +278,7 @@ $conn->close();
                     <div class="mb-3 row">
                         <label class="col-sm-4 col-form-label">Descrição</label>
                         <div class="col-sm-8">
-                            <input type="text" class="form-control" id="descricaoMovimentacao" value="Sangria - Finalização de caixa" disabled>
+                            <input type="text" class="form-control" id="descricaoMovimentacao" value="Sangria - Finalização de Caixa" disabled>
                         </div>
                     </div>
                     <div class="mb-3 row">

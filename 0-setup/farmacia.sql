@@ -291,7 +291,7 @@ CREATE TABLE IF NOT EXISTS `MEDICAMENTOS` (
     `ID_Tarja` INT NOT NULL,
     `Tipo` ENUM('Genérico', 'Similar', 'Referência') NOT NULL,
     `Prin_Ativo` VARCHAR(255) DEFAULT NULL,
-    `MS` VARCHAR(13) NOT NULL,
+    `MS` VARCHAR(17) NOT NULL,
     `Controlado` ENUM ('Sim', 'Não') DEFAULT 'Não',
     FOREIGN KEY (`ID_Produto`) REFERENCES `PRODUTOS` (`ID_Produto`) ON DELETE CASCADE,
     FOREIGN KEY (`ID_Tarja`) REFERENCES `TARJAS_MEDICAMENTOS` (`ID_Tarja`),

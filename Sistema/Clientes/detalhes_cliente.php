@@ -122,11 +122,11 @@ if (isset($_SESSION['Cargo']) && ($_SESSION['Cargo'] == 'Gerente' || $_SESSION['
                                                             data-cep="<?= htmlspecialchars($end['CEP']) ?>"
                                                             data-endereco="<?= htmlspecialchars($end['Endereco']) ?>"
                                                             data-numero="<?= htmlspecialchars($end['End_Numero']) ?>"
-                                                            data-complemento="<?= htmlspecialchars($end['Complemento']) ?>"
+                                                            data-complemento="<?= $end['Complemento'] != null ? htmlspecialchars($end['Complemento']) : '' ?>"
                                                             data-bairro="<?= htmlspecialchars($end['Bairro']) ?>"
                                                             data-cidade="<?= htmlspecialchars($end['Cidade']) ?>"
                                                             data-estado="<?= htmlspecialchars($end['Estado']) ?>"
-                                                            data-obs="<?= htmlspecialchars($end['OBS']) ?>">
+                                                            data-obs="<?= $end['OBS'] != null ? htmlspecialchars($end['OBS']) : '' ?>">
                                                         <i class="bi bi-pencil-fill"></i>
                                                     </button>
                                                     <button type="button" class="btn btn-danger btn-sm" title="Remover Endereço" onclick="abrirModalRemocao(<?= $end['ID_Endereco_Cli'] ?>)">

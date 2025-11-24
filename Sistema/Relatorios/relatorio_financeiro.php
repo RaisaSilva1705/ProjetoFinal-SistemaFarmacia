@@ -197,7 +197,7 @@ $margem_liquida = ($receita_liquida > 0) ? ($lucro_liquido / $receita_liquida) *
                                         <td class="text-end fw-bold fs-5">R$ <?= number_format($receita_bruta, 2, ',', '.'); ?></td>
                                     </tr>
                                     <tr>
-                                        <td>(-) Devoluções e Abatimentos</td>
+                                        <td class="fw-bold">(-) Devoluções e Abatimentos</td>
                                         <td class="text-end text-danger">(R$ <?= number_format($total_devolucoes, 2, ',', '.'); ?>)</td>
                                     </tr>
                                     <tr class="table-light">
@@ -257,26 +257,33 @@ $margem_liquida = ($receita_liquida > 0) ? ($lucro_liquido / $receita_liquida) *
         <div id="manual-content-container" style="display: none;">
             <h4><i class="bi bi-graph-up-arrow"></i> Relatório Financeiro (DRE)</h4>
             <hr>
-            <p>Este é o relatório mais importante para a saúde financeira do seu negócio. O <strong>Demonstrativo do Resultado do Exercício (DRE)</strong> mostra de forma clara e estruturada se a farmácia está tendo <strong>lucro ou prejuízo</strong> em um determinado período.</p>
+            <p>O <strong>DRE (Demonstrativo do Resultado do Exercício)</strong> é o coração financeiro da farmácia. Ele foi ajustado para refletir a realidade do balcão, contabilizando vendas, cancelamentos e perdas de produtos.</p>
 
             <h6><i class="bi bi-funnel-fill"></i> Filtro por Período</h6>
-            <p>Utilize os campos de data no topo para definir o período que você deseja analisar. Por padrão, o relatório exibe os resultados do mês atual.</p>
+            <p>Selecione as datas de início e fim no topo da página para analisar o desempenho de um mês, semana ou dia específico.</p>
 
-            <h6><i class="bi bi-calculator-fill"></i> Entendendo os Indicadores</h6>
-            <ul>
-                <li><strong>Receita Bruta Total:</strong> A soma de todo o dinheiro que entrou através das vendas, antes de qualquer dedução.</li>
-                <li><strong>Custos + Despesas:</strong> A soma de tudo que saiu para a operação funcionar, incluindo o custo dos produtos vendidos (CMV) e as despesas operacionais (aluguel, salários, etc.).</li>
-                <li><strong>Lucro Líquido:</strong> O resultado final. É o que realmente "sobrou" para o negócio após pagar todos os custos e despesas. Um valor positivo indica lucro; um valor negativo indica prejuízo.</li>
-                <li><strong>Margem Líquida:</strong> A porcentagem da sua receita que se transformou em lucro. É um indicador vital da eficiência e rentabilidade da sua farmácia.</li>
-            </ul>
-
-            <h6><i class="bi bi-table"></i> Lendo o Demonstrativo</h6>
-            <p>A tabela principal detalha o cálculo do Lucro Líquido passo a passo:</p>
+            <h6><i class="bi bi-calculator-fill"></i> Estrutura do Relatório (Como ler os números)</h6>
+            <p>A tabela segue a lógica contábil oficial para determinar se houve lucro ou prejuízo:</p>
             <ol>
-                <li>Começa com a <strong>Receita Bruta</strong>.</li>
-                <li>Subtrai o <strong>Custo da Mercadoria Vendida (CMV)</strong>, que é o valor de custo dos produtos que você vendeu. O resultado é o <strong>Lucro Bruto</strong>.</li>
-                <li>Do Lucro Bruto, subtrai todas as <strong>Despesas Operacionais</strong> (como contas pagas e perdas de estoque), detalhadas por categoria.</li>
-                <li>O resultado final é o <strong>Lucro Líquido</strong> do período.</li>
+                <li>
+                    <strong>(+) Receita Bruta:</strong> A soma total de todas as vendas registradas no PDV.
+                </li>
+                <li>
+                    <strong>(-) Devoluções e Abatimentos:</strong> Aqui subtraímos o valor de produtos que foram devolvidos pelos clientes e reembolsados. Dinheiro que voltou para o cliente não é receita.
+                </li>
+                <li>
+                    <strong>(=) Receita Líquida:</strong> É o dinheiro real que ficou na farmácia após os descontos das devoluções. Todos os custos abaixo são calculados sobre este valor.
+                </li>
+                <li>
+                    <strong>(-) CMV (Custo da Mercadoria Vendida):</strong> Quanto custou para comprar os produtos que foram vendidos.
+                </li>
+                <li>
+                    <strong>(-) Despesas Operacionais:</strong> Contas pagas (água, luz, salários) e <strong>Perdas de Estoque</strong>.
+                    <br><em class="text-muted">Nota: Se um produto for devolvido e marcado como "Avariado/Vencido", seu custo entra aqui como prejuízo, pois ele não volta para a prateleira.</em>
+                </li>
+                <li>
+                    <strong>(=) Lucro Líquido:</strong> O resultado final. Se positivo <span class="text-success">(Verde)</span>, a operação deu lucro. Se negativo <span class="text-danger">(Vermelho)</span>, os custos superaram as vendas.
+                </li>
             </ol>
         </div>
 

@@ -100,7 +100,7 @@ $result = $stmt->get_result();
                                     <?php while($row = $result->fetch_assoc()): ?>
                                         <tr>
                                             <td><?= htmlspecialchars($row['Nome']) ?></td>
-                                            <td><?= htmlspecialchars($row['Genero']) ?></td>
+                                            <td><?= $row['Genero'] != null ? htmlspecialchars($row['Genero']) : 'N/A' ?></td>
                                             <td><?= htmlspecialchars($row['DocumentoPrincipal'] ?? 'N/A') ?></td>
                                             <td><?= htmlspecialchars($row['Tel'] ?? 'N/A') ?></td>
                                             <td class="text-center">

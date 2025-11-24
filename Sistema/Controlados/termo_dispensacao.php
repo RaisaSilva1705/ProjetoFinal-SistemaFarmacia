@@ -45,8 +45,8 @@ $stmt_itens->bind_param("i", $id_prescricao);
 $stmt_itens->execute();
 $itens_dispensados = $stmt_itens->get_result()->fetch_all(MYSQLI_ASSOC);
 
-$nome_comprador = $dados_adicionais['comprador_nome'] ?? 'NÃO INFORMADO';
-$doc_comprador  = $dados_adicionais['comprador_doc'] ?? 'NÃO INFORMADO';
+$nome_comprador = $dados_adicionais['comprador_nome'] ?? '_______________';
+$doc_comprador  = $dados_adicionais['comprador_doc'] ?? '_______________';
 
 if ($dados_adicionais['comprador_eh_paciente'] && empty($doc_comprador)) 
     $doc_comprador = "_______________"; 

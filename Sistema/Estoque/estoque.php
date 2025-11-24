@@ -11,6 +11,7 @@ define('MODULO_SOLICITADO', 'ESTOQUE_GERENCIAR');
 include DEV_PATH . "Exec/validar_acesso.php";
 
 $busca_nome = $_GET['busca_nome'] ?? '';
+$categoria_id = (isset($_GET['categoria']) && $_GET['categoria'] !== 'Todos') ? $_GET['categoria'] : '';
 $quantidade = (isset($_GET['quantidade']) && $_GET['quantidade'] !== 'Todos') ? $_GET['quantidade'] : '';
 $status_estoque = (isset($_GET['status']) && $_GET['status'] !== 'Todos') ? $_GET['status'] : '';
 
@@ -38,6 +39,11 @@ if (!empty($busca_nome)) {
     $params[] = "%" . $busca_nome . "%";
 }
 
+if (!empty($categoria_id)) {
+    $where_conditions[] = "P.ID_Categoria = ?";
+    $types .= 'i';
+    $params[] = intval($categoria_id);
+}
 if (!empty($quantidade)) {
     $having_conditions[] = "SUM(E.Quantidade) > ?";
     $types .= 'i';
@@ -101,9 +107,23 @@ $result = $stmt->get_result();
                     <div class="card card-body mb-4">
                         <form method="GET" action="estoque.php" class="mb-4">
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <label for="busca_nome" class="form-label">Nome ou Cód. de Barras</label>
                                     <input type="text" name="busca_nome" id="busca_nome" class="form-control" placeholder="Buscar por nome ou EAN..." value="<?= htmlspecialchars($_GET['busca_nome'] ?? '') ?>">
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label for="categoria" class="form-label">Categoria</label>
+                                    <select name="categoria" id="categoria" class="form-select">
+                                        <option value="Todos">Todas</option>
+                                        <?php
+                                        $categorias_result = $conn->query("SELECT ID_Categoria, Categoria FROM CATEGORIAS ORDER BY Categoria");
+                                        while ($cat = $categorias_result->fetch_assoc()) {
+                                            $selected = ($_GET['categoria'] ?? '') == $cat['ID_Categoria'] ? 'selected' : '';
+                                            echo "<option value='{$cat['ID_Categoria']}' $selected>{$cat['Categoria']}</option>";
+                                        }
+                                        ?>
+                                    </select>
                                 </div>
                                 
                                 <div class="col-md-2">
