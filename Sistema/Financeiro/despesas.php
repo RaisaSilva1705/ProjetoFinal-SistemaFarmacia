@@ -66,7 +66,7 @@ $despesas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                         <h2 class="m-0">Contas a Pagar e Pagas</h2>
                         <div>
                             <a href="../Relatorios/relatorio_financeiro.php" class="btn btn-outline-secondary">
-                                <i class="bi bi-pie-chart-fill"></i> Ver Relatório DRE
+                                <i class="bi bi-pie-chart-fill"></i> Ver Relatório
                             </a>
                             <a href="nova_despesa.php" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Nova Despesa</a>
                             <a href="categorias_despesa.php" class="btn btn-outline-secondary">Gerenciar Categorias</a>
@@ -187,7 +187,7 @@ $despesas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
             <h6><i class="bi bi-plus-circle-fill"></i> Ações Principais</h6>
             <ul>
-                <li><strong>Ver Relatório DRE:</strong> Atalho para o Relatório Financeiro, onde o total das despesas pagas impacta o cálculo do seu lucro.</li>
+                <li><strong>Ver Relatório Financeiro:</strong> Atalho para o Relatório Financeiro, onde o total das despesas pagas impacta o cálculo do seu lucro.</li>
                 <li><strong>Nova Despesa:</strong> Abre o formulário para registrar uma nova conta a pagar.</li>
                 <li><strong>Gerenciar Categorias:</strong> Leva à tela de cadastro e edição das categorias de despesas (ex: Aluguel, Salários, Marketing).</li>
             </ul>

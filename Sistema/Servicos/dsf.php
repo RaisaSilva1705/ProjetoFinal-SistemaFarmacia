@@ -163,7 +163,7 @@ unset($dados_servico['doc_responsavel']);
                                 <div class="resultado-com-referencia">
                                     <div class="resultado-paciente">
                                         <span><strong><?= htmlspecialchars($label) ?>:</strong></span>
-                                        <span class="valor-destaque"><?= htmlspecialchars($valor) ?> <?= htmlspecialchars($unidade) ?></span>
+                                        <span class="valor-destaque"><?= $valor != null ? htmlspecialchars($valor) : '' ?> <?= $unidade != null ? htmlspecialchars($unidade) : '' ?></span>
                                     </div>
                                     <table class="tabela-referencias">
                                         <thead>
@@ -188,7 +188,7 @@ unset($dados_servico['doc_responsavel']);
                                 <div class="info-pair">
                                     <div>
                                         <span><strong><?= htmlspecialchars($label) ?>:</strong></span>
-                                        <span><?= htmlspecialchars($valor) ?> <?= htmlspecialchars($unidade) ?></span>
+                                        <span class="valor-destaque"><?= $valor != null ? htmlspecialchars($valor) : '' ?> <?= $unidade != null ? htmlspecialchars($unidade) : '' ?></span>
                                     </div>
                                 </div>
                             <?php endif; ?>
@@ -209,8 +209,8 @@ unset($dados_servico['doc_responsavel']);
                 <section class="dsf-section">
                     <h6>OBSERVAÇÕES</h6>
                     <p><?= nl2br(htmlspecialchars($registro['OBS'] ?? 'Sem observações.')) ?></p>
-                    <p>O usuário autoriza o uso das informações fornecidas para a assistência farmacêutica, que consiste em ações voltadas para a promoção, a proteção e a recuperação da saúde, seja ela individual ou coletiva, tendo o medicamento como elemento essencial e com o objetivo ao seu acesso ao seu uso racional. Desta forma, o usuário autoriza o uso de suas informações pela <?= htmlspecialchars($empresa['Nome_Fantasia']) ?> para acompanhamento do histórico de avaliações: <strong><?= htmlspecialchars(ucfirst($autoriza_dados)) ?></strong></p>
-                    <p>Paciente encaminhado ao médico: <strong><?= htmlspecialchars(ucfirst($encaminhado_medico)) ?></strong></p>
+                    <p style="text-align: justify;">O usuário autoriza o uso das informações fornecidas para a assistência farmacêutica, que consiste em ações voltadas para a promoção, a proteção e a recuperação da saúde, seja ela individual ou coletiva, tendo o medicamento como elemento essencial e com o objetivo ao seu acesso ao seu uso racional. Desta forma, o usuário autoriza o uso de suas informações pela <?= htmlspecialchars($empresa['Nome_Fantasia']) ?> para acompanhamento do histórico de avaliações: <strong><?= htmlspecialchars(ucfirst($autoriza_dados)) ?></strong></p>
+                    <p style="text-align: justify;">Paciente encaminhado ao médico: <strong><?= htmlspecialchars(ucfirst($encaminhado_medico)) ?></strong></p>
                 </section>
                 
                 <div class="signature-area">

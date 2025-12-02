@@ -39,6 +39,10 @@ try {
     $primeiroPagamento = true;
     
     foreach($formas_pagamento as $pagamento) {
+        if (isset($item['tipo']) && $item['tipo'] === 'servico') {
+            continue; 
+        }
+        
         $id_forma_pag = intval($pagamento['id_forma_pag']);
         $valor = (float)$pagamento['valor'];
         $trocoReal = ($primeiroPagamento && $trocoCalculado > 0) ? $trocoCalculado : 0.00;

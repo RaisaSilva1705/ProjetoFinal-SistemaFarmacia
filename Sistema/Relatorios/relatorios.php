@@ -37,7 +37,7 @@ include DEV_PATH . "Exec/validar_acesso.php";
                             <div class="card h-100 shadow-sm">
                                 <div class="card-body text-center d-flex flex-column">
                                     <i class="bi bi-pie-chart-fill fs-1 text-success"></i>
-                                    <h5 class="card-title mt-3">Relatório Financeiro (DRE)</h5>
+                                    <h5 class="card-title mt-3">Relatório Financeiro</h5>
                                     <p class="card-text text-muted">Acompanhe a saúde financeira da farmácia: Receita, Custos, Despesas e Lucro Líquido.</p>
                                     <a href="relatorio_financeiro.php" class="btn btn-success mt-auto">Acessar Relatório</a>
                                 </div>
@@ -166,7 +166,7 @@ include DEV_PATH . "Exec/validar_acesso.php";
             <h6 class="mt-4"><i class="bi bi-currency-dollar"></i> Análises Estratégicas e Financeiras</h6>
             <p>Este grupo de relatórios foca na saúde financeira e operacional do negócio.</p>
             <ul>
-                <li><strong>Relatório Financeiro (DRE):</strong> O mais importante. Mostra se a sua operação está dando lucro ou prejuízo.</li>
+                <li><strong>Relatório Financeiro:</strong> O mais importante. Mostra se a sua operação está dando lucro ou prejuízo.</li>
                 <li><strong>Relatório de Vendas (PDV):</strong> Fornece o detalhe de cada venda realizada, permitindo auditorias e análises de faturamento.</li>
                 <li><strong>Posição de Estoque:</strong> Apresenta o valor total do seu inventário e alerta sobre produtos que precisam de reposição.</li>
             </ul>

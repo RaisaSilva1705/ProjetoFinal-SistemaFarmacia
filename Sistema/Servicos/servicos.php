@@ -97,8 +97,8 @@ $historico = $stmt->get_result();
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2 class="m-0">Histórico de Serviços Prestados</h2>
                         <div>
-                            <a href="novo_servico.php" class="btn btn-primary">Registrar Atendimento</a>
-                            <a href="../Relatorios/relatorio_servicos.php" class="btn btn-outline-secondary">Ver Relatório</a>
+                            <a href="novo_servico.php" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Registrar Atendimento</a>
+                            <a href="../Relatorios/relatorio_servicos.php" class="btn btn-outline-secondary"><i class="bi bi-bar-chart-line-fill"></i> Ver Relatório</a>
                         </div>
                     </div>
 
@@ -122,7 +122,7 @@ $historico = $stmt->get_result();
                                     <input type="text" name="busca_farma" id="busca_farma" class="form-control" value="<?= htmlspecialchars($busca_farma) ?>">
                                 </div>
                                 <div class="col-md-2">
-                                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+                                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel-fill"></i> Filtrar</button>
                                 </div>
                             </div>
                         </form>
@@ -150,7 +150,7 @@ $historico = $stmt->get_result();
                                             <td><?= formatar_resultado_servico($reg['Dados_Servico'], $reg['ID_Servico'], $conn) ?></td>
                                             <td><?= htmlspecialchars($reg['Nome_Funcionario']) ?></td>
                                             <td class="text-center">
-                                                <a href="dsf.php?id=<?= $reg['ID_Registro_Servico'] ?>" class="btn btn-info btn-sm" target="_blank">Gerar DSF</a>
+                                                <a href="dsf.php?id=<?= $reg['ID_Registro_Servico'] ?>" class="btn btn-info btn-sm" target="_blank" title="Gerar DSF"><i class="bi bi-file-earmark-medical-fill"></i></a>
                                             </td>
                                         </tr>
                                     <?php endwhile; ?>

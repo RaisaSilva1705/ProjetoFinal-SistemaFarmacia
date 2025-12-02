@@ -258,7 +258,7 @@ $servicos = $conn->query("SELECT ID_Servico, Nome_Servico, Valor FROM SERVICOS_F
                                     <small class="text-muted">EAN: ${item.EAN_GTIN} | Categoria: ${item.Categoria} | Estoque: ${item.Estoque}</small>
                                 </div>
                                 <div class="px-3"><strong>R$ ${parseFloat(item.Preco_Venda || 0).toFixed(2).replace('.', ',')}</strong></div>
-                                <div><button type="button" class="btn btn-sm btn-success" onclick="addToCart(${currentIndex})" ${item.Estoque <= 0 ? 'disabled' : ''}>
+                                <div class="text-end"><button type="button" class="btn btn-sm btn-success" onclick="addToCart(${currentIndex})" ${item.Estoque <= 0 ? 'disabled' : ''}>
                                     <i class="bi bi-plus-circle"></i> Adicionar
                                 </button></div>
                             </div>`;
@@ -310,7 +310,7 @@ $servicos = $conn->query("SELECT ID_Servico, Nome_Servico, Valor FROM SERVICOS_F
                             promocaoTexto = `<br><small class="text-success fw-bold"><i class="bi bi-tag-fill"></i> ${item.desconto_promocao_desc} (-R$ ${descontoTotalDaLinha.toFixed(2).replace('.', ',')})</small>`;
                         
                         const itemHtml = `
-                            <div class="item-list-row border-bottom mb-2">
+                            <div class="item-list-row-c border-bottom mb-2">
                                 <div class="item-name">
                                     <strong>${item.tipo === 'servico' ? 'Serviço' : 'Produto'}:</strong> ${item.nome}
                                     ${descontoGerencialTexto}

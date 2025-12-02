@@ -370,47 +370,47 @@ INSERT INTO PRODUTOS (ID_Produto, ID_Categoria, Nome, Marca, ID_Fornecedor, ID_U
 -- 2. MEDICAMENTOS (Detalhes técnicos apenas para IDs 1-35)
 -- CategoriasMed: 1=Analg, 2=AntiInf, 3=Antibio, 4=Hiper, 5=Diab, 6=Alerg, 7=Depress, 8=Contra
 -- Tarjas: 1=MIP, 2=Gen, 3=Verm, 4=VermRet, 5=Preta
-INSERT INTO MEDICAMENTOS (ID_Medicamento, ID_Produto, ID_CategoriaMed, ID_Tarja, Tipo, MS, Controlado) VALUES
+INSERT INTO MEDICAMENTOS (ID_Medicamento, ID_Produto, ID_CategoriaMed, ID_Tarja, Tipo, Prin_Ativo, MS, Controlado) VALUES
 -- Analgésicos (MIPs e Tarja Vermelha Simples)
-(1, 1, 1, 2, 'Genérico', '1.0001.0001.001-1', 'Não'),
-(2, 2, 1, 1, 'Referência', '1.0002.0002.002-1', 'Não'),
-(3, 3, 1, 1, 'Referência', '1.0003.0003.003-1', 'Não'),
-(4, 4, 1, 2, 'Genérico', '1.0004.0004.004-1', 'Não'),
-(5, 5, 1, 1, 'Referência', '1.0005.0005.005-1', 'Não'),
-(6, 6, 1, 1, 'Referência', '1.0006.0006.006-1', 'Não'),
-(7, 7, 1, 1, 'Referência', '1.0007.0007.007-1', 'Não'),
-(8, 8, 2, 2, 'Genérico', '1.0008.0008.008-1', 'Não'),
-(9, 9, 2, 2, 'Genérico', '1.0009.0009.009-1', 'Não'),
-(10, 10, 2, 1, 'Referência', '1.0010.0010.010-1', 'Não'),
+(1, 1, 1, 2, 'Genérico', 'Dipirona Monoidratada', '1.0001.0001.001-1', 'Não'),
+(2, 2, 1, 1, 'Referência', 'Dipirona Monoidratada', '1.0002.0002.002-1', 'Não'), -- Novalgina
+(3, 3, 1, 1, 'Referência', 'Paracetamol', '1.0003.0003.003-1', 'Não'), -- Tylenol
+(4, 4, 1, 2, 'Genérico', 'Paracetamol', '1.0004.0004.004-1', 'Não'),
+(5, 5, 1, 1, 'Referência', 'Dipirona Monoidratada + Citrato de Orfenadrina + Cafeína Anidra', '1.0005.0005.005-1', 'Não'), -- Dorflex
+(6, 6, 1, 1, 'Referência', 'Dipirona + Mucato de Isometepteno + Cafeína', '1.0006.0006.006-1', 'Não'), -- Neosaldina
+(7, 7, 1, 1, 'Referência', 'Butilbrometo de Escopolamina + Dipirona', '1.0007.0007.007-1', 'Não'), -- Buscopan Composto
+(8, 8, 2, 2, 'Genérico', 'Ibuprofeno', '1.0008.0008.008-1', 'Não'),
+(9, 9, 2, 2, 'Genérico', 'Nimesulida', '1.0009.0009.009-1', 'Não'),
+(10, 10, 2, 1, 'Referência', 'Diclofenaco Dietilamônio', '1.0010.0010.010-1', 'Não'), -- Cataflam
 -- Antibióticos (Controle Especial - Retenção de Receita)
-(11, 11, 3, 4, 'Genérico', '1.0011.0011.011-1', 'Sim'),
-(12, 12, 3, 4, 'Genérico', '1.0012.0012.012-1', 'Sim'),
-(13, 13, 3, 4, 'Genérico', '1.0013.0013.013-1', 'Sim'),
-(14, 14, 3, 4, 'Genérico', '1.0014.0014.014-1', 'Sim'),
-(15, 15, 3, 4, 'Genérico', '1.0015.0015.015-1', 'Sim'),
+(11, 11, 3, 4, 'Genérico', 'Amoxicilina Tri-Hidratada', '1.0011.0011.011-1', 'Sim'),
+(12, 12, 3, 4, 'Genérico', 'Amoxicilina Tri-Hidratada + Clavulanato de Potássio', '1.0012.0012.012-1', 'Sim'),
+(13, 13, 3, 4, 'Genérico', 'Azitromicina Di-Hidratada', '1.0013.0013.013-1', 'Sim'),
+(14, 14, 3, 4, 'Genérico', 'Cefalexina Monoidratada', '1.0014.0014.014-1', 'Sim'),
+(15, 15, 3, 4, 'Genérico', 'Cloridrato de Ciprofloxacino', '1.0015.0015.015-1', 'Sim'),
 -- Uso Contínuo (Tarja Vermelha)
-(16, 16, 4, 2, 'Genérico', '1.0016.0016.016-1', 'Não'),
-(17, 17, 4, 2, 'Genérico', '1.0017.0017.017-1', 'Não'),
-(18, 18, 4, 2, 'Genérico', '1.0018.0018.018-1', 'Não'),
-(19, 19, 5, 2, 'Genérico', '1.0019.0019.019-1', 'Não'),
-(20, 20, 5, 2, 'Genérico', '1.0020.0020.020-1', 'Não'),
-(21, 21, 4, 3, 'Referência', '1.0021.0021.021-1', 'Não'),
+(16, 16, 4, 2, 'Genérico', 'Losartana Potássica', '1.0016.0016.016-1', 'Não'),
+(17, 17, 4, 2, 'Genérico', 'Maleato de Enalapril', '1.0017.0017.017-1', 'Não'),
+(18, 18, 4, 2, 'Genérico', 'Atenolol', '1.0018.0018.018-1', 'Não'),
+(19, 19, 5, 2, 'Genérico', 'Cloridrato de Metformina', '1.0019.0019.019-1', 'Não'),
+(20, 20, 5, 2, 'Genérico', 'Glibenclamida', '1.0020.0020.020-1', 'Não'),
+(21, 21, 4, 3, 'Referência', 'Rivaroxabana', '1.0021.0021.021-1', 'Não'), -- Xarelto
 -- Controlados (Tarja Preta e Vermelha Retenção)
-(22, 22, 7, 5, 'Referência', '1.0022.0022.022-1', 'Sim'), -- Rivotril
-(23, 23, 7, 5, 'Genérico', '1.0023.0023.023-1', 'Sim'),
-(24, 24, 7, 4, 'Genérico', '1.0024.0024.024-1', 'Sim'), -- Sertralina
-(25, 25, 7, 4, 'Genérico', '1.0025.0025.025-1', 'Sim'),
-(26, 26, 7, 4, 'Genérico', '1.0026.0026.026-1', 'Sim'), -- Zolpidem
--- Outros
-(27, 27, 8, 3, 'Similar', '1.0027.0027.027-1', 'Não'),
-(28, 28, 8, 3, 'Referência', '1.0028.0028.028-1', 'Não'),
-(29, 29, 6, 1, 'Referência', '1.0029.0029.029-1', 'Não'),
-(30, 30, 6, 3, 'Similar', '1.0030.0030.030-1', 'Não'),
-(31, 31, 2, 2, 'Genérico', '1.0031.0031.031-1', 'Não'),
-(32, 32, 2, 2, 'Genérico', '1.0032.0032.032-1', 'Não'),
-(33, 33, 1, 1, 'Similar', '1.0033.0033.033-1', 'Não'),
-(34, 34, 1, 1, 'Referência', '1.0034.0034.034-1', 'Não'),
-(35, 35, 2, 1, 'Similar', '1.0035.0035.035-1', 'Não');
+(22, 22, 7, 5, 'Referência', 'Clonazepam', '1.0022.0022.022-1', 'Sim'), -- Rivotril
+(23, 23, 7, 5, 'Genérico', 'Clonazepam', '1.0023.0023.023-1', 'Sim'),
+(24, 24, 7, 4, 'Genérico', 'Cloridrato de Sertralina', '1.0024.0024.024-1', 'Sim'),
+(25, 25, 7, 4, 'Genérico', 'Cloridrato de Fluoxetina', '1.0025.0025.025-1', 'Sim'),
+(26, 26, 7, 4, 'Genérico', 'Hemitartarato de Zolpidem', '1.0026.0026.026-1', 'Sim'),
+-- Outros (Anticoncepcionais, Antialérgicos, Estômago)
+(27, 27, 8, 3, 'Similar', 'Levonorgestrel + Etinilestradiol', '1.0027.0027.027-1', 'Não'), -- Ciclo 21
+(28, 28, 8, 3, 'Referência', 'Drospirenona + Etinilestradiol', '1.0028.0028.028-1', 'Não'), -- Yasmin
+(29, 29, 6, 1, 'Referência', 'Cloridrato de Fexofenadina', '1.0029.0029.029-1', 'Não'), -- Allegra
+(30, 30, 6, 3, 'Similar', 'Maleato de Dexclorfeniramina', '1.0030.0030.030-1', 'Não'), -- Histamin
+(31, 31, 2, 2, 'Genérico', 'Pantoprazol Sódico Sesqui-Hidratado', '1.0031.0031.031-1', 'Não'),
+(32, 32, 2, 2, 'Genérico', 'Omeprazol', '1.0032.0032.032-1', 'Não'),
+(33, 33, 1, 1, 'Similar', 'Ácido Ascórbico', '1.0033.0033.033-1', 'Não'), -- Vitamina C
+(34, 34, 1, 1, 'Referência', 'Colecalciferol', '1.0034.0034.034-1', 'Não'), -- Addera D3
+(35, 35, 2, 1, 'Similar', 'Simeticona', '1.0035.0035.035-1', 'Não');
 
 -- 3. LOTES (Um lote inicial para cada produto)
 INSERT INTO LOTES (ID_Lote, Nome_Lote, ID_Produto, Preco_Custo, Preco_Venda, Data_Validade) VALUES

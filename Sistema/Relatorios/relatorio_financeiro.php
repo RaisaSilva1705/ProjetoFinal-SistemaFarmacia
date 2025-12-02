@@ -122,7 +122,7 @@ $margem_liquida = ($receita_liquida > 0) ? ($lucro_liquido / $receita_liquida) *
                 
                 <div class="container p-5">
                     <div class="d-flex justify-content-between align-items-center mb-4 no-print">
-                        <h2 class="m-0">Relatório Financeiro (DRE)</h2>
+                        <h2 class="m-0">Relatório Financeiro</h2>
                         <button onclick="window.print()" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-printer"></i> Imprimir Relatório
                         </button>

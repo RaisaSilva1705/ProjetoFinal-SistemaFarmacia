@@ -158,11 +158,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </div>
                             <div class="row">
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label">Título do Campo</label>
+                                    <label class="form-label fw-bold">Título do Campo</label>
                                     <input type="text" name="campos[${contadorCampos}][label]" class="form-control" required>
                                 </div>
                                 <div class="col-md-3 mb-3">
-                                    <label class="form-label">Tipo de Campo</label>
+                                    <label class="form-label fw-bold">Tipo de Campo</label>
                                     <select name="campos[${contadorCampos}][tipo]" class="form-select">
                                         <option value="text">Texto</option>
                                         <option value="number">Número</option>
@@ -172,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     </select>
                                 </div>
                                 <div class="col-md-3 mb-3">
-                                    <label class="form-label">Unidade de Medida (Opcional)</label>
+                                    <label class="form-label fw-bold">Unidade de Medida (Opcional)</label>
                                     <input type="text" name="campos[${contadorCampos}][unidade]" class="form-control" placeholder="Ex: mmHg, BPM, mg/dL">
                                 </div>
                             </div>

@@ -167,10 +167,10 @@ while ($campo = $resultCampos->fetch_assoc()) {
                             </div>
                             <div class="row">
                                 <div class="col-md-4 mb-3">
-                                    <label class="form-label">Título do Campo</label>
+                                    <label class="form-label fw-bold">Título do Campo</label>
                                     <input type="text" name="campos[${campoIndex}][label]" class="form-control" value="${campoData?.Label_Campo || ''}" required>
                                 </div>
-                                <div class="col-md-3 mb-3">
+                                <div class="col-md-3 mb-3 fw-bold">
                                     <label class="form-label">Tipo de Campo</label>
                                     <select name="campos[${campoIndex}][tipo]" class="form-select">
                                         <option value="text" ${campoData?.Tipo_Campo === 'text' ? 'selected' : ''}>Texto</option>
@@ -181,7 +181,7 @@ while ($campo = $resultCampos->fetch_assoc()) {
                                     </select>
                                 </div>
                                 <div class="col-md-3 mb-3">
-                                    <label class="form-label">Unidade de Medida (Opcional)</label>
+                                    <label class="form-label fw-bold">Unidade de Medida (Opcional)</label>
                                     <input type="text" name="campos[${campoIndex}][unidade]" class="form-control" value="${campoData?.Unidade_Medida || ''}" placeholder="Ex: mmHg, BPM, mg/dL">
                                 </div>
                             </div>
